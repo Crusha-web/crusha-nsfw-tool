@@ -146,6 +146,51 @@ body{font-size:14px;padding:0.5rem}
 <i class="fas fa-copy"></i> COPY PROMPT
 </button>
 
+<!-- SD WebUI API パネル -->
+<div style="margin-top:0.5rem;padding:0.5rem;background:rgba(34,211,238,0.08);border:2px solid rgba(34,211,238,0.4);border-radius:0.5rem">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
+<div style="color:#22d3ee;font-size:9px;font-weight:700;text-shadow:0 0 10px rgba(34,211,238,0.8)"><i class="fas fa-server"></i> SD WebUI API</div>
+<div style="display:flex;align-items:center;gap:0.3rem">
+<span style="color:#6b7280;font-size:8px;font-weight:700" id="apiOffLabel">OFF</span>
+<div id="apiToggle" onclick="toggleApi()" style="width:36px;height:18px;background:#374151;border-radius:9px;position:relative;cursor:pointer;transition:all 0.3s;flex-shrink:0">
+<div id="apiToggleKnob" style="position:absolute;top:2px;left:2px;width:14px;height:14px;background:#6b7280;border-radius:50%;transition:all 0.3s"></div>
+</div>
+<span style="color:#22d3ee;font-size:8px;font-weight:700" id="apiOnLabel">ON</span>
+</div>
+</div>
+<div id="apiPanel" style="display:none">
+<input id="apiUrl" type="text" value="http://localhost:7860" placeholder="http://localhost:7860" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-family:monospace;font-size:9px;padding:0.3rem 0.5rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.4);margin-bottom:0.3rem">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-bottom:0.3rem">
+<div>
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Steps</div>
+<input id="apiSteps" type="number" value="28" min="1" max="150" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
+</div>
+<div>
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">CFG Scale</div>
+<input id="apiCfg" type="number" value="7" min="1" max="30" step="0.5" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
+</div>
+<div>
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Width</div>
+<input id="apiWidth" type="number" value="512" min="64" max="2048" step="64" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
+</div>
+<div>
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Height</div>
+<input id="apiHeight" type="number" value="768" min="64" max="2048" step="64" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
+</div>
+</div>
+<button onclick="sendToApi()" id="apiSendBtn" style="width:100%;background:linear-gradient(135deg,#22d3ee,#0891b2);color:white;padding:0.4rem;border:none;border-radius:0.4rem;cursor:pointer;font-weight:800;font-size:9px;box-shadow:0 0 20px rgba(34,211,238,0.5);transition:all 0.2s">
+<i class="fas fa-paper-plane"></i> SD WebUI に送信して生成
+</button>
+<div id="apiStatus" style="margin-top:0.3rem;font-size:8px;color:#22d3ee;text-align:center;min-height:14px"></div>
+<div id="apiResult" style="margin-top:0.3rem;display:none">
+<img id="apiResultImg" style="width:100%;border-radius:0.4rem;border:2px solid rgba(34,211,238,0.5);cursor:pointer" src="" alt="Generated Image" onclick="this.requestFullscreen&&this.requestFullscreen()">
+<button onclick="saveApiImage()" style="width:100%;margin-top:0.3rem;background:rgba(34,211,238,0.2);color:#22d3ee;padding:0.3rem;border:1px solid #22d3ee;border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700">
+<i class="fas fa-download"></i> 画像を保存
+</button>
+</div>
+</div>
+</div>
+
 <div style="margin-top:0.5rem;padding:0.5rem;background:rgba(168,85,247,0.2);border:2px solid rgba(168,85,247,0.5);border-radius:0.5rem">
 <div style="color:#a855f7;font-size:9px;font-weight:700;margin-bottom:0.3rem;text-shadow:0 0 10px rgba(168,85,247,0.8)">
 <i class="fas fa-female"></i> 体型切り替え
@@ -2057,6 +2102,13 @@ btn.style.boxShadow=btn.id==='body-'+savedBodyType?'0 0 15px rgba(168,85,247,0.5
 },100);
 }
 
+// API設定復元
+const savedApi=_store.getItem('apiEnabled');
+if(savedApi==='1'){
+apiEnabled=false;
+toggleApi();
+}
+
 upStat();
 gen(); // 初期プロンプト生成
 }
@@ -3122,6 +3174,81 @@ showFeedback('📸 REAL STYLE!','#059669');
 }
 _store.setItem('renderStyle',style);
 gen();
+}
+
+let apiEnabled=false;
+function toggleApi(){
+apiEnabled=!apiEnabled;
+const tog=document.getElementById('apiToggle');
+const knob=document.getElementById('apiToggleKnob');
+const panel=document.getElementById('apiPanel');
+const offLabel=document.getElementById('apiOffLabel');
+const onLabel=document.getElementById('apiOnLabel');
+if(apiEnabled){
+tog.style.background='#22d3ee';
+knob.style.left='20px';
+knob.style.background='white';
+panel.style.display='block';
+offLabel.style.color='#6b7280';
+onLabel.style.color='#22d3ee';
+showFeedback('🟢 API ON!','#22d3ee');
+}else{
+tog.style.background='#374151';
+knob.style.left='2px';
+knob.style.background='#6b7280';
+panel.style.display='none';
+offLabel.style.color='#6b7280';
+onLabel.style.color='#6b7280';
+showFeedback('⚫ API OFF!','#6b7280');
+}
+_store.setItem('apiEnabled',apiEnabled?'1':'0');
+}
+
+async function sendToApi(){
+if(!apiEnabled){showFeedback('⚠️ API OFF!','#f59e0b');return;}
+const promptText=document.getElementById('prompt').value;
+if(!promptText.trim()){showFeedback('⚠️ GENERATE FIRST!','#f59e0b');return;}
+const baseUrl=(document.getElementById('apiUrl').value||'http://localhost:7860').replace(/\/+$/,'');
+const steps=parseInt(document.getElementById('apiSteps').value)||28;
+const cfg=parseFloat(document.getElementById('apiCfg').value)||7;
+const w=parseInt(document.getElementById('apiWidth').value)||512;
+const h=parseInt(document.getElementById('apiHeight').value)||768;
+const negText=document.getElementById('negPrompt').value||'';
+const btn=document.getElementById('apiSendBtn');
+const status=document.getElementById('apiStatus');
+const result=document.getElementById('apiResult');
+const img=document.getElementById('apiResultImg');
+btn.disabled=true;
+btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> 生成中...';
+status.textContent='SD WebUI に接続中...';
+result.style.display='none';
+try{
+const payload={prompt:promptText,negative_prompt:negText,steps:steps,cfg_scale:cfg,width:w,height:h,sampler_name:'DPM++ 2M Karras'};
+const res=await fetch(baseUrl+'/sdapi/v1/txt2img',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+if(!res.ok)throw new Error('HTTP '+res.status);
+const data=await res.json();
+if(data.images&&data.images[0]){
+img.src='data:image/png;base64,'+data.images[0];
+result.style.display='block';
+status.textContent='✅ 生成完了！';
+showFeedback('✅ IMAGE GENERATED!','#22d3ee');
+}else{throw new Error('No image in response');}
+}catch(e){
+status.textContent='❌ '+e.message+' (SD WebUIが起動しているか確認)';
+showFeedback('❌ API ERROR!','#ef4444');
+}finally{
+btn.disabled=false;
+btn.innerHTML='<i class="fas fa-paper-plane"></i> SD WebUI に送信して生成';
+}
+}
+
+function saveApiImage(){
+const img=document.getElementById('apiResultImg');
+if(!img.src||img.src==='')return;
+const a=document.createElement('a');
+a.href=img.src;
+a.download='crusha_generated_'+Date.now()+'.png';
+a.click();
 }
 
 function showFeedback(msg,color='#ec4899'){

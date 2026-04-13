@@ -8,8 +8,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:radial-gradient(circle,#1a0a1f,#0a0015);min-height:100vh;font-size:12px;overflow-x:hidden;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;padding:0.5rem}
-.app{width:100%;max-width:1800px;min-height:calc(100vh - 1rem);background:rgba(20,0,30,.95);backdrop-filter:blur(40px);border:2px solid rgba(236,72,153,0.6);border-radius:1rem;overflow:visible;padding-bottom:2rem}
+html,body{height:100%;overflow:hidden}
+body{font-family:sans-serif;background:radial-gradient(circle,#1a0a1f,#0a0015);height:100vh;font-size:12px;display:flex;justify-content:center;align-items:stretch}
+.app{width:100%;max-width:2000px;background:rgba(20,0,30,.95);backdrop-filter:blur(40px);border:2px solid rgba(236,72,153,0.6);border-radius:1rem;display:flex;flex-direction:column;overflow:hidden}
+.app-header{flex-shrink:0;background:linear-gradient(135deg,#ec4899,#be185d);padding:0.75rem;text-align:center;border-bottom:3px solid rgba(255,255,255,0.3);box-shadow:0 0 30px rgba(236,72,153,0.8)}
+.app-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 550px}
+.left-panel{overflow-y:auto;padding:1rem}
+.left-panel::-webkit-scrollbar{width:10px}
+.left-panel::-webkit-scrollbar-track{background:rgba(20,0,30,0.5)}
+.left-panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#ec4899,#be185d);border-radius:5px}
+.right-panel{background:rgba(20,0,30,0.98);padding:1rem;overflow-y:auto;border-left:2px solid rgba(236,72,153,0.3)}
+.right-panel::-webkit-scrollbar{width:8px}
+.right-panel::-webkit-scrollbar-track{background:rgba(20,0,30,0.5)}
+.right-panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#8b5cf6,#6d28d9);border-radius:5px}
 .cat-sec{background:rgba(30,10,40,0.8);border-radius:0.6rem;padding:0.75rem;margin-bottom:0.5rem;border:2px solid rgba(236,72,153,0.4)}
 .cat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem}
 .cat-title{font-size:13px;font-weight:800;color:#ec4899;text-transform:uppercase;text-shadow:0 0 10px rgba(236,72,153,0.5)}
@@ -20,7 +31,7 @@ body{font-family:sans-serif;background:radial-gradient(circle,#1a0a1f,#0a0015);m
 .tag-btn.selected{background:linear-gradient(135deg,#ec4899,#be185d);color:white;border-color:#f9a8d4;box-shadow:0 0 30px rgba(236,72,153,0.9)}
 .tag-btn.selected::after{content:"✓";position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);font-size:14px}
 .tag-ja{display:block;font-size:9px;color:#fbbf24;margin-top:0.3rem;opacity:0.8}
-.scroll{overflow-y:auto;max-height:calc(100vh - 180px);padding:0.5rem}
+.scroll{overflow-y:auto;padding:0.5rem}
 .scroll::-webkit-scrollbar{width:10px}
 .scroll::-webkit-scrollbar-track{background:rgba(20,0,30,0.5)}
 .scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#ec4899,#be185d);border-radius:5px}
@@ -60,19 +71,19 @@ body{font-size:14px;padding:0.5rem}
 </head>
 <body>
 <div class="app">
-<div style="background:linear-gradient(135deg,#ec4899,#be185d);padding:0.75rem;text-align:center;border-bottom:3px solid rgba(255,255,255,0.3);box-shadow:0 0 30px rgba(236,72,153,0.8)">
+<div class="app-header">
 <h1 style="font-size:16px;font-weight:900;color:white;text-shadow:0 0 20px rgba(255,255,255,0.8)">💎 CRUSHA NSFW ULTIMATE <span style="color:#22d3ee">v14</span></h1>
 <p style="font-size:8px;color:rgba(255,255,255,0.95);margin-top:0.2rem;font-weight:600">
 14 Perfect Characters × 4500+ Tags × 20 DNA × FLUX 2 Compatible × 12 Pro Quality × JSON/Hierarchical
 </p>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 550px;align-items:start">
-<div class="scroll" style="padding:1rem;height:calc(100vh - 80px)">
+<div class="app-body">
+<div class="left-panel">
 <div id="cats"></div>
 </div>
 
-<div style="background:rgba(20,0,30,0.98);padding:1rem;overflow-y:auto;height:calc(100vh - 80px);position:sticky;top:80px">
+<div class="right-panel">
 
 <!-- プロンプト表示エリア：一番上に配置 -->
 <div style="background:rgba(20,0,30,0.98);border-radius:0.8rem;padding:0.6rem;border:2px solid rgba(236,72,153,0.6);box-shadow:0 0 30px rgba(236,72,153,0.3);margin-bottom:0.75rem">

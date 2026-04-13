@@ -12,8 +12,8 @@ html,body{height:100%;overflow:hidden}
 body{font-family:sans-serif;background:radial-gradient(circle,#1a0a1f,#0a0015);height:100vh;font-size:12px;display:flex;justify-content:center;align-items:stretch}
 .app{width:100%;max-width:2000px;background:rgba(20,0,30,.95);backdrop-filter:blur(40px);border:2px solid rgba(236,72,153,0.6);border-radius:1rem;display:flex;flex-direction:column;overflow:hidden}
 .app-header{flex-shrink:0;background:linear-gradient(135deg,#ec4899,#be185d);padding:0.75rem;text-align:center;border-bottom:3px solid rgba(255,255,255,0.3);box-shadow:0 0 30px rgba(236,72,153,0.8)}
-.app-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 550px}
-.left-panel{overflow-y:auto;padding:1rem}
+.app-body{flex:1;min-height:0;display:grid;grid-template-columns:380px 1fr}
+.left-panel{overflow-y:auto;padding:0}
 .left-panel::-webkit-scrollbar{width:10px}
 .left-panel::-webkit-scrollbar-track{background:rgba(20,0,30,0.5)}
 .left-panel::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#ec4899,#be185d);border-radius:5px}
@@ -80,7 +80,10 @@ body{font-size:14px;padding:0.5rem}
 
 <div class="app-body">
 <div class="left-panel">
-<div id="cats"></div>
+<div style="position:sticky;top:0;z-index:10;background:rgba(10,0,15,0.95);padding:0.4rem;border-bottom:1px solid rgba(236,72,153,0.3)">
+<input type="text" id="tagSearch" placeholder="🔍 タグ検索 / Search tags..." oninput="filterTags(this.value)" style="width:100%;background:rgba(20,0,30,0.9);color:#fbbf24;font-size:10px;padding:0.35rem 0.6rem;border-radius:0.4rem;border:2px solid rgba(236,72,153,0.4);outline:none">
+</div>
+<div id="cats" style="padding:0.5rem"></div>
 </div>
 
 <div class="right-panel">
@@ -2103,12 +2106,12 @@ Object.keys(DB).forEach((cat,i)=>{
 const tags=DB[cat];
 const name=cat.replace(/_/g,' ').toUpperCase();
 const jname=CATNAMES[cat]||name;
-h+=`<div class="cat-sec">
-<div class="cat-head">
-<div class="cat-title">${i+1}. ${name} <span class="cat-subtitle">(${jname})</span> <span style="background:#dc2626;color:white;font-size:8px;padding:0.2rem 0.4rem;border-radius:0.3rem;box-shadow:0 0 10px rgba(220,38,38,0.8)">${tags.length}</span></div>
-<button class="rand-btn" onclick="randCat('${cat}')"><i class="fas fa-dice"></i> RANDOM</button>
+h+=`<div class="cat-sec" data-cat="${cat}">
+<div class="cat-head" onclick="toggleCat(this)" style="cursor:pointer">
+<div class="cat-title"><span class="cat-arrow" style="color:#ec4899;margin-right:0.3rem;font-size:10px">▶</span>${i+1}. ${name} <span class="cat-subtitle">(${jname})</span> <span style="background:#dc2626;color:white;font-size:8px;padding:0.2rem 0.4rem;border-radius:0.3rem;box-shadow:0 0 10px rgba(220,38,38,0.8)">${tags.length}</span> <span class="cat-sel-count" style="display:none;background:#22c55e;color:white;font-size:8px;padding:0.2rem 0.4rem;border-radius:0.3rem;margin-left:0.2rem"></span></div>
+<button class="rand-btn" onclick="event.stopPropagation();randCat('${cat}')"><i class="fas fa-dice"></i> RANDOM</button>
 </div>
-<div class="tag-grid">
+<div class="tag-grid" style="display:none">
 ${tags.map((t,j)=>{
 const k=`${cat}_${j}`;
 return `<div style="background:rgba(30,10,40,0.9);border:2px solid #ec4899;border-radius:0.5rem;padding:0.5rem">
@@ -2203,7 +2206,53 @@ valueSpan.textContent=tagWeights[k].toFixed(1);
 saveSettings();
 upStat();
 updateSelectedTags();
+updateCatSelCount(cat);
 gen(); // プロンプト再生成
+}
+
+function toggleCat(el){
+const sec=el.closest('.cat-sec');
+const grid=sec.querySelector('.tag-grid');
+const arrow=sec.querySelector('.cat-arrow');
+const isHidden=grid.style.display==='none';
+grid.style.display=isHidden?'grid':'none';
+if(arrow)arrow.textContent=isHidden?'▼':'▶';
+}
+
+function filterTags(q){
+const query=q.toLowerCase().trim();
+document.querySelectorAll('.cat-sec').forEach(sec=>{
+let anyMatch=false;
+sec.querySelectorAll('.tag-btn').forEach(btn=>{
+const wrapper=btn.parentElement;
+const text=btn.textContent.toLowerCase();
+const match=!query||text.includes(query);
+wrapper.style.display=match?'':'none';
+if(match)anyMatch=true;
+});
+sec.style.display=(anyMatch||!query)?'':'none';
+if(query&&anyMatch){
+const grid=sec.querySelector('.tag-grid');
+const arrow=sec.querySelector('.cat-arrow');
+if(grid)grid.style.display='grid';
+if(arrow)arrow.textContent='▼';
+}else if(!query){
+const grid=sec.querySelector('.tag-grid');
+const arrow=sec.querySelector('.cat-arrow');
+if(grid)grid.style.display='none';
+if(arrow)arrow.textContent='▶';
+}
+});
+}
+
+function updateCatSelCount(cat){
+const sec=document.querySelector(`.cat-sec[data-cat="${cat}"]`);
+if(!sec)return;
+const badge=sec.querySelector('.cat-sel-count');
+if(!badge)return;
+const count=Object.keys(sel).filter(k=>k.startsWith(cat+'_')).length;
+if(count>0){badge.textContent=count+' selected';badge.style.display='';}
+else{badge.style.display='none';}
 }
 
 function randCat(cat){
@@ -2225,6 +2274,7 @@ if(b)b.classList.add('selected');
 seeds[cat]=Math.random();
 saveSettings();
 upStat();
+updateCatSelCount(cat);
 gen(); // プロンプト再生成
 }
 
@@ -2249,6 +2299,7 @@ if(b)b.classList.add('selected');
 });
 saveSettings();
 upStat();
+Object.keys(DB).forEach(cat=>updateCatSelCount(cat));
 gen();
 }
 

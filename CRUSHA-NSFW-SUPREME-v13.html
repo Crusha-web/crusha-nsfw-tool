@@ -3318,17 +3318,40 @@ showFeedback('❌ 接続失敗','#ef4444');
 }
 }
 
-async function sendToApi(){
-if(!apiEnabled){showFeedback('⚠️ API OFF!','#f59e0b');return;}
-const promptText=document.getElementById('prompt').value;
-if(!promptText.trim()){showFeedback('⚠️ GENERATE FIRST!','#f59e0b');return;}
-if(apiType==='comfyui') await sendToComfyUI();
-else await sendToA1111();
+// セクションヘッダーを除去してSD用クリーンプロンプトを生成
+function getApiPrompt(){
+const raw=document.getElementById('prompt').value;
+const parts=[];
+let inJson=false;
+for(const line of raw.split('\n')){
+const t=line.trim();
+if(!t)continue;
+if(t.startsWith('{')||t.startsWith('[')){inJson=true;continue;}
+if(inJson){if(t==='}')inJson=false;continue;}
+if(/^={3,}/.test(t))continue;
+if(/^\[Mode:/i.test(t))continue;
+if(/^[A-N]\s*\[/i.test(t))continue;
+if(/^[-─]{3,}/.test(t))continue;
+if(t.startsWith('//')||t.startsWith('#'))continue;
+parts.push(t);
+}
+return parts.join(', ')
+.replace(/,\s*BREAK\s*,/g,' BREAK ')
+.replace(/BREAK\s*,\s*/g,'BREAK ')
+.replace(/,\s*,+/g,', ')
+.trim();
 }
 
-async function sendToComfyUI(){
+async function sendToApi(){
+if(!apiEnabled){showFeedback('⚠️ API OFF!','#f59e0b');return;}
+const promptText=getApiPrompt();
+if(!promptText.trim()){showFeedback('⚠️ GENERATE FIRST!','#f59e0b');return;}
+if(apiType==='comfyui') await sendToComfyUI(promptText);
+else await sendToA1111(promptText);
+}
+
+async function sendToComfyUI(promptText){
 const baseUrl=(document.getElementById('apiUrl').value||'http://127.0.0.1:8188').replace(/\/+$/,'');
-const promptText=document.getElementById('prompt').value;
 const negText=document.getElementById('negPrompt').value||'';
 const steps=parseInt(document.getElementById('apiSteps').value)||28;
 const cfg=parseFloat(document.getElementById('apiCfg').value)||7;
@@ -3413,9 +3436,8 @@ btn.innerHTML='<i class="fas fa-paper-plane"></i> 生成送信';
 }
 }
 
-async function sendToA1111(){
+async function sendToA1111(promptText){
 const baseUrl=(document.getElementById('apiUrl').value||'http://127.0.0.1:7860').replace(/\/+$/,'');
-const promptText=document.getElementById('prompt').value;
 const negText=document.getElementById('negPrompt').value||'';
 const steps=parseInt(document.getElementById('apiSteps').value)||28;
 const cfg=parseFloat(document.getElementById('apiCfg').value)||7;

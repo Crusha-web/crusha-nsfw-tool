@@ -67,6 +67,14 @@ body{font-size:14px;padding:0.5rem}
 .preset-btn{font-size:14px;padding:0.8rem 1.2rem}
 }
 @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(0.8)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8)}}
+.mtype-btn{background:rgba(34,211,238,0.08);color:#67e8f9;border:1px solid rgba(34,211,238,0.35);border-radius:0.3rem;padding:0.25rem 0.3rem;font-size:8px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center}
+.mtype-btn:hover{background:rgba(34,211,238,0.2);border-color:#22d3ee}
+.mtype-btn.active{background:linear-gradient(135deg,#22d3ee,#0891b2);color:white;border-color:#22d3ee;box-shadow:0 0 10px rgba(34,211,238,0.5)}
+.q-btn{background:rgba(168,85,247,0.1);color:#c084fc;border:1px solid rgba(168,85,247,0.35);border-radius:0.3rem;padding:0.25rem 0.3rem;font-size:8px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center}
+.q-btn:hover{background:rgba(168,85,247,0.25);border-color:#a855f7}
+.q-btn.active{background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;border-color:#a855f7;box-shadow:0 0 10px rgba(168,85,247,0.5)}
+.cn-preset-btn{background:rgba(249,115,22,0.1);color:#fb923c;border:1px solid rgba(249,115,22,0.35);border-radius:0.3rem;padding:0.25rem 0.3rem;font-size:8px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center}
+.cn-preset-btn:hover{background:rgba(249,115,22,0.25);border-color:#f97316;box-shadow:0 0 8px rgba(249,115,22,0.4)}
 </style>
 </head>
 <body>
@@ -160,94 +168,64 @@ body{font-size:14px;padding:0.5rem}
 <i class="fas fa-copy"></i> COPY PROMPT
 </button>
 
-<!-- AI API パネル -->
-<div style="margin-top:0.5rem;padding:0.5rem;background:rgba(34,211,238,0.08);border:2px solid rgba(34,211,238,0.4);border-radius:0.5rem">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
-<div style="color:#22d3ee;font-size:9px;font-weight:700;text-shadow:0 0 10px rgba(34,211,238,0.8)"><i class="fas fa-server"></i> AI API 送信</div>
-<div style="display:flex;align-items:center;gap:0.3rem">
-<span style="color:#6b7280;font-size:8px;font-weight:700" id="apiOffLabel">OFF</span>
-<div id="apiToggle" onclick="toggleApi()" style="width:36px;height:18px;background:#374151;border-radius:9px;position:relative;cursor:pointer;transition:all 0.3s;flex-shrink:0">
-<div id="apiToggleKnob" style="position:absolute;top:2px;left:2px;width:14px;height:14px;background:#6b7280;border-radius:50%;transition:all 0.3s"></div>
+<!-- ComfyUI プロンプト最適化パネル -->
+<div style="margin-top:0.5rem;padding:0.5rem;background:rgba(34,211,238,0.06);border:2px solid rgba(34,211,238,0.5);border-radius:0.5rem">
+<div style="color:#22d3ee;font-size:9px;font-weight:700;margin-bottom:0.4rem;text-shadow:0 0 10px rgba(34,211,238,0.6)"><i class="fas fa-network-wired"></i> ComfyUI プロンプト最適化</div>
+<!-- モデルタイプ -->
+<div style="margin-bottom:0.35rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">📦 モデルタイプ</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.2rem">
+<button class="mtype-btn active" id="mtype-sdxl" onclick="setModelType('sdxl')">SDXL</button>
+<button class="mtype-btn" id="mtype-pony" onclick="setModelType('pony')">Pony/Illus</button>
+<button class="mtype-btn" id="mtype-sd15" onclick="setModelType('sd15')">SD 1.5</button>
+<button class="mtype-btn" id="mtype-flux" onclick="setModelType('flux')">FLUX.1</button>
+<button class="mtype-btn" id="mtype-animatediff" onclick="setModelType('animatediff')">AnimateDiff</button>
+<button class="mtype-btn" id="mtype-wan" onclick="setModelType('wan')">Wan 2.2</button>
 </div>
-<span style="color:#22d3ee;font-size:8px;font-weight:700" id="apiOnLabel">ON</span>
+</div>
+<!-- クオリティプリセット -->
+<div style="margin-bottom:0.35rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">⚙️ クオリティプリセット</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.2rem">
+<button class="q-btn" id="qbtn-1" onclick="setQualityPreset(1)">⚡Fast</button>
+<button class="q-btn active" id="qbtn-2" onclick="setQualityPreset(2)">⚖Std</button>
+<button class="q-btn" id="qbtn-3" onclick="setQualityPreset(3)">✨High</button>
+<button class="q-btn" id="qbtn-4" onclick="setQualityPreset(4)">💎Max</button>
 </div>
 </div>
-<div id="apiPanel" style="display:none">
-<!-- API種別 -->
-<div style="display:flex;gap:0.3rem;margin-bottom:0.3rem">
-<button id="apiTypeComfy" onclick="setApiType('comfyui')" style="flex:1;background:linear-gradient(135deg,#22d3ee,#0891b2);color:white;padding:0.3rem;border:none;border-radius:0.3rem;cursor:pointer;font-weight:800;font-size:8px">
-<i class="fas fa-network-wired"></i> ComfyUI
+<!-- ComfyUI推奨設定表示 -->
+<div style="background:rgba(10,0,15,0.8);border:1px solid rgba(34,211,238,0.3);border-radius:0.4rem;padding:0.4rem;margin-bottom:0.35rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem">
+<span style="color:#fbbf24;font-size:7px;font-weight:700">📋 KSampler 推奨値 (コピペ用)</span>
+<button onclick="copyNodeSettings()" style="background:rgba(34,211,238,0.2);color:#22d3ee;border:1px solid #22d3ee;padding:0.1rem 0.4rem;border-radius:0.2rem;cursor:pointer;font-size:7px;font-weight:700"><i class="fas fa-copy"></i> コピー</button>
+</div>
+<div id="nodeSettingsText" style="font-family:monospace;font-size:8px;color:#22d3ee;line-height:1.7"></div>
+</div>
+<!-- ControlNet ガイド -->
+<div style="margin-bottom:0.35rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">🎭 ControlNet 構成プリセット</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.2rem">
+<button class="cn-preset-btn" onclick="applyCnPreset('openpose')">🦴 OpenPose</button>
+<button class="cn-preset-btn" onclick="applyCnPreset('canny')">✏️ Canny</button>
+<button class="cn-preset-btn" onclick="applyCnPreset('depth')">🌀 Depth</button>
+<button class="cn-preset-btn" onclick="applyCnPreset('ipadapter')">🖼 IP-Adapter</button>
+</div>
+<div id="cnGuideText" style="display:none;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:0.3rem;padding:0.3rem;margin-top:0.2rem;font-family:monospace;font-size:7px;color:#c084fc;line-height:1.6"></div>
+</div>
+<!-- LoRA プロンプト挿入 -->
+<div style="margin-bottom:0.35rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">🔧 LoRA タグ追加 <span style="color:#6b7280;font-weight:400">(プロンプトに埋め込む)</span></div>
+<div style="display:flex;gap:0.2rem;align-items:center;margin-bottom:0.2rem">
+<input type="text" id="loraNameInput" placeholder="LoRA名 (例: crusha_v1)" style="flex:1;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:8px;padding:0.25rem 0.4rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);font-family:monospace" onkeydown="if(event.key==='Enter')addLoraEntry()">
+<input type="number" id="loraStrInput" value="0.8" min="0" max="2" step="0.05" style="width:38px;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:8px;padding:0.25rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
+<button onclick="addLoraEntry()" style="background:rgba(34,211,238,0.25);color:#22d3ee;border:1px solid #22d3ee;padding:0.2rem 0.5rem;border-radius:0.3rem;cursor:pointer;font-size:10px;font-weight:700">＋</button>
+</div>
+<div id="loraEntries" style="display:flex;flex-direction:column;gap:0.15rem"></div>
+</div>
+<!-- 再構築ボタン -->
+<button onclick="gen();showFeedback('🔥 REBUILT!','#22d3ee')" style="width:100%;background:linear-gradient(135deg,#22d3ee,#0891b2);color:white;padding:0.4rem;border:none;border-radius:0.4rem;cursor:pointer;font-weight:800;font-size:9px;box-shadow:0 0 15px rgba(34,211,238,0.4)">
+<i class="fas fa-sync-alt"></i> プロンプト再構築 (モデル最適化)
 </button>
-<button id="apiTypeA1111" onclick="setApiType('a1111')" style="flex:1;background:rgba(30,10,40,0.9);color:#6b7280;padding:0.3rem;border:1px solid #374151;border-radius:0.3rem;cursor:pointer;font-weight:700;font-size:8px">
-<i class="fas fa-desktop"></i> A1111
-</button>
-</div>
-<!-- URL -->
-<input id="apiUrl" type="text" value="http://127.0.0.1:8188" placeholder="http://127.0.0.1:8188" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-family:monospace;font-size:9px;padding:0.3rem 0.5rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.4);margin-bottom:0.3rem">
-<!-- モデル選択（ComfyUI用） -->
-<div id="comfyModelRow" style="margin-bottom:0.3rem">
-<div style="display:flex;align-items:center;gap:0.3rem;margin-bottom:0.2rem">
-<div style="color:#fbbf24;font-size:7px;font-weight:700;flex:1">Checkpoint Model</div>
-<button onclick="loadComfyModels()" style="background:rgba(34,211,238,0.2);color:#22d3ee;padding:0.1rem 0.4rem;border:1px solid #22d3ee;border-radius:0.2rem;cursor:pointer;font-size:7px;font-weight:700"><i class="fas fa-sync"></i> 取得</button>
-</div>
-<select id="apiModel" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:8px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3)">
-<option value="">-- 「取得」を押してモデルを読み込む --</option>
-</select>
-</div>
-<!-- パラメータ -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-bottom:0.3rem">
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Steps</div>
-<input id="apiSteps" type="number" value="28" min="1" max="150" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
-</div>
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">CFG Scale</div>
-<input id="apiCfg" type="number" value="7" min="1" max="30" step="0.5" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
-</div>
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Width</div>
-<input id="apiWidth" type="number" value="832" min="64" max="2048" step="64" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
-</div>
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Height</div>
-<input id="apiHeight" type="number" value="1216" min="64" max="2048" step="64" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:9px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3);text-align:center">
-</div>
-</div>
-<!-- ComfyUI専用: Sampler/Scheduler -->
-<div id="comfySamplerRow" style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;margin-bottom:0.3rem">
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Sampler</div>
-<select id="apiSampler" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:8px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3)">
-<option value="dpmpp_2m">DPM++ 2M</option>
-<option value="dpmpp_2m_sde">DPM++ 2M SDE</option>
-<option value="euler_ancestral">Euler a</option>
-<option value="euler">Euler</option>
-<option value="dpmpp_3m_sde">DPM++ 3M SDE</option>
-<option value="lcm">LCM</option>
-</select>
-</div>
-<div>
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">Scheduler</div>
-<select id="apiScheduler" style="width:100%;background:rgba(10,0,15,0.8);color:#22d3ee;font-size:8px;padding:0.3rem;border-radius:0.3rem;border:1px solid rgba(34,211,238,0.3)">
-<option value="karras">Karras</option>
-<option value="normal">Normal</option>
-<option value="exponential">Exponential</option>
-<option value="sgm_uniform">SGM Uniform</option>
-<option value="simple">Simple</option>
-</select>
-</div>
-</div>
-<button onclick="sendToApi()" id="apiSendBtn" style="width:100%;background:linear-gradient(135deg,#22d3ee,#0891b2);color:white;padding:0.4rem;border:none;border-radius:0.4rem;cursor:pointer;font-weight:800;font-size:9px;box-shadow:0 0 20px rgba(34,211,238,0.5);transition:all 0.2s">
-<i class="fas fa-paper-plane"></i> 生成送信
-</button>
-<div id="apiStatus" style="margin-top:0.3rem;font-size:8px;color:#22d3ee;text-align:center;min-height:14px"></div>
-<div id="apiResult" style="margin-top:0.3rem;display:none">
-<img id="apiResultImg" style="width:100%;border-radius:0.4rem;border:2px solid rgba(34,211,238,0.5);cursor:pointer" src="" alt="Generated Image" onclick="this.requestFullscreen&&this.requestFullscreen()">
-<button onclick="saveApiImage()" style="width:100%;margin-top:0.3rem;background:rgba(34,211,238,0.2);color:#22d3ee;padding:0.3rem;border:1px solid #22d3ee;border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700">
-<i class="fas fa-download"></i> 画像を保存
-</button>
-</div>
-</div>
 </div>
 
 <div style="margin-top:0.5rem;padding:0.5rem;background:rgba(168,85,247,0.2);border:2px solid rgba(168,85,247,0.5);border-radius:0.5rem">
@@ -2161,15 +2139,7 @@ btn.style.boxShadow=btn.id==='body-'+savedBodyType?'0 0 15px rgba(168,85,247,0.5
 },100);
 }
 
-// API設定復元
-const savedApiType=_store.getItem('apiType');
-if(savedApiType)setApiType(savedApiType);
-const savedApi=_store.getItem('apiEnabled');
-if(savedApi==='1'){
-apiEnabled=false;
-toggleApi();
-}
-
+updateNodeSettings(); // ComfyUI推奨設定を初期表示
 upStat();
 gen(); // 初期プロンプト生成
 }
@@ -2972,7 +2942,7 @@ finalOutput='=== JSON PROMPT (FLUX 2 Compatible) ===\n\n'+JSON.stringify(jsonPro
 finalOutput=pr+'\n\n'+conflictWarnings;
 }
 
-document.getElementById('prompt').value=finalOutput;
+document.getElementById('prompt').value=postProcessForModel(finalOutput);
 
 // デバッグ用：各セクション内容確認
 console.log('=== SECTIONS DETAIL ===');
@@ -3285,251 +3255,157 @@ _store.setItem('renderStyle',style);
 gen();
 }
 
-let apiEnabled=false;
-let apiType='comfyui';
+// =============================================================================
+// ComfyUI プロンプト最適化エンジン v1.0
+// =============================================================================
 
-function setApiType(type){
-apiType=type;
-const comfyBtn=document.getElementById('apiTypeComfy');
-const a1111Btn=document.getElementById('apiTypeA1111');
-const comfyModel=document.getElementById('comfyModelRow');
-const comfySampler=document.getElementById('comfySamplerRow');
-const urlInput=document.getElementById('apiUrl');
-if(type==='comfyui'){
-comfyBtn.style.background='linear-gradient(135deg,#22d3ee,#0891b2)';
-comfyBtn.style.color='white';
-comfyBtn.style.border='none';
-a1111Btn.style.background='rgba(30,10,40,0.9)';
-a1111Btn.style.color='#6b7280';
-a1111Btn.style.border='1px solid #374151';
-comfyModel.style.display='block';
-comfySampler.style.display='grid';
-if(urlInput.value.includes('7860'))urlInput.value='http://127.0.0.1:8188';
-}else{
-a1111Btn.style.background='linear-gradient(135deg,#22d3ee,#0891b2)';
-a1111Btn.style.color='white';
-a1111Btn.style.border='none';
-comfyBtn.style.background='rgba(30,10,40,0.9)';
-comfyBtn.style.color='#6b7280';
-comfyBtn.style.border='1px solid #374151';
-comfyModel.style.display='none';
-comfySampler.style.display='none';
-if(urlInput.value.includes('8188'))urlInput.value='http://127.0.0.1:7860';
-}
-_store.setItem('apiType',type);
+const MODEL_CONFIGS={
+  sdxl:{name:'SDXL / Illustrious',steps:[20,28,35,50],cfg:[6,7,7.5,8],sampler:'dpmpp_2m',scheduler:'karras',resolution:'832x1216',useBreak:true,usePonyScore:false,notes:'SDXL標準。BREAK分割推奨。CFG 7〜8が最適。'},
+  pony:{name:'Pony / IllustriousXL',steps:[20,28,35,50],cfg:[5,6,7,7.5],sampler:'euler_ancestral',scheduler:'normal',resolution:'832x1216',useBreak:true,usePonyScore:true,notes:'score_9〜score_6_up必須。CFG低め推奨。Pony V6対応。'},
+  sd15:{name:'SD 1.5',steps:[20,28,35,50],cfg:[7,7.5,8,10],sampler:'dpmpp_2m',scheduler:'karras',resolution:'512x768',useBreak:false,usePonyScore:false,notes:'SD1.5は512px基準。高CFG可。BREAK不要。'},
+  flux:{name:'FLUX.1 Dev/Schnell',steps:[20,25,30,40],cfg:[1,1,1,1],sampler:'euler',scheduler:'simple',resolution:'832x1216',useBreak:false,usePonyScore:false,notes:'CFG=1固定。ネガティブ不要。自然言語記述が有効。'},
+  animatediff:{name:'AnimateDiff (SDXL)',steps:[20,25,28,35],cfg:[6,7,7.5,8],sampler:'dpmpp_2m',scheduler:'karras',resolution:'512x768',useBreak:false,usePonyScore:false,notes:'batch_size=フレーム数(16〜32)。motion module: mm_sd15_v3推奨。'},
+  wan:{name:'Wan 2.2 / HunyuanVideo',steps:[25,30,40,50],cfg:[5,6,7,8],sampler:'dpmpp_2m',scheduler:'karras',resolution:'848x480',useBreak:false,usePonyScore:false,notes:'T2V/I2V対応。解像度848x480〜1280x720。フレーム数81推奨。'}
+};
+
+let currentModelType='sdxl';
+let currentQualityPreset=2;
+let loraEntries=[];
+
+function setModelType(type){
+  currentModelType=type;
+  document.querySelectorAll('.mtype-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('mtype-'+type);
+  if(btn)btn.classList.add('active');
+  updateNodeSettings();
+  gen();
 }
 
-function toggleApi(){
-apiEnabled=!apiEnabled;
-const tog=document.getElementById('apiToggle');
-const knob=document.getElementById('apiToggleKnob');
-const panel=document.getElementById('apiPanel');
-const offLabel=document.getElementById('apiOffLabel');
-const onLabel=document.getElementById('apiOnLabel');
-if(apiEnabled){
-tog.style.background='#22d3ee';
-knob.style.left='20px';
-knob.style.background='white';
-panel.style.display='block';
-offLabel.style.color='#6b7280';
-onLabel.style.color='#22d3ee';
-showFeedback('🟢 API ON!','#22d3ee');
-}else{
-tog.style.background='#374151';
-knob.style.left='2px';
-knob.style.background='#6b7280';
-panel.style.display='none';
-offLabel.style.color='#6b7280';
-onLabel.style.color='#6b7280';
-showFeedback('⚫ API OFF!','#6b7280');
-}
-_store.setItem('apiEnabled',apiEnabled?'1':'0');
+function setQualityPreset(level){
+  currentQualityPreset=level;
+  document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('qbtn-'+level);
+  if(btn)btn.classList.add('active');
+  updateNodeSettings();
 }
 
-async function loadComfyModels(){
-const baseUrl=(document.getElementById('apiUrl').value||'http://127.0.0.1:8188').replace(/\/+$/,'');
-const sel=document.getElementById('apiModel');
-sel.innerHTML='<option value="">読み込み中...</option>';
-try{
-const res=await fetch(baseUrl+'/object_info/CheckpointLoaderSimple');
-if(!res.ok)throw new Error('HTTP '+res.status);
-const data=await res.json();
-const models=data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]||[];
-sel.innerHTML='';
-models.forEach(m=>{
-const opt=document.createElement('option');
-opt.value=m;opt.textContent=m;
-sel.appendChild(opt);
-});
-if(models.length===0)sel.innerHTML='<option value="">モデルが見つかりません</option>';
-else showFeedback('✅ '+models.length+' models!','#22d3ee');
-}catch(e){
-sel.innerHTML='<option value="">取得失敗: ComfyUIが起動しているか確認</option>';
-showFeedback('❌ 接続失敗','#ef4444');
-}
+function updateNodeSettings(){
+  const cfg=MODEL_CONFIGS[currentModelType];
+  if(!cfg)return;
+  const qi=currentQualityPreset-1;
+  const steps=cfg.steps[qi];
+  const cfgVal=cfg.cfg[qi];
+  const el=document.getElementById('nodeSettingsText');
+  if(!el)return;
+  el.innerHTML=[
+    '<span style="color:#a78bfa">steps</span>: <span style="color:#22d3ee">'+steps+'</span>',
+    '<span style="color:#a78bfa">cfg_scale</span>: <span style="color:#22d3ee">'+cfgVal+'</span>',
+    '<span style="color:#a78bfa">sampler_name</span>: <span style="color:#22d3ee">'+cfg.sampler+'</span>',
+    '<span style="color:#a78bfa">scheduler</span>: <span style="color:#22d3ee">'+cfg.scheduler+'</span>',
+    '<span style="color:#a78bfa">resolution</span>: <span style="color:#22d3ee">'+cfg.resolution+'</span>',
+    '<span style="color:#6b7280;font-style:italic">// '+cfg.notes+'</span>'
+  ].join('<br>');
 }
 
-// セクションヘッダーを除去してSD用クリーンプロンプトを生成
+function copyNodeSettings(){
+  const cfg=MODEL_CONFIGS[currentModelType];
+  if(!cfg)return;
+  const qi=currentQualityPreset-1;
+  const text='steps: '+cfg.steps[qi]+'\ncfg_scale: '+cfg.cfg[qi]+'\nsampler_name: '+cfg.sampler+'\nscheduler: '+cfg.scheduler+'\nresolution: '+cfg.resolution+'\n// '+cfg.notes;
+  navigator.clipboard.writeText(text).then(()=>showFeedback('📋 KSampler設定コピー!','#22d3ee'));
+}
+
+const CN_GUIDES={
+  openpose:{title:'🦴 OpenPose ControlNet',text:'Node: ControlNetApplyAdvanced\nPreprocessor: DWPreprocessor (推奨) / OpenPosePreprocessor\nModel(SD15): control_v11p_sd15_openpose.pth\nModel(SDXL): controlnet-openpose-sdxl-1.0\nstrength: 0.6~0.85  start: 0.0 / end: 0.9\nTIP: キャラポーズ固定。顔・手はstrength下げると自然。'},
+  canny:{title:'✏️ Canny ControlNet',text:'Node: ControlNetApplyAdvanced\nPreprocessor: CannyEdgePreprocessor\n  low_threshold: 100  high_threshold: 200\nModel(SD15): control_v11p_sd15_canny.pth\nModel(SDXL): controlnet-canny-sdxl-1.0\nstrength: 0.4~0.7  start: 0.0 / end: 0.8\nTIP: 衣装・背景の輪郭固定。strength強すぎると硬い。'},
+  depth:{title:'🌀 Depth ControlNet',text:'Node: ControlNetApplyAdvanced\nPreprocessor: MiDaS-DepthMapPreprocessor / ZoeDepthPreprocessor\nModel(SD15): control_v11f1p_sd15_depth.pth\nModel(SDXL): controlnet-depth-sdxl-1.0\nstrength: 0.5~0.8  start: 0.0 / end: 0.9\nTIP: 3D空間・遠近感固定。背景との分離に有効。'},
+  ipadapter:{title:'🖼 IP-Adapter',text:'Node: IPAdapterApply / IPAdapterAdvanced\nModel(SDXL): ip-adapter-plus_sdxl_vit-h.safetensors\nModel(顔): ip-adapter-plus-face_sdxl_vit-h.safetensors\nCLIP Vision: clip_vision_g.safetensors\nweight: 0.5~0.8\nweight_type: "style transfer" → スタイル転写\nweight_type: "composition" → 構図転写'}
+};
+
+function applyCnPreset(type){
+  const guide=CN_GUIDES[type];
+  if(!guide)return;
+  const el=document.getElementById('cnGuideText');
+  if(!el)return;
+  el.style.display='block';
+  el.innerHTML='<strong style="color:#f0abfc">'+guide.title+'</strong>\n'+guide.text;
+}
+
+function addLoraEntry(){
+  const nameInput=document.getElementById('loraNameInput');
+  const strInput=document.getElementById('loraStrInput');
+  const name=nameInput.value.trim();
+  const str=parseFloat(strInput.value)||0.8;
+  if(!name){showFeedback('⚠️ LoRA名を入力!','#f59e0b');return;}
+  const id=Date.now();
+  loraEntries.push({id,name,str});
+  nameInput.value='';
+  renderLoraEntries();
+  gen();
+}
+
+function removeLoraEntry(id){
+  loraEntries=loraEntries.filter(e=>e.id!==id);
+  renderLoraEntries();
+  gen();
+}
+
+function renderLoraEntries(){
+  const container=document.getElementById('loraEntries');
+  if(!container)return;
+  container.innerHTML=loraEntries.map(e=>
+    '<div style="display:flex;align-items:center;gap:0.2rem;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.3);border-radius:0.3rem;padding:0.2rem 0.4rem">'+
+    '<span style="flex:1;font-family:monospace;font-size:8px;color:#22d3ee">&lt;lora:'+e.name+':'+e.str+'&gt;</span>'+
+    '<button onclick="removeLoraEntry('+e.id+')" style="background:rgba(239,68,68,0.3);color:#f87171;border:none;border-radius:0.2rem;cursor:pointer;font-size:10px;padding:0 0.3rem;line-height:1.4">x</button>'+
+    '</div>'
+  ).join('');
+}
+
+function getLoraPromptSuffix(){
+  return loraEntries.map(e=>'<lora:'+e.name+':'+e.str+'>').join(' ');
+}
+
+function postProcessForModel(rawPrompt){
+  const cfg=MODEL_CONFIGS[currentModelType];
+  if(!cfg)return rawPrompt;
+  let out=rawPrompt;
+  const loraSuffix=getLoraPromptSuffix();
+  if(loraSuffix)out=out.trimEnd()+'\n\n'+loraSuffix;
+  if(currentModelType==='flux'){
+    out=out.replace(/\bBREAK\b/g,'').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  if(currentModelType==='pony'){
+    const scoreTag='score_9, score_8_up, score_7_up, score_6_up';
+    if(!out.includes('score_9'))out=scoreTag+', '+out;
+  }
+  return out;
+}
+
+// クリーンプロンプト取得（構造ヘッダー除去）
 function getApiPrompt(){
-const raw=document.getElementById('prompt').value;
-const parts=[];
-let inJson=false;
-for(const line of raw.split('\n')){
-const t=line.trim();
-if(!t)continue;
-if(t.startsWith('{')||t.startsWith('[')){inJson=true;continue;}
-if(inJson){if(t==='}')inJson=false;continue;}
-if(/^={3,}/.test(t))continue;
-if(/^\[Mode:/i.test(t))continue;
-if(/^[A-N]\s*\[/i.test(t))continue;
-if(/^[-─]{3,}/.test(t))continue;
-if(t.startsWith('//')||t.startsWith('#'))continue;
-parts.push(t);
-}
-return parts.join(', ')
-.replace(/,\s*BREAK\s*,/g,' BREAK ')
-.replace(/BREAK\s*,\s*/g,'BREAK ')
-.replace(/,\s*,+/g,', ')
-.trim();
-}
-
-async function sendToApi(){
-if(!apiEnabled){showFeedback('⚠️ API OFF!','#f59e0b');return;}
-const promptText=getApiPrompt();
-if(!promptText.trim()){showFeedback('⚠️ GENERATE FIRST!','#f59e0b');return;}
-if(apiType==='comfyui') await sendToComfyUI(promptText);
-else await sendToA1111(promptText);
+  const raw=document.getElementById('prompt').value;
+  const parts=[];
+  let inJson=false;
+  for(const line of raw.split('\n')){
+    const t=line.trim();
+    if(!t)continue;
+    if(t.startsWith('{')||t.startsWith('[')){ inJson=true;continue; }
+    if(inJson){if(t==='}')inJson=false;continue;}
+    if(/^={3,}/.test(t))continue;
+    if(/^\[Mode:/i.test(t))continue;
+    if(/^\[[\d]+\./i.test(t))continue;
+    if(/^[A-N]\s*\[/i.test(t))continue;
+    if(/^[-─]{3,}/.test(t))continue;
+    if(t.startsWith('//')||t.startsWith('#'))continue;
+    parts.push(t);
+  }
+  return parts.join(', ')
+    .replace(/,\s*BREAK\s*,/g,' BREAK ')
+    .replace(/BREAK\s*,\s*/g,'BREAK ')
+    .replace(/,\s*,+/g,', ')
+    .trim();
 }
 
-async function sendToComfyUI(promptText){
-const baseUrl=(document.getElementById('apiUrl').value||'http://127.0.0.1:8188').replace(/\/+$/,'');
-const negText=document.getElementById('negPrompt').value||'';
-const steps=parseInt(document.getElementById('apiSteps').value)||28;
-const cfg=parseFloat(document.getElementById('apiCfg').value)||7;
-const w=parseInt(document.getElementById('apiWidth').value)||832;
-const h=parseInt(document.getElementById('apiHeight').value)||1216;
-const model=document.getElementById('apiModel').value||'';
-const sampler=document.getElementById('apiSampler').value||'dpmpp_2m';
-const scheduler=document.getElementById('apiScheduler').value||'karras';
-const btn=document.getElementById('apiSendBtn');
-const status=document.getElementById('apiStatus');
-const result=document.getElementById('apiResult');
-const img=document.getElementById('apiResultImg');
-btn.disabled=true;
-btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> 送信中...';
-status.textContent='ComfyUI に接続中...';
-result.style.display='none';
-const seed=Math.floor(Math.random()*2147483647);
-const workflow={
-"1":{"class_type":"CheckpointLoaderSimple","inputs":{"ckpt_name":model}},
-"2":{"class_type":"CLIPTextEncode","inputs":{"text":promptText,"clip":["1",1]}},
-"3":{"class_type":"CLIPTextEncode","inputs":{"text":negText,"clip":["1",1]}},
-"4":{"class_type":"EmptyLatentImage","inputs":{"width":w,"height":h,"batch_size":1}},
-"5":{"class_type":"KSampler","inputs":{"model":["1",0],"positive":["2",0],"negative":["3",0],"latent_image":["4",0],"seed":seed,"steps":steps,"cfg":cfg,"sampler_name":sampler,"scheduler":scheduler,"denoise":1}},
-"6":{"class_type":"VAEDecode","inputs":{"samples":["5",0],"vae":["1",2]}},
-"7":{"class_type":"SaveImage","inputs":{"images":["6",0],"filename_prefix":"CRUSHA"}}
-};
-try{
-const queueRes=await fetch(baseUrl+'/prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:workflow})});
-if(!queueRes.ok)throw new Error('Queue HTTP '+queueRes.status);
-const queueData=await queueRes.json();
-const promptId=queueData.prompt_id;
-if(!promptId)throw new Error('No prompt_id returned');
-status.textContent='⏳ キュー追加完了 (ID:'+promptId.slice(0,8)+'...) 生成待ち...';
-// Poll history
-let attempts=0;
-const maxAttempts=120;
-while(attempts<maxAttempts){
-await new Promise(r=>setTimeout(r,1500));
-attempts++;
-status.textContent='⏳ 生成中... ('+Math.round(attempts*1.5)+'秒)';
-const histRes=await fetch(baseUrl+'/history/'+promptId);
-if(!histRes.ok){attempts++;continue;}
-const histData=await histRes.json();
-const entry=histData[promptId];
-if(!entry)continue;
-if(entry.status&&entry.status.status_str==='error'){
-const errMsg=entry.status.messages?.find(m=>m[0]==='execution_error');
-throw new Error(errMsg?errMsg[1]?.exception_message||'実行エラー':'実行エラー');
-}
-const outputs=entry.outputs;
-if(!outputs)continue;
-// Find SaveImage node output
-for(const nodeId of Object.keys(outputs)){
-const nodeOut=outputs[nodeId];
-if(nodeOut.images&&nodeOut.images.length>0){
-const imgInfo=nodeOut.images[0];
-const imgUrl=baseUrl+'/view?filename='+encodeURIComponent(imgInfo.filename)+'&subfolder='+encodeURIComponent(imgInfo.subfolder||'')+'&type='+encodeURIComponent(imgInfo.type||'output');
-// Fetch and convert to base64 for display
-const imgRes=await fetch(imgUrl);
-const blob=await imgRes.blob();
-const reader=new FileReader();
-reader.onload=()=>{
-img.src=reader.result;
-result.style.display='block';
-};
-reader.readAsDataURL(blob);
-status.textContent='✅ 生成完了！';
-showFeedback('✅ ComfyUI IMAGE!','#22d3ee');
-btn.disabled=false;
-btn.innerHTML='<i class="fas fa-paper-plane"></i> 生成送信';
-return;
-}
-}
-}
-throw new Error('タイムアウト ('+maxAttempts*1.5+'秒)');
-}catch(e){
-status.textContent='❌ '+e.message;
-showFeedback('❌ ComfyUI ERROR!','#ef4444');
-}finally{
-btn.disabled=false;
-btn.innerHTML='<i class="fas fa-paper-plane"></i> 生成送信';
-}
-}
-
-async function sendToA1111(promptText){
-const baseUrl=(document.getElementById('apiUrl').value||'http://127.0.0.1:7860').replace(/\/+$/,'');
-const negText=document.getElementById('negPrompt').value||'';
-const steps=parseInt(document.getElementById('apiSteps').value)||28;
-const cfg=parseFloat(document.getElementById('apiCfg').value)||7;
-const w=parseInt(document.getElementById('apiWidth').value)||832;
-const h=parseInt(document.getElementById('apiHeight').value)||1216;
-const btn=document.getElementById('apiSendBtn');
-const status=document.getElementById('apiStatus');
-const result=document.getElementById('apiResult');
-const img=document.getElementById('apiResultImg');
-btn.disabled=true;
-btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> 生成中...';
-status.textContent='A1111 に接続中...';
-result.style.display='none';
-try{
-const payload={prompt:promptText,negative_prompt:negText,steps:steps,cfg_scale:cfg,width:w,height:h,sampler_name:'DPM++ 2M Karras'};
-const res=await fetch(baseUrl+'/sdapi/v1/txt2img',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-if(!res.ok)throw new Error('HTTP '+res.status);
-const data=await res.json();
-if(data.images&&data.images[0]){
-img.src='data:image/png;base64,'+data.images[0];
-result.style.display='block';
-status.textContent='✅ 生成完了！';
-showFeedback('✅ A1111 IMAGE!','#22d3ee');
-}else{throw new Error('No image in response');}
-}catch(e){
-status.textContent='❌ '+e.message+' (A1111が起動しているか確認)';
-showFeedback('❌ API ERROR!','#ef4444');
-}finally{
-btn.disabled=false;
-btn.innerHTML='<i class="fas fa-paper-plane"></i> 生成送信';
-}
-}
-
-function saveApiImage(){
-const img=document.getElementById('apiResultImg');
-if(!img.src||img.src==='')return;
-const a=document.createElement('a');
-a.href=img.src;
-a.download='crusha_generated_'+Date.now()+'.png';
-a.click();
-}
 
 function showFeedback(msg,color='#ec4899'){
 const fb=document.createElement('div');

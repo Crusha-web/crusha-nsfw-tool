@@ -147,6 +147,132 @@ body{font-size:14px;padding:0.5rem}
 ✨ クルーシャモード: DNA固定使用 | 🎨 アニメスタイル
 </div>
 
+<!-- ===== CHARACTER × SCENE SELECTOR ===== -->
+<div style="background:rgba(236,72,153,0.08);border:2px solid rgba(236,72,153,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+<span style="color:#ec4899;font-size:11px;font-weight:800">👤 CHARACTER × SCENE</span>
+<div style="display:flex;gap:0.2rem">
+<button class="char-tab active" id="tab-chars" onclick="switchCharTab('chars')">キャラ選択</button>
+<button class="char-tab" id="tab-all" onclick="switchCharTab('all')">全組み合わせ</button>
+</div>
+</div>
+
+<div id="charTab-chars">
+<div id="charGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.18rem;margin-bottom:0.35rem"></div>
+<div id="sceneSelector" style="display:none;border-top:1px solid rgba(236,72,153,0.25);padding-top:0.3rem;margin-top:0.1rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">🎬 シーン選択</div>
+<div id="sceneGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.18rem"></div>
+</div>
+</div>
+
+<div id="charTab-all" style="display:none">
+<div id="charSceneGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.12rem;max-height:260px;overflow-y:auto;padding:0.25rem;background:rgba(0,0,0,0.25);border-radius:0.4rem"></div>
+</div>
+
+<button onclick="clearCharScene()" style="width:100%;margin-top:0.3rem;background:rgba(220,38,38,0.12);color:#fca5a5;border:1px solid rgba(220,38,38,0.35);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.22rem">✕ キャラ・シーン解除</button>
+</div>
+
+<!-- ===== COMPOSITION BUILDER ===== -->
+<div style="background:rgba(6,182,212,0.05);border:2px solid rgba(6,182,212,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+<span style="color:#22d3ee;font-size:11px;font-weight:800">🎬 COMPOSITION BUILDER</span>
+<span style="font-size:7px;color:#6b7280">映像制作レベル構図 → H[CAMERA]自動挿入</span>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">📏 SHOT SIZE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
+<button class="comp-btn" id="cs-shotSize-ecu" onclick="setComp('shotSize','ecu')">ECU<span class="comp-sub">極寄り</span></button>
+<button class="comp-btn" id="cs-shotSize-bcu" onclick="setComp('shotSize','bcu')">BCU<span class="comp-sub">胸〜上</span></button>
+<button class="comp-btn" id="cs-shotSize-cu" onclick="setComp('shotSize','cu')">CU<span class="comp-sub">顔</span></button>
+<button class="comp-btn" id="cs-shotSize-mcu" onclick="setComp('shotSize','mcu')">MCU<span class="comp-sub">上半身</span></button>
+<button class="comp-btn" id="cs-shotSize-ms" onclick="setComp('shotSize','ms')">MS<span class="comp-sub">腰上</span></button>
+<button class="comp-btn" id="cs-shotSize-mls" onclick="setComp('shotSize','mls')">MLS<span class="comp-sub">膝上</span></button>
+<button class="comp-btn" id="cs-shotSize-ls" onclick="setComp('shotSize','ls')">LS<span class="comp-sub">全身</span></button>
+<button class="comp-btn" id="cs-shotSize-ews" onclick="setComp('shotSize','ews')">EWS<span class="comp-sub">超広角</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">📐 CAMERA ANGLE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
+<button class="comp-btn" id="cs-angle-eye" onclick="setComp('angle','eye')">EYE<span class="comp-sub">目線</span></button>
+<button class="comp-btn" id="cs-angle-low" onclick="setComp('angle','low')">LOW<span class="comp-sub">ロー</span></button>
+<button class="comp-btn" id="cs-angle-high" onclick="setComp('angle','high')">HIGH<span class="comp-sub">ハイ</span></button>
+<button class="comp-btn" id="cs-angle-birds" onclick="setComp('angle','birds')">BIRD<span class="comp-sub">真上</span></button>
+<button class="comp-btn" id="cs-angle-worms" onclick="setComp('angle','worms')">WORM<span class="comp-sub">真下</span></button>
+<button class="comp-btn" id="cs-angle-dutch" onclick="setComp('angle','dutch')">DUTCH<span class="comp-sub">斜め</span></button>
+<button class="comp-btn" id="cs-angle-side" onclick="setComp('angle','side')">SIDE<span class="comp-sub">横</span></button>
+<button class="comp-btn" id="cs-angle-rear" onclick="setComp('angle','rear')">REAR<span class="comp-sub">後ろ</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">👁 POV TYPE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(7,1fr)">
+<button class="comp-btn" id="cs-pov-std" onclick="setComp('pov','std')">3RD<span class="comp-sub">三人称</span></button>
+<button class="comp-btn" id="cs-pov-pov" onclick="setComp('pov','pov')">POV<span class="comp-sub">一人称</span></button>
+<button class="comp-btn" id="cs-pov-os" onclick="setComp('pov','os')">O/S<span class="comp-sub">肩越し</span></button>
+<button class="comp-btn" id="cs-pov-voyeur" onclick="setComp('pov','voyeur')">VYR<span class="comp-sub">覗き</span></button>
+<button class="comp-btn" id="cs-pov-mirror" onclick="setComp('pov','mirror')">MIRR<span class="comp-sub">鏡</span></button>
+<button class="comp-btn" id="cs-pov-under" onclick="setComp('pov','under')">UNDR<span class="comp-sub">股下</span></button>
+<button class="comp-btn" id="cs-pov-glass" onclick="setComp('pov','glass')">GLAS<span class="comp-sub">ガラス越</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">🔭 LENS / FOCAL LENGTH</div>
+<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
+<button class="comp-btn" id="cs-lens-wide" onclick="setComp('lens','wide')">14mm<span class="comp-sub">広角</span></button>
+<button class="comp-btn" id="cs-lens-std" onclick="setComp('lens','std')">35mm<span class="comp-sub">標準</span></button>
+<button class="comp-btn" id="cs-lens-port" onclick="setComp('lens','port')">85mm<span class="comp-sub">ポート</span></button>
+<button class="comp-btn" id="cs-lens-tele" onclick="setComp('lens','tele')">135mm<span class="comp-sub">望遠</span></button>
+<button class="comp-btn" id="cs-lens-macro" onclick="setComp('lens','macro')">MACRO<span class="comp-sub">接写</span></button>
+<button class="comp-btn" id="cs-lens-fish" onclick="setComp('lens','fish')">FISH<span class="comp-sub">魚眼</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">🌀 DEPTH OF FIELD</div>
+<div class="comp-grid" style="grid-template-columns:repeat(3,1fr)">
+<button class="comp-btn" id="cs-dof-shallow" onclick="setComp('dof','shallow')">f/1.4 BOKEH<span class="comp-sub">ボケ強 主体際立つ</span></button>
+<button class="comp-btn" id="cs-dof-normal" onclick="setComp('dof','normal')">f/4 BALANCED<span class="comp-sub">標準 自然分離</span></button>
+<button class="comp-btn" id="cs-dof-deep" onclick="setComp('dof','deep')">f/11 SHARP<span class="comp-sub">全体鮮明</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">📐 FRAMING RULE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(5,1fr)">
+<button class="comp-btn" id="cs-frame-center" onclick="setComp('frame','center')">CENTER<span class="comp-sub">中央</span></button>
+<button class="comp-btn" id="cs-frame-rule3" onclick="setComp('frame','rule3')">RULE/3<span class="comp-sub">三分割</span></button>
+<button class="comp-btn" id="cs-frame-golden" onclick="setComp('frame','golden')">GOLDEN<span class="comp-sub">黄金比</span></button>
+<button class="comp-btn" id="cs-frame-symm" onclick="setComp('frame','symm')">SYMM<span class="comp-sub">シンメトリ</span></button>
+<button class="comp-btn" id="cs-frame-diag" onclick="setComp('frame','diag')">DIAG<span class="comp-sub">対角線</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">💡 PROFESSIONAL LIGHTING SETUP</div>
+<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
+<button class="comp-btn" id="cs-light-3pt" onclick="setComp('light','3pt')">3-PT<span class="comp-sub">3点照明</span></button>
+<button class="comp-btn" id="cs-light-rembrandt" onclick="setComp('light','rembrandt')">REMBR<span class="comp-sub">レンブラント</span></button>
+<button class="comp-btn" id="cs-light-butterfly" onclick="setComp('light','butterfly')">BFLY<span class="comp-sub">バタフライ</span></button>
+<button class="comp-btn" id="cs-light-backlight" onclick="setComp('light','backlight')">BACK<span class="comp-sub">逆光</span></button>
+<button class="comp-btn" id="cs-light-neon" onclick="setComp('light','neon')">NEON<span class="comp-sub">ネオン</span></button>
+<button class="comp-btn" id="cs-light-golden" onclick="setComp('light','golden')">GOLDEN<span class="comp-sub">黄金時間</span></button>
+</div>
+</div>
+
+<div style="margin-top:0.3rem;background:rgba(0,0,0,0.3);border:1px solid rgba(6,182,212,0.18);border-radius:0.3rem;padding:0.3rem">
+<div style="color:#6b7280;font-size:6px;margin-bottom:0.1rem">▶ 生成構図プロンプト (H[CAMERA]セクション自動挿入)</div>
+<div id="compPreview" style="font-family:monospace;font-size:7px;color:#67e8f9;line-height:1.5;word-break:break-all;min-height:12px">(未選択)</div>
+</div>
+<button onclick="clearComp()" style="width:100%;margin-top:0.22rem;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.2rem">✕ 構図リセット</button>
+</div>
+
+<button onclick="clearPreset()"
+
 <textarea id="prompt" class="prompt-out" autocomplete="off" placeholder="v14 - 20キャラ | 80シーン | 関羽・ヘスティア追加 プロンプトが生成されます..."></textarea>
 
 <!-- v13 ネガティブプロンプト表示 -->
@@ -287,131 +413,7 @@ body{font-size:14px;padding:0.5rem}
 </p>
 </div>
 
-<!-- ===== CHARACTER × SCENE SELECTOR ===== -->
-<div style="background:rgba(236,72,153,0.08);border:2px solid rgba(236,72,153,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
-<span style="color:#ec4899;font-size:11px;font-weight:800">👤 CHARACTER × SCENE</span>
-<div style="display:flex;gap:0.2rem">
-<button class="char-tab active" id="tab-chars" onclick="switchCharTab('chars')">キャラ選択</button>
-<button class="char-tab" id="tab-all" onclick="switchCharTab('all')">全組み合わせ</button>
-</div>
-</div>
-
-<div id="charTab-chars">
-<div id="charGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.18rem;margin-bottom:0.35rem"></div>
-<div id="sceneSelector" style="display:none;border-top:1px solid rgba(236,72,153,0.25);padding-top:0.3rem;margin-top:0.1rem">
-<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">🎬 シーン選択</div>
-<div id="sceneGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.18rem"></div>
-</div>
-</div>
-
-<div id="charTab-all" style="display:none">
-<div id="charSceneGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.12rem;max-height:260px;overflow-y:auto;padding:0.25rem;background:rgba(0,0,0,0.25);border-radius:0.4rem"></div>
-</div>
-
-<button onclick="clearCharScene()" style="width:100%;margin-top:0.3rem;background:rgba(220,38,38,0.12);color:#fca5a5;border:1px solid rgba(220,38,38,0.35);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.22rem">✕ キャラ・シーン解除</button>
-</div>
-
-<!-- ===== COMPOSITION BUILDER ===== -->
-<div style="background:rgba(6,182,212,0.05);border:2px solid rgba(6,182,212,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
-<span style="color:#22d3ee;font-size:11px;font-weight:800">🎬 COMPOSITION BUILDER</span>
-<span style="font-size:7px;color:#6b7280">映像制作レベル構図 → H[CAMERA]自動挿入</span>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">📏 SHOT SIZE</div>
-<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
-<button class="comp-btn" id="cs-shotSize-ecu" onclick="setComp('shotSize','ecu')">ECU<span class="comp-sub">極寄り</span></button>
-<button class="comp-btn" id="cs-shotSize-bcu" onclick="setComp('shotSize','bcu')">BCU<span class="comp-sub">胸〜上</span></button>
-<button class="comp-btn" id="cs-shotSize-cu" onclick="setComp('shotSize','cu')">CU<span class="comp-sub">顔</span></button>
-<button class="comp-btn" id="cs-shotSize-mcu" onclick="setComp('shotSize','mcu')">MCU<span class="comp-sub">上半身</span></button>
-<button class="comp-btn" id="cs-shotSize-ms" onclick="setComp('shotSize','ms')">MS<span class="comp-sub">腰上</span></button>
-<button class="comp-btn" id="cs-shotSize-mls" onclick="setComp('shotSize','mls')">MLS<span class="comp-sub">膝上</span></button>
-<button class="comp-btn" id="cs-shotSize-ls" onclick="setComp('shotSize','ls')">LS<span class="comp-sub">全身</span></button>
-<button class="comp-btn" id="cs-shotSize-ews" onclick="setComp('shotSize','ews')">EWS<span class="comp-sub">超広角</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">📐 CAMERA ANGLE</div>
-<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
-<button class="comp-btn" id="cs-angle-eye" onclick="setComp('angle','eye')">EYE<span class="comp-sub">目線</span></button>
-<button class="comp-btn" id="cs-angle-low" onclick="setComp('angle','low')">LOW<span class="comp-sub">ロー</span></button>
-<button class="comp-btn" id="cs-angle-high" onclick="setComp('angle','high')">HIGH<span class="comp-sub">ハイ</span></button>
-<button class="comp-btn" id="cs-angle-birds" onclick="setComp('angle','birds')">BIRD<span class="comp-sub">真上</span></button>
-<button class="comp-btn" id="cs-angle-worms" onclick="setComp('angle','worms')">WORM<span class="comp-sub">真下</span></button>
-<button class="comp-btn" id="cs-angle-dutch" onclick="setComp('angle','dutch')">DUTCH<span class="comp-sub">斜め</span></button>
-<button class="comp-btn" id="cs-angle-side" onclick="setComp('angle','side')">SIDE<span class="comp-sub">横</span></button>
-<button class="comp-btn" id="cs-angle-rear" onclick="setComp('angle','rear')">REAR<span class="comp-sub">後ろ</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">👁 POV TYPE</div>
-<div class="comp-grid" style="grid-template-columns:repeat(7,1fr)">
-<button class="comp-btn" id="cs-pov-std" onclick="setComp('pov','std')">3RD<span class="comp-sub">三人称</span></button>
-<button class="comp-btn" id="cs-pov-pov" onclick="setComp('pov','pov')">POV<span class="comp-sub">一人称</span></button>
-<button class="comp-btn" id="cs-pov-os" onclick="setComp('pov','os')">O/S<span class="comp-sub">肩越し</span></button>
-<button class="comp-btn" id="cs-pov-voyeur" onclick="setComp('pov','voyeur')">VYR<span class="comp-sub">覗き</span></button>
-<button class="comp-btn" id="cs-pov-mirror" onclick="setComp('pov','mirror')">MIRR<span class="comp-sub">鏡</span></button>
-<button class="comp-btn" id="cs-pov-under" onclick="setComp('pov','under')">UNDR<span class="comp-sub">股下</span></button>
-<button class="comp-btn" id="cs-pov-glass" onclick="setComp('pov','glass')">GLAS<span class="comp-sub">ガラス越</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">🔭 LENS / FOCAL LENGTH</div>
-<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
-<button class="comp-btn" id="cs-lens-wide" onclick="setComp('lens','wide')">14mm<span class="comp-sub">広角</span></button>
-<button class="comp-btn" id="cs-lens-std" onclick="setComp('lens','std')">35mm<span class="comp-sub">標準</span></button>
-<button class="comp-btn" id="cs-lens-port" onclick="setComp('lens','port')">85mm<span class="comp-sub">ポート</span></button>
-<button class="comp-btn" id="cs-lens-tele" onclick="setComp('lens','tele')">135mm<span class="comp-sub">望遠</span></button>
-<button class="comp-btn" id="cs-lens-macro" onclick="setComp('lens','macro')">MACRO<span class="comp-sub">接写</span></button>
-<button class="comp-btn" id="cs-lens-fish" onclick="setComp('lens','fish')">FISH<span class="comp-sub">魚眼</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">🌀 DEPTH OF FIELD</div>
-<div class="comp-grid" style="grid-template-columns:repeat(3,1fr)">
-<button class="comp-btn" id="cs-dof-shallow" onclick="setComp('dof','shallow')">f/1.4 BOKEH<span class="comp-sub">ボケ強 主体際立つ</span></button>
-<button class="comp-btn" id="cs-dof-normal" onclick="setComp('dof','normal')">f/4 BALANCED<span class="comp-sub">標準 自然分離</span></button>
-<button class="comp-btn" id="cs-dof-deep" onclick="setComp('dof','deep')">f/11 SHARP<span class="comp-sub">全体鮮明</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">📐 FRAMING RULE</div>
-<div class="comp-grid" style="grid-template-columns:repeat(5,1fr)">
-<button class="comp-btn" id="cs-frame-center" onclick="setComp('frame','center')">CENTER<span class="comp-sub">中央</span></button>
-<button class="comp-btn" id="cs-frame-rule3" onclick="setComp('frame','rule3')">RULE/3<span class="comp-sub">三分割</span></button>
-<button class="comp-btn" id="cs-frame-golden" onclick="setComp('frame','golden')">GOLDEN<span class="comp-sub">黄金比</span></button>
-<button class="comp-btn" id="cs-frame-symm" onclick="setComp('frame','symm')">SYMM<span class="comp-sub">シンメトリ</span></button>
-<button class="comp-btn" id="cs-frame-diag" onclick="setComp('frame','diag')">DIAG<span class="comp-sub">対角線</span></button>
-</div>
-</div>
-
-<div class="comp-row">
-<div class="comp-label">💡 PROFESSIONAL LIGHTING SETUP</div>
-<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
-<button class="comp-btn" id="cs-light-3pt" onclick="setComp('light','3pt')">3-PT<span class="comp-sub">3点照明</span></button>
-<button class="comp-btn" id="cs-light-rembrandt" onclick="setComp('light','rembrandt')">REMBR<span class="comp-sub">レンブラント</span></button>
-<button class="comp-btn" id="cs-light-butterfly" onclick="setComp('light','butterfly')">BFLY<span class="comp-sub">バタフライ</span></button>
-<button class="comp-btn" id="cs-light-backlight" onclick="setComp('light','backlight')">BACK<span class="comp-sub">逆光</span></button>
-<button class="comp-btn" id="cs-light-neon" onclick="setComp('light','neon')">NEON<span class="comp-sub">ネオン</span></button>
-<button class="comp-btn" id="cs-light-golden" onclick="setComp('light','golden')">GOLDEN<span class="comp-sub">黄金時間</span></button>
-</div>
-</div>
-
-<div style="margin-top:0.3rem;background:rgba(0,0,0,0.3);border:1px solid rgba(6,182,212,0.18);border-radius:0.3rem;padding:0.3rem">
-<div style="color:#6b7280;font-size:6px;margin-bottom:0.1rem">▶ 生成構図プロンプト (H[CAMERA]セクション自動挿入)</div>
-<div id="compPreview" style="font-family:monospace;font-size:7px;color:#67e8f9;line-height:1.5;word-break:break-all;min-height:12px">(未選択)</div>
-</div>
-<button onclick="clearComp()" style="width:100%;margin-top:0.22rem;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.2rem">✕ 構図リセット</button>
-</div>
-
-<button onclick="clearPreset()" style="width:100%;margin-bottom:0.4rem;background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.5);color:#dc2626;border-radius:0.4rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.25rem">
+ style="width:100%;margin-bottom:0.4rem;background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.5);color:#dc2626;border-radius:0.4rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.25rem">
 <i class="fas fa-times"></i> 全プリセット解除
 </button>
 
@@ -892,13 +894,12 @@ erotic_fluid_effects:"エロ体液効果",
 body_type_variants:"体型バリエ",
 breast_variation:"胸バリエ",
 quality_score_system:"品質スコア",
-meta_quality_tags:"メタ品質"
-},
+meta_quality_tags:"メタ品質",
 pro_pose_library:"プロポーズライブラリ",
 pro_bg_nsfw:"NSFWプロ背景",
 pro_skin_rendering:"プロ肌レンダリング",
 quality_comfyui_pro:"ComfyUIプロ品質"
-}
+};
 
 const DB={
 pubic_hair_styles:[

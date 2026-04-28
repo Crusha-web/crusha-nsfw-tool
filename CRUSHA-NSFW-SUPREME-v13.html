@@ -66,6 +66,32 @@ body{font-size:14px;padding:0.5rem}
 .cat-title{font-size:15px}
 .preset-btn{font-size:14px;padding:0.8rem 1.2rem}
 }
+
+/* ===== COMPOSITION BUILDER ===== */
+.comp-row{margin-bottom:0.28rem}
+.comp-label{color:#a78bfa;font-size:7px;font-weight:700;margin-bottom:0.1rem;letter-spacing:0.03em}
+.comp-grid{display:grid;gap:0.1rem}
+.comp-btn{background:rgba(6,182,212,0.05);color:#67e8f9;border:1px solid rgba(6,182,212,0.18);border-radius:0.22rem;padding:0.22rem 0.04rem;font-size:7px;font-weight:700;cursor:pointer;transition:all 0.12s;display:flex;flex-direction:column;align-items:center;line-height:1.15;text-align:center;min-width:0}
+.comp-btn:hover{background:rgba(6,182,212,0.18);border-color:rgba(6,182,212,0.55)}
+.comp-btn.active{background:linear-gradient(135deg,#0e7490,#164e63);color:#fff;border-color:#22d3ee;box-shadow:0 0 8px rgba(6,182,212,0.55)}
+.comp-sub{font-size:5.5px;color:#94a3b8;font-weight:400;margin-top:1px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.comp-btn.active .comp-sub{color:rgba(255,255,255,0.7)}
+/* ===== CHARACTER CARDS ===== */
+.char-tab{background:rgba(30,10,40,0.8);color:#6b7280;border:1px solid rgba(236,72,153,0.25);padding:0.2rem 0.5rem;border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;transition:all 0.15s}
+.char-tab.active{background:rgba(236,72,153,0.25);color:#ec4899;border-color:#ec4899}
+.char-card{background:rgba(18,4,26,0.95);border:2px solid rgba(80,40,110,0.35);border-radius:0.4rem;padding:0.25rem 0.1rem;cursor:pointer;text-align:center;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px}
+.char-card:hover{border-color:rgba(236,72,153,0.6);background:rgba(236,72,153,0.08)}
+.char-card.active{border-color:#ec4899;box-shadow:0 0 14px rgba(236,72,153,0.65);background:rgba(236,72,153,0.18)}
+.char-emoji{font-size:14px;line-height:1.1}
+.char-name{font-size:7px;font-weight:800;color:#fbbf24;margin-top:0.1rem;line-height:1.2}
+.char-type{font-size:5.5px;color:#6b7280;line-height:1.2}
+.scene-pill{background:rgba(18,4,26,0.95);color:#fbbf24;border:1px solid rgba(236,72,153,0.35);border-radius:0.35rem;padding:0.3rem 0.1rem;cursor:pointer;font-size:8px;font-weight:700;transition:all 0.15s;text-align:center}
+.scene-pill:hover{background:rgba(236,72,153,0.18);border-color:#ec4899}
+.scene-pill.active{background:linear-gradient(135deg,#be185d,#9d174d);color:#fff;border-color:#f9a8d4;box-shadow:0 0 10px rgba(236,72,153,0.5)}
+.pro-cat-btn{background:rgba(168,85,247,0.08);color:#c084fc;border:1px solid rgba(168,85,247,0.3);border-radius:0.3rem;padding:0.25rem 0.4rem;font-size:8px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:left}
+.pro-cat-btn:hover{background:rgba(168,85,247,0.2);border-color:#a855f7}
+.pro-cat-btn.active{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:#a855f7;box-shadow:0 0 8px rgba(168,85,247,0.5)}
+
 @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(0.8)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8)}}
 .mtype-btn{background:rgba(34,211,238,0.08);color:#67e8f9;border:1px solid rgba(34,211,238,0.35);border-radius:0.3rem;padding:0.25rem 0.3rem;font-size:8px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center}
 .mtype-btn:hover{background:rgba(34,211,238,0.2);border-color:#22d3ee}
@@ -261,178 +287,133 @@ body{font-size:14px;padding:0.5rem}
 </p>
 </div>
 
-<!-- プリセットカード選択＋編集 -->
-<div style="background:rgba(236,72,153,0.1);border:2px solid rgba(236,72,153,0.5);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
-<h3 style="color:#ec4899;font-size:13px;font-weight:800;margin-bottom:0.5rem;text-shadow:0 0 10px rgba(236,72,153,0.8)"><i class="fas fa-cards-blank"></i> PRESET CARDS</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
-<button class="preset-btn" id="preset-masturbation" onclick="togglePreset('masturbation')"><i class="fas fa-hand-sparkles"></i> オナニー</button>
-<button class="preset-btn" id="preset-gyaru_sex" onclick="togglePreset('gyaru_sex')"><i class="fas fa-fire"></i> ギャルセックス</button>
-<button class="preset-btn" id="preset-cosplay" onclick="togglePreset('cosplay')"><i class="fas fa-mask"></i> コスプレ</button>
-<button class="preset-btn" id="preset-sex" onclick="togglePreset('sex')"><i class="fas fa-heart"></i> セックス</button>
-<button class="preset-btn" id="preset-blowjob" onclick="togglePreset('blowjob')"><i class="fas fa-kiss"></i> フェラチオ</button>
-<button class="preset-btn" id="preset-paizuri" onclick="togglePreset('paizuri')"><i class="fas fa-heart"></i> パイズリ</button>
-<button class="preset-btn" id="preset-threesome" onclick="togglePreset('threesome')"><i class="fas fa-users"></i> 3P</button>
-<button class="preset-btn" id="preset-custom" onclick="togglePreset('custom')"><i class="fas fa-wrench"></i> カスタム</button>
+<!-- ===== CHARACTER × SCENE SELECTOR ===== -->
+<div style="background:rgba(236,72,153,0.08);border:2px solid rgba(236,72,153,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+<span style="color:#ec4899;font-size:11px;font-weight:800">👤 CHARACTER × SCENE</span>
+<div style="display:flex;gap:0.2rem">
+<button class="char-tab active" id="tab-chars" onclick="switchCharTab('chars')">キャラ選択</button>
+<button class="char-tab" id="tab-all" onclick="switchCharTab('all')">全組み合わせ</button>
+</div>
 </div>
 
-<h3 style="color:#fbbf24;font-size:11px;font-weight:800;margin-top:0.75rem;margin-bottom:0.4rem;text-shadow:0 0 10px rgba(251,191,36,0.8)"><i class="fas fa-camera"></i> 📸 全身アングル別</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">
-<button class="preset-btn angle-btn" onclick="togglePreset('angle_front')" style="background:rgba(59,130,246,0.3);font-size:9px"><i class="fas fa-eye"></i> 正面POV</button>
-<button class="preset-btn angle-btn" onclick="togglePreset('angle_below')" style="background:rgba(16,185,129,0.3);font-size:9px"><i class="fas fa-arrow-up"></i> 真下POV</button>
-<button class="preset-btn angle-btn" onclick="togglePreset('angle_side')" style="background:rgba(168,85,247,0.3);font-size:9px"><i class="fas fa-arrows-alt-h"></i> 横POV</button>
-<button class="preset-btn angle-btn" onclick="togglePreset('angle_diagonal')" style="background:rgba(251,146,60,0.3);font-size:9px"><i class="fas fa-angle-double-up"></i> 斜めPOV</button>
-<button class="preset-btn angle-btn" onclick="togglePreset('angle_overhead')" style="background:rgba(236,72,153,0.3);font-size:9px"><i class="fas fa-arrow-down"></i> 真上POV</button>
+<div id="charTab-chars">
+<div id="charGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.18rem;margin-bottom:0.35rem"></div>
+<div id="sceneSelector" style="display:none;border-top:1px solid rgba(236,72,153,0.25);padding-top:0.3rem;margin-top:0.1rem">
+<div style="color:#fbbf24;font-size:7px;font-weight:700;margin-bottom:0.2rem">🎬 シーン選択</div>
+<div id="sceneGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.18rem"></div>
+</div>
 </div>
 
-<h3 style="color:#a855f7;font-size:11px;font-weight:800;margin-top:0.75rem;margin-bottom:0.4rem;text-shadow:0 0 10px rgba(168,85,247,0.8)"><i class="fas fa-star"></i> ギャルキャラ (13人)</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">
-<button class="preset-btn" onclick="togglePreset('mika_gyaru')" style="background:rgba(236,72,153,0.3);font-size:9px"><i class="fas fa-star"></i> 城ヶ崎美嘉</button>
-<button class="preset-btn" onclick="togglePreset('hancock_gyaru')" style="background:rgba(139,92,246,0.3);font-size:9px"><i class="fas fa-crown"></i> ハンコック</button>
-<button class="preset-btn" onclick="togglePreset('ichika_gyaru')" style="background:rgba(168,85,247,0.3);font-size:9px"><i class="fas fa-star"></i> 一花</button>
-<button class="preset-btn" onclick="togglePreset('luka_gyaru')" style="background:rgba(251,191,36,0.3);font-size:9px"><i class="fas fa-microphone"></i> 巡音ルカ</button>
-<button class="preset-btn" onclick="togglePreset('reiran_gyaru')" style="background:rgba(236,72,153,0.3);font-size:9px"><i class="fas fa-gem"></i> 麗蘭</button>
-<button class="preset-btn" onclick="togglePreset('tsukasa_nishino')" style="background:rgba(251,191,36,0.3);font-size:9px"><i class="fas fa-film"></i> 西野つかさ</button>
-<button class="preset-btn" onclick="togglePreset('lucy_gyaru')" style="background:rgba(251,191,36,0.3);font-size:9px"><i class="fas fa-star"></i> ルーシィ</button>
-<button class="preset-btn" onclick="togglePreset('kyoko_gyaru')" style="background:rgba(139,69,19,0.3);font-size:9px"><i class="fas fa-coffee"></i> 加賀香子</button>
-<button class="preset-btn" onclick="togglePreset('reimi_gyaru')" style="background:rgba(239,68,68,0.3);font-size:9px"><i class="fas fa-user-nurse"></i> 新城礼美</button>
-<button class="preset-btn" onclick="togglePreset('satsuki_kitaoji')" style="background:rgba(251,146,60,0.3);font-size:9px"><i class="fas fa-fire"></i> 北大路さつき</button>
-<button class="preset-btn" onclick="togglePreset('shinka_nibutani')" style="background:rgba(251,113,133,0.3);font-size:9px"><i class="fas fa-magic"></i> 丹生谷森夏</button>
-<button class="preset-btn" onclick="togglePreset('marie_rose')" style="background:rgba(255,182,193,0.3);font-size:9px"><i class="fas fa-ribbon"></i> マリー・ローズ</button>
-<button class="preset-btn" onclick="togglePreset('suisei_hoshimachi')" style="background:rgba(0,71,171,0.3);font-size:9px"><i class="fas fa-star"></i> 星街すいせい</button>
+<div id="charTab-all" style="display:none">
+<div id="charSceneGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.12rem;max-height:260px;overflow-y:auto;padding:0.25rem;background:rgba(0,0,0,0.25);border-radius:0.4rem"></div>
 </div>
 
-<h3 style="color:#22d3ee;font-size:11px;font-weight:800;margin-top:0.75rem;margin-bottom:0.4rem;text-shadow:0 0 10px rgba(34,211,238,0.8)"><i class="fas fa-plus-circle"></i> 🆕 v12/v13/v14新キャラ (7人)</h3>
-<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.5rem">
-<button class="preset-btn" onclick="togglePreset('nami_onepiece')" style="background:rgba(251,146,60,0.3);font-size:9px"><i class="fas fa-map"></i> ナミ</button>
-<button class="preset-btn" onclick="togglePreset('robin_onepiece')" style="background:rgba(99,102,241,0.3);font-size:9px"><i class="fas fa-book"></i> ニコ・ロビン</button>
-<button class="preset-btn" onclick="togglePreset('misato_katsuragi')" style="background:rgba(239,68,68,0.3);font-size:9px"><i class="fas fa-wine-glass"></i> 葛城ミサト</button>
-<button class="preset-btn" onclick="togglePreset('mikumo_guynemer')" style="background:rgba(139,92,246,0.3);font-size:9px"><i class="fas fa-star"></i> 美雲ギンヌメール</button>
-<button class="preset-btn" onclick="togglePreset('kanu_ikkitousen')" style="background:rgba(180,30,30,0.3);font-size:9px"><i class="fas fa-dragon"></i> 関羽雲長</button>
-<button class="preset-btn" onclick="togglePreset('hestia_danmachi')" style="background:rgba(100,180,255,0.3);font-size:9px"><i class="fas fa-fire-alt"></i> ヘスティア</button>
+<button onclick="clearCharScene()" style="width:100%;margin-top:0.3rem;background:rgba(220,38,38,0.12);color:#fca5a5;border:1px solid rgba(220,38,38,0.35);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.22rem">✕ キャラ・シーン解除</button>
 </div>
 
-<h3 style="color:#ec4899;font-size:11px;font-weight:800;margin-top:0.75rem;margin-bottom:0.4rem;text-shadow:0 0 10px rgba(236,72,153,0.8)"><i class="fas fa-fire"></i> 全キャラ×シーン専用（80種）</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.3rem;max-height:400px;overflow-y:auto;padding:0.5rem;background:rgba(0,0,0,0.3);border-radius:0.5rem">
-<button class="preset-btn" onclick="togglePreset('mika_sex')" style="background:rgba(236,72,153,0.4);font-size:8px"><i class="fas fa-heart"></i> 美嘉SEX</button>
-<button class="preset-btn" onclick="togglePreset('mika_masturbation')" style="background:rgba(236,72,153,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 美嘉オナニー</button>
-<button class="preset-btn" onclick="togglePreset('mika_paizuri')" style="background:rgba(236,72,153,0.4);font-size:8px"><i class="fas fa-heart"></i> 美嘉パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('mika_blowjob')" style="background:rgba(236,72,153,0.4);font-size:8px"><i class="fas fa-kiss"></i> 美嘉フェラ</button>
-<button class="preset-btn" onclick="togglePreset('hancock_sex')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-heart"></i> ハンコックSEX</button>
-<button class="preset-btn" onclick="togglePreset('hancock_masturbation')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ハンコックオナニー</button>
-<button class="preset-btn" onclick="togglePreset('hancock_paizuri')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-heart"></i> ハンコックパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('hancock_blowjob')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-kiss"></i> ハンコックフェラ</button>
-<button class="preset-btn" onclick="togglePreset('ichika_sex')" style="background:rgba(168,85,247,0.4);font-size:8px"><i class="fas fa-heart"></i> 一花SEX</button>
-<button class="preset-btn" onclick="togglePreset('ichika_masturbation')" style="background:rgba(168,85,247,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 一花オナニー</button>
-<button class="preset-btn" onclick="togglePreset('ichika_paizuri')" style="background:rgba(168,85,247,0.4);font-size:8px"><i class="fas fa-heart"></i> 一花パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('ichika_blowjob')" style="background:rgba(168,85,247,0.4);font-size:8px"><i class="fas fa-kiss"></i> 一花フェラ</button>
-<button class="preset-btn" onclick="togglePreset('luka_sex')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-heart"></i> ルカSEX</button>
-<button class="preset-btn" onclick="togglePreset('luka_masturbation')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ルカオナニー</button>
-<button class="preset-btn" onclick="togglePreset('luka_paizuri')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-heart"></i> ルカパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('luka_blowjob')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-kiss"></i> ルカフェラ</button>
-<button class="preset-btn" onclick="togglePreset('reiran_sex')" style="background:rgba(255,215,0,0.4);font-size:8px"><i class="fas fa-heart"></i> 麗蘭SEX</button>
-<button class="preset-btn" onclick="togglePreset('reiran_masturbation')" style="background:rgba(255,215,0,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 麗蘭オナニー</button>
-<button class="preset-btn" onclick="togglePreset('reiran_paizuri')" style="background:rgba(255,215,0,0.4);font-size:8px"><i class="fas fa-heart"></i> 麗蘭パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('reiran_blowjob')" style="background:rgba(255,215,0,0.4);font-size:8px"><i class="fas fa-kiss"></i> 麗蘭フェラ</button>
-<button class="preset-btn" onclick="togglePreset('tsukasa_sex')" style="background:rgba(59,130,246,0.4);font-size:8px"><i class="fas fa-heart"></i> つかさSEX</button>
-<button class="preset-btn" onclick="togglePreset('tsukasa_masturbation')" style="background:rgba(59,130,246,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> つかさオナニー</button>
-<button class="preset-btn" onclick="togglePreset('tsukasa_paizuri')" style="background:rgba(59,130,246,0.4);font-size:8px"><i class="fas fa-heart"></i> つかさパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('tsukasa_blowjob')" style="background:rgba(59,130,246,0.4);font-size:8px"><i class="fas fa-kiss"></i> つかさフェラ</button>
-<button class="preset-btn" onclick="togglePreset('lucy_sex')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-heart"></i> ルーシィSEX</button>
-<button class="preset-btn" onclick="togglePreset('lucy_masturbation')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ルーシィオナニー</button>
-<button class="preset-btn" onclick="togglePreset('lucy_paizuri')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-heart"></i> ルーシィパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('lucy_blowjob')" style="background:rgba(251,191,36,0.4);font-size:8px"><i class="fas fa-kiss"></i> ルーシィフェラ</button>
-<button class="preset-btn" onclick="togglePreset('kyoko_sex')" style="background:rgba(139,69,19,0.4);font-size:8px"><i class="fas fa-heart"></i> 香子SEX</button>
-<button class="preset-btn" onclick="togglePreset('kyoko_masturbation')" style="background:rgba(139,69,19,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 香子オナニー</button>
-<button class="preset-btn" onclick="togglePreset('kyoko_paizuri')" style="background:rgba(139,69,19,0.4);font-size:8px"><i class="fas fa-heart"></i> 香子パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('kyoko_blowjob')" style="background:rgba(139,69,19,0.4);font-size:8px"><i class="fas fa-kiss"></i> 香子フェラ</button>
-<button class="preset-btn" onclick="togglePreset('reimi_sex')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-heart"></i> 礼美SEX</button>
-<button class="preset-btn" onclick="togglePreset('reimi_masturbation')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 礼美オナニー</button>
-<button class="preset-btn" onclick="togglePreset('reimi_paizuri')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-heart"></i> 礼美パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('reimi_blowjob')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-kiss"></i> 礼美フェラ</button>
-<button class="preset-btn" onclick="togglePreset('satsuki_sex')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-heart"></i> さつきSEX</button>
-<button class="preset-btn" onclick="togglePreset('satsuki_masturbation')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> さつきオナニー</button>
-<button class="preset-btn" onclick="togglePreset('satsuki_paizuri')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-heart"></i> さつきパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('satsuki_blowjob')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-kiss"></i> さつきフェラ</button>
-<button class="preset-btn" onclick="togglePreset('shinka_sex')" style="background:rgba(251,113,133,0.4);font-size:8px"><i class="fas fa-heart"></i> 森夏SEX</button>
-<button class="preset-btn" onclick="togglePreset('shinka_masturbation')" style="background:rgba(251,113,133,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 森夏オナニー</button>
-<button class="preset-btn" onclick="togglePreset('shinka_paizuri')" style="background:rgba(251,113,133,0.4);font-size:8px"><i class="fas fa-heart"></i> 森夏パイズリ</button>
-<button class="preset-btn" onclick="togglePreset('shinka_blowjob')" style="background:rgba(251,113,133,0.4);font-size:8px"><i class="fas fa-kiss"></i> 森夏フェラ</button>
-<button class="preset-btn" onclick="togglePreset('marie_sex')" style="background:rgba(255,182,193,0.4);font-size:8px"><i class="fas fa-heart"></i> マリーSEX</button>
-<button class="preset-btn" onclick="togglePreset('marie_masturbation')" style="background:rgba(255,182,193,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> マリーオナニー</button>
-<button class="preset-btn" onclick="togglePreset('marie_paizuri')" style="background:rgba(255,182,193,0.4);font-size:8px"><i class="fas fa-heart"></i> マリーパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('marie_blowjob')" style="background:rgba(255,182,193,0.4);font-size:8px"><i class="fas fa-kiss"></i> マリーフェラ</button>
-<button class="preset-btn" onclick="togglePreset('suisei_sex')" style="background:rgba(0,71,171,0.4);font-size:8px"><i class="fas fa-heart"></i> すいせいSEX</button>
-<button class="preset-btn" onclick="togglePreset('suisei_masturbation')" style="background:rgba(0,71,171,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> すいせいオナニー</button>
-<button class="preset-btn" onclick="togglePreset('suisei_paizuri')" style="background:rgba(0,71,171,0.4);font-size:8px"><i class="fas fa-heart"></i> すいせいパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('suisei_blowjob')" style="background:rgba(0,71,171,0.4);font-size:8px"><i class="fas fa-kiss"></i> すいせいフェラ</button>
-<!-- v12新キャラシーン -->
-<button class="preset-btn" onclick="togglePreset('nami_sex')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-heart"></i> ナミSEX</button>
-<button class="preset-btn" onclick="togglePreset('nami_masturbation')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ナミオナニー</button>
-<button class="preset-btn" onclick="togglePreset('nami_paizuri')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-heart"></i> ナミパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('nami_blowjob')" style="background:rgba(251,146,60,0.4);font-size:8px"><i class="fas fa-kiss"></i> ナミフェラ</button>
-<button class="preset-btn" onclick="togglePreset('robin_sex')" style="background:rgba(99,102,241,0.4);font-size:8px"><i class="fas fa-heart"></i> ロビンSEX</button>
-<button class="preset-btn" onclick="togglePreset('robin_masturbation')" style="background:rgba(99,102,241,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ロビンオナニー</button>
-<button class="preset-btn" onclick="togglePreset('robin_paizuri')" style="background:rgba(99,102,241,0.4);font-size:8px"><i class="fas fa-heart"></i> ロビンパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('robin_blowjob')" style="background:rgba(99,102,241,0.4);font-size:8px"><i class="fas fa-kiss"></i> ロビンフェラ</button>
-<button class="preset-btn" onclick="togglePreset('misato_sex')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-heart"></i> ミサトSEX</button>
-<button class="preset-btn" onclick="togglePreset('misato_masturbation')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ミサトオナニー</button>
-<button class="preset-btn" onclick="togglePreset('misato_paizuri')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-heart"></i> ミサトパイズリ</button>
-<button class="preset-btn" onclick="togglePreset('misato_blowjob')" style="background:rgba(239,68,68,0.4);font-size:8px"><i class="fas fa-kiss"></i> ミサトフェラ</button>
-<button class="preset-btn" onclick="togglePreset('mikumo_sex')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-heart"></i> 美雲SEX</button>
-<button class="preset-btn" onclick="togglePreset('mikumo_masturbation')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 美雲オナ</button>
-<button class="preset-btn" onclick="togglePreset('mikumo_paizuri')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-star"></i> 美雲パイ</button>
-<button class="preset-btn" onclick="togglePreset('mikumo_blowjob')" style="background:rgba(139,92,246,0.4);font-size:8px"><i class="fas fa-kiss"></i> 美雲フェラ</button>
-<button class="preset-btn" onclick="togglePreset('kanu_sex')" style="background:rgba(180,30,30,0.4);font-size:8px"><i class="fas fa-heart"></i> 関羽SEX</button>
-<button class="preset-btn" onclick="togglePreset('kanu_masturbation')" style="background:rgba(180,30,30,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> 関羽オナ</button>
-<button class="preset-btn" onclick="togglePreset('kanu_paizuri')" style="background:rgba(180,30,30,0.4);font-size:8px"><i class="fas fa-dragon"></i> 関羽パイ</button>
-<button class="preset-btn" onclick="togglePreset('kanu_blowjob')" style="background:rgba(180,30,30,0.4);font-size:8px"><i class="fas fa-kiss"></i> 関羽フェラ</button>
-<button class="preset-btn" onclick="togglePreset('hestia_sex')" style="background:rgba(100,180,255,0.4);font-size:8px"><i class="fas fa-heart"></i> ヘスティアSEX</button>
-<button class="preset-btn" onclick="togglePreset('hestia_masturbation')" style="background:rgba(100,180,255,0.4);font-size:8px"><i class="fas fa-hand-sparkles"></i> ヘスティアオナ</button>
-<button class="preset-btn" onclick="togglePreset('hestia_paizuri')" style="background:rgba(100,180,255,0.4);font-size:8px"><i class="fas fa-fire-alt"></i> ヘスティアパイ</button>
-<button class="preset-btn" onclick="togglePreset('hestia_blowjob')" style="background:rgba(100,180,255,0.4);font-size:8px"><i class="fas fa-kiss"></i> ヘスティアフェラ</button>
+<!-- ===== COMPOSITION BUILDER ===== -->
+<div style="background:rgba(6,182,212,0.05);border:2px solid rgba(6,182,212,0.45);border-radius:0.6rem;padding:0.5rem;margin-bottom:0.5rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+<span style="color:#22d3ee;font-size:11px;font-weight:800">🎬 COMPOSITION BUILDER</span>
+<span style="font-size:7px;color:#6b7280">映像制作レベル構図 → H[CAMERA]自動挿入</span>
 </div>
 
-<button class="preset-btn" onclick="clearPreset()" style="width:100%;margin-top:0.5rem;background:rgba(220,38,38,0.3);border-color:#dc2626;color:#dc2626">
-<i class="fas fa-times"></i> プリセット解除
+<div class="comp-row">
+<div class="comp-label">📏 SHOT SIZE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
+<button class="comp-btn" id="cs-shotSize-ecu" onclick="setComp('shotSize','ecu')">ECU<span class="comp-sub">極寄り</span></button>
+<button class="comp-btn" id="cs-shotSize-bcu" onclick="setComp('shotSize','bcu')">BCU<span class="comp-sub">胸〜上</span></button>
+<button class="comp-btn" id="cs-shotSize-cu" onclick="setComp('shotSize','cu')">CU<span class="comp-sub">顔</span></button>
+<button class="comp-btn" id="cs-shotSize-mcu" onclick="setComp('shotSize','mcu')">MCU<span class="comp-sub">上半身</span></button>
+<button class="comp-btn" id="cs-shotSize-ms" onclick="setComp('shotSize','ms')">MS<span class="comp-sub">腰上</span></button>
+<button class="comp-btn" id="cs-shotSize-mls" onclick="setComp('shotSize','mls')">MLS<span class="comp-sub">膝上</span></button>
+<button class="comp-btn" id="cs-shotSize-ls" onclick="setComp('shotSize','ls')">LS<span class="comp-sub">全身</span></button>
+<button class="comp-btn" id="cs-shotSize-ews" onclick="setComp('shotSize','ews')">EWS<span class="comp-sub">超広角</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">📐 CAMERA ANGLE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(8,1fr)">
+<button class="comp-btn" id="cs-angle-eye" onclick="setComp('angle','eye')">EYE<span class="comp-sub">目線</span></button>
+<button class="comp-btn" id="cs-angle-low" onclick="setComp('angle','low')">LOW<span class="comp-sub">ロー</span></button>
+<button class="comp-btn" id="cs-angle-high" onclick="setComp('angle','high')">HIGH<span class="comp-sub">ハイ</span></button>
+<button class="comp-btn" id="cs-angle-birds" onclick="setComp('angle','birds')">BIRD<span class="comp-sub">真上</span></button>
+<button class="comp-btn" id="cs-angle-worms" onclick="setComp('angle','worms')">WORM<span class="comp-sub">真下</span></button>
+<button class="comp-btn" id="cs-angle-dutch" onclick="setComp('angle','dutch')">DUTCH<span class="comp-sub">斜め</span></button>
+<button class="comp-btn" id="cs-angle-side" onclick="setComp('angle','side')">SIDE<span class="comp-sub">横</span></button>
+<button class="comp-btn" id="cs-angle-rear" onclick="setComp('angle','rear')">REAR<span class="comp-sub">後ろ</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">👁 POV TYPE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(7,1fr)">
+<button class="comp-btn" id="cs-pov-std" onclick="setComp('pov','std')">3RD<span class="comp-sub">三人称</span></button>
+<button class="comp-btn" id="cs-pov-pov" onclick="setComp('pov','pov')">POV<span class="comp-sub">一人称</span></button>
+<button class="comp-btn" id="cs-pov-os" onclick="setComp('pov','os')">O/S<span class="comp-sub">肩越し</span></button>
+<button class="comp-btn" id="cs-pov-voyeur" onclick="setComp('pov','voyeur')">VYR<span class="comp-sub">覗き</span></button>
+<button class="comp-btn" id="cs-pov-mirror" onclick="setComp('pov','mirror')">MIRR<span class="comp-sub">鏡</span></button>
+<button class="comp-btn" id="cs-pov-under" onclick="setComp('pov','under')">UNDR<span class="comp-sub">股下</span></button>
+<button class="comp-btn" id="cs-pov-glass" onclick="setComp('pov','glass')">GLAS<span class="comp-sub">ガラス越</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">🔭 LENS / FOCAL LENGTH</div>
+<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
+<button class="comp-btn" id="cs-lens-wide" onclick="setComp('lens','wide')">14mm<span class="comp-sub">広角</span></button>
+<button class="comp-btn" id="cs-lens-std" onclick="setComp('lens','std')">35mm<span class="comp-sub">標準</span></button>
+<button class="comp-btn" id="cs-lens-port" onclick="setComp('lens','port')">85mm<span class="comp-sub">ポート</span></button>
+<button class="comp-btn" id="cs-lens-tele" onclick="setComp('lens','tele')">135mm<span class="comp-sub">望遠</span></button>
+<button class="comp-btn" id="cs-lens-macro" onclick="setComp('lens','macro')">MACRO<span class="comp-sub">接写</span></button>
+<button class="comp-btn" id="cs-lens-fish" onclick="setComp('lens','fish')">FISH<span class="comp-sub">魚眼</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">🌀 DEPTH OF FIELD</div>
+<div class="comp-grid" style="grid-template-columns:repeat(3,1fr)">
+<button class="comp-btn" id="cs-dof-shallow" onclick="setComp('dof','shallow')">f/1.4 BOKEH<span class="comp-sub">ボケ強 主体際立つ</span></button>
+<button class="comp-btn" id="cs-dof-normal" onclick="setComp('dof','normal')">f/4 BALANCED<span class="comp-sub">標準 自然分離</span></button>
+<button class="comp-btn" id="cs-dof-deep" onclick="setComp('dof','deep')">f/11 SHARP<span class="comp-sub">全体鮮明</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">📐 FRAMING RULE</div>
+<div class="comp-grid" style="grid-template-columns:repeat(5,1fr)">
+<button class="comp-btn" id="cs-frame-center" onclick="setComp('frame','center')">CENTER<span class="comp-sub">中央</span></button>
+<button class="comp-btn" id="cs-frame-rule3" onclick="setComp('frame','rule3')">RULE/3<span class="comp-sub">三分割</span></button>
+<button class="comp-btn" id="cs-frame-golden" onclick="setComp('frame','golden')">GOLDEN<span class="comp-sub">黄金比</span></button>
+<button class="comp-btn" id="cs-frame-symm" onclick="setComp('frame','symm')">SYMM<span class="comp-sub">シンメトリ</span></button>
+<button class="comp-btn" id="cs-frame-diag" onclick="setComp('frame','diag')">DIAG<span class="comp-sub">対角線</span></button>
+</div>
+</div>
+
+<div class="comp-row">
+<div class="comp-label">💡 PROFESSIONAL LIGHTING SETUP</div>
+<div class="comp-grid" style="grid-template-columns:repeat(6,1fr)">
+<button class="comp-btn" id="cs-light-3pt" onclick="setComp('light','3pt')">3-PT<span class="comp-sub">3点照明</span></button>
+<button class="comp-btn" id="cs-light-rembrandt" onclick="setComp('light','rembrandt')">REMBR<span class="comp-sub">レンブラント</span></button>
+<button class="comp-btn" id="cs-light-butterfly" onclick="setComp('light','butterfly')">BFLY<span class="comp-sub">バタフライ</span></button>
+<button class="comp-btn" id="cs-light-backlight" onclick="setComp('light','backlight')">BACK<span class="comp-sub">逆光</span></button>
+<button class="comp-btn" id="cs-light-neon" onclick="setComp('light','neon')">NEON<span class="comp-sub">ネオン</span></button>
+<button class="comp-btn" id="cs-light-golden" onclick="setComp('light','golden')">GOLDEN<span class="comp-sub">黄金時間</span></button>
+</div>
+</div>
+
+<div style="margin-top:0.3rem;background:rgba(0,0,0,0.3);border:1px solid rgba(6,182,212,0.18);border-radius:0.3rem;padding:0.3rem">
+<div style="color:#6b7280;font-size:6px;margin-bottom:0.1rem">▶ 生成構図プロンプト (H[CAMERA]セクション自動挿入)</div>
+<div id="compPreview" style="font-family:monospace;font-size:7px;color:#67e8f9;line-height:1.5;word-break:break-all;min-height:12px">(未選択)</div>
+</div>
+<button onclick="clearComp()" style="width:100%;margin-top:0.22rem;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);border-radius:0.3rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.2rem">✕ 構図リセット</button>
+</div>
+
+<button onclick="clearPreset()" style="width:100%;margin-bottom:0.4rem;background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.5);color:#dc2626;border-radius:0.4rem;cursor:pointer;font-size:8px;font-weight:700;padding:0.25rem">
+<i class="fas fa-times"></i> 全プリセット解除
 </button>
-
-<!-- プリセット詳細表示・編集エリア -->
-<div id="presetDetail" style="display:none;margin-top:1rem;background:rgba(10,0,15,0.9);border:2px solid rgba(236,72,153,0.5);border-radius:0.75rem;padding:0.75rem">
-<h4 style="color:#fbbf24;font-size:11px;font-weight:800;margin-bottom:0.5rem"><i class="fas fa-edit"></i> プリセット詳細編集</h4>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">優先カテゴリ（カンマ区切り）</label>
-<textarea id="presetCats" class="char-in" rows="2" style="font-size:9px" placeholder="例: pov_camera_extreme, sexual_pose_detailed"></textarea>
-</div>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">強制タグ - Solo/Partner</label>
-<input type="text" id="presetPartner" class="char-in" style="font-size:9px;min-height:30px" placeholder="例: 1girl, solo, adult">
-</div>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">強制タグ - Makeup</label>
-<input type="text" id="presetMakeup" class="char-in" style="font-size:9px;min-height:30px" placeholder="例: bold gyaru makeup">
-</div>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">強制タグ - Skin</label>
-<input type="text" id="presetSkin" class="char-in" style="font-size:9px;min-height:30px" placeholder="例: tanned skin gyaru">
-</div>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">強制タグ - Outfit</label>
-<input type="text" id="presetOutfit" class="char-in" style="font-size:9px;min-height:30px" placeholder="例: maid outfit">
-</div>
-<div style="margin-bottom:0.5rem">
-<label style="color:#ec4899;font-size:9px;font-weight:700;display:block;margin-bottom:0.2rem">強制タグ - Camera Angle</label>
-<input type="text" id="presetCamera" class="char-in" style="font-size:9px;min-height:30px" placeholder="例: POV from below, dutch angle">
-</div>
-<div style="display:flex;gap:0.5rem">
-<button onclick="savePresetEdit()" class="save-btn" style="flex:1;font-size:9px;padding:0.4rem">
-<i class="fas fa-save"></i> 保存
-</button>
-<button onclick="resetPresetEdit()" style="flex:1;background:rgba(220,38,38,0.3);color:#dc2626;padding:0.4rem;border:2px solid #dc2626;border-radius:0.5rem;cursor:pointer;font-weight:700;font-size:9px">
-<i class="fas fa-undo"></i> リセット
-</button>
-</div>
-</div>
-</div>
 
 <div style="background:rgba(236,72,153,0.1);border:2px solid rgba(236,72,153,0.5);border-radius:1rem;padding:0.75rem;margin-bottom:0.75rem;max-height:350px;overflow-y:auto">
 <h3 style="color:#ec4899;font-size:13px;font-weight:800;margin-bottom:0.5rem;text-shadow:0 0 10px rgba(236,72,153,0.8)"><i class="fas fa-dna"></i> CRUSHA DNA (20)</h3>
@@ -912,7 +893,12 @@ body_type_variants:"体型バリエ",
 breast_variation:"胸バリエ",
 quality_score_system:"品質スコア",
 meta_quality_tags:"メタ品質"
-};
+},
+pro_pose_library:"プロポーズライブラリ",
+pro_bg_nsfw:"NSFWプロ背景",
+pro_skin_rendering:"プロ肌レンダリング",
+quality_comfyui_pro:"ComfyUIプロ品質"
+}
 
 const DB={
 pubic_hair_styles:[
@@ -1661,7 +1647,81 @@ meta_quality_tags:[
 {e:"award winning",j:"受賞"},
 {e:"professional quality",j:"プロ品質"},
 {e:"commercial quality",j:"商用品質"}
+],
+pro_pose_library:[
+{e:"standing straight pose, perfect posture, neutral stance",j:"直立ポーズ"},
+{e:"contrapposto pose, weight on one hip, natural S-curve",j:"コントラポスト"},
+{e:"lying on back, supine pose, legs together",j:"仰向け"},
+{e:"lying face down, prone position, rear view",j:"うつ伏せ"},
+{e:"sitting with legs spread apart, exposed",j:"M字開脚"},
+{e:"kneeling seiza, sitting on heels",j:"正座"},
+{e:"doggy style position, on all fours",j:"四つん這い"},
+{e:"cowgirl riding position, astride",j:"騎乗位"},
+{e:"reverse cowgirl, back-facing riding",j:"逆騎乗位"},
+{e:"missionary position, lying on back legs spread",j:"正常位"},
+{e:"standing split, one leg raised vertical",j:"立ちスプリット"},
+{e:"legs raised high, feet toward camera",j:"足上げポーズ"},
+{e:"pinup pose, arched back hip thrust",j:"ピンナップ"},
+{e:"presenting from behind, bent over",j:"後背位"},
+{e:"fetal position curled up",j:"胎児ポーズ"},
+{e:"arms restrained above head, wrists together",j:"手縛りポーズ"},
+{e:"spread eagle, arms and legs wide open",j:"大の字"},
+{e:"side lying pose, lateral recumbent",j:"横向き寝"},
+{e:"seated legs crossed elegant",j:"足組み座り"},
+{e:"crouching low squat position",j:"しゃがみ"}
+],
+pro_bg_nsfw:[
+{e:"hotel room bed, white sheets, warm lighting",j:"ホテルベッド"},
+{e:"luxury apartment bedroom, floor-to-ceiling windows, city view",j:"高級マンション"},
+{e:"Japanese tatami room, shoji screen light",j:"和室"},
+{e:"bathroom tiles, wet floor, steam",j:"バスルーム"},
+{e:"shower room, water droplets, glass wall",j:"シャワールーム"},
+{e:"outdoor nature, forest clearing, sunlight through trees",j:"野外林間"},
+{e:"rooftop terrace night, city lights below",j:"屋上夜景"},
+{e:"pool edge, blue water, summer afternoon",j:"プールサイド"},
+{e:"office desk after hours, city night view",j:"会社残業後"},
+{e:"changing room, mirrors, curtain",j:"更衣室"},
+{e:"dark nightclub interior, neon lights, crowd behind",j:"ナイトクラブ"},
+{e:"classical Japanese inn onsen, wooden bath",j:"温泉旅館"},
+{e:"gym locker room, lockers, bench",j:"ジム"},
+{e:"doctor examination table, medical setting",j:"診察台"},
+{e:"classroom after school, desks chairs",j:"放課後教室"}
+],
+pro_skin_rendering:[
+{e:"subsurface scattering skin, light passes through skin layers",j:"肌SSS"},
+{e:"micro skin texture, visible pores, natural imperfections",j:"肌微細テクスチャ"},
+{e:"wet glistening skin, sweat sheen, glossy",j:"濡れ光沢肌"},
+{e:"peach fuzz skin texture, soft downy hairs",j:"産毛肌"},
+{e:"tan line contrast, bikini tan mark",j:"日焼け跡"},
+{e:"goosebumps skin texture, aroused",j:"鳥肌"},
+{e:"skin flush, arousal redness on chest neck",j:"紅潮肌"},
+{e:"soft skin indentation, finger press mark",j:"くぼみ肌"},
+{e:"vein detail on breasts, blue veins visible through pale skin",j:"胸静脈"},
+{e:"stretch mark subtle, natural body marks",j:"妊娠線"},
+{e:"skin glow from within, healthy radiant complexion",j:"内側から輝く肌"},
+{e:"oily skin sheen, natural sebum shine",j:"皮脂光沢"},
+{e:"powdery matte skin finish, porcelain",j:"マット肌"},
+{e:"tanned bronze skin, sun-kissed even tone",j:"小麦色肌"},
+{e:"pale fair skin almost translucent",j:"透白肌"}
+],
+quality_comfyui_pro:[
+{e:"absurdres, highres, ultra-detailed",j:"Illustrious必須タグ"},
+{e:"score_9, score_8_up, score_7_up, score_6_up",j:"Pony必須スコアタグ"},
+{e:"masterpiece, best quality, amazing quality",j:"汎用最高品質"},
+{e:"detailed face, perfect face, beautiful detailed eyes",j:"顔品質強化"},
+{e:"perfect anatomy, correct proportions, proper limbs",j:"解剖学的正確"},
+{e:"8k uhd, ultra high resolution, hyper detailed",j:"8K解像度"},
+{e:"professional photography, commercial photography",j:"商用品質写真"},
+{e:"award winning photo, photography magazine quality",j:"受賞写真品質"},
+{e:"sharp focus, in focus, tack sharp",j:"ピント完璧"},
+{e:"RAW photo, photorealistic, hyperrealistic",j:"フォトリアル"},
+{e:"cinematic quality, film grain subtle, movie still",j:"映画品質"},
+{e:"no artifacts, clean image, artifact-free",j:"アーティファクトなし"},
+{e:"coherent image, consistent style",j:"一貫性"},
+{e:"detailed hands, perfect fingers, anatomically correct hands",j:"手指完璧"},
+{e:"detailed background, elaborate scene",j:"背景高品質"}
 ]
+
 };
 
 const OPTIMAL_COUNTS={
@@ -2139,7 +2199,8 @@ btn.style.boxShadow=btn.id==='body-'+savedBodyType?'0 0 15px rgba(168,85,247,0.5
 },100);
 }
 
-updateNodeSettings(); // ComfyUI推奨設定を初期表示
+buildCharUI(); // キャラクターUIを構築
+	updateNodeSettings(); // ComfyUI推奨設定を初期表示
 upStat();
 gen(); // 初期プロンプト生成
 }
@@ -2715,6 +2776,10 @@ cp.slice(0,2).forEach(part=>sections.H.push(part));
 const camParts=PRESETS[activePreset].force.camera.split(',').map(p=>p.trim()).filter(p=>p.length>0);
 camParts.slice(0,3).forEach(part=>sections.H.push(part));
 }
+// COMPOSITION BUILDER injection (H section)
+const _compPrompt=getCompPrompt();
+if(_compPrompt)sections.H.push(_compPrompt);
+
 // I [STYLE & RENDERING]
 if(renderStyle==='anime'){
 sections.I.push('anime style, 2D illustration, cel shading, beautiful anime art, highly detailed anime, studio quality anime, sharp clean linework, vibrant saturated colors, professional anime character design');
@@ -3404,6 +3469,257 @@ function getApiPrompt(){
     .replace(/BREAK\s*,\s*/g,'BREAK ')
     .replace(/,\s*,+/g,', ')
     .trim();
+}
+
+
+// =============================================================================
+// CHARACTER SELECTOR ENGINE
+// =============================================================================
+const CHAR_META=[
+  {key:'crusha',charId:'crusha',emoji:'🦔',name:'クルーシャ',type:'ORIGINAL',color:'#ec4899',isCrusha:true},
+  {key:'mika_gyaru',charId:'mika',emoji:'🌸',name:'城ヶ崎美嘉',type:'アイマス',color:'#ec4899'},
+  {key:'hancock_gyaru',charId:'hancock',emoji:'👑',name:'ハンコック',type:'ONE PIECE',color:'#8b5cf6'},
+  {key:'ichika_gyaru',charId:'ichika',emoji:'📚',name:'中野一花',type:'五等分',color:'#a855f7'},
+  {key:'luka_gyaru',charId:'luka',emoji:'🎵',name:'巡音ルカ',type:'VOCALOID',color:'#f59e0b'},
+  {key:'reiran_gyaru',charId:'reiran',emoji:'💎',name:'麗蘭',type:'ORIGINAL',color:'#ffd700'},
+  {key:'tsukasa_nishino',charId:'tsukasa',emoji:'🎬',name:'西野つかさ',type:'ドラマ',color:'#3b82f6'},
+  {key:'lucy_gyaru',charId:'lucy',emoji:'⭐',name:'ルーシィ',type:'FairyTail',color:'#f59e0b'},
+  {key:'kyoko_gyaru',charId:'kyoko',emoji:'☕',name:'加賀香子',type:'日焼け',color:'#78350f'},
+  {key:'reimi_gyaru',charId:'reimi',emoji:'💊',name:'新城礼美',type:'看護師',color:'#ef4444'},
+  {key:'satsuki_kitaoji',charId:'satsuki',emoji:'🔥',name:'北大路さつき',type:'爆乳',color:'#f97316'},
+  {key:'shinka_nibutani',charId:'shinka',emoji:'✨',name:'丹生谷森夏',type:'中二病',color:'#f472b6'},
+  {key:'marie_rose',charId:'marie',emoji:'🎀',name:'マリー・ローズ',type:'DOA',color:'#ffb6c1'},
+  {key:'suisei_hoshimachi',charId:'suisei',emoji:'💫',name:'星街すいせい',type:'ホロライブ',color:'#6366f1'},
+  {key:'nami_onepiece',charId:'nami',emoji:'🗺',name:'ナミ',type:'ONE PIECE',color:'#f97316'},
+  {key:'robin_onepiece',charId:'robin',emoji:'📖',name:'ニコ・ロビン',type:'ONE PIECE',color:'#6366f1'},
+  {key:'misato_katsuragi',charId:'misato',emoji:'🍺',name:'葛城ミサト',type:'エヴァ',color:'#dc2626'},
+  {key:'mikumo_guynemer',charId:'mikumo',emoji:'🎙',name:'美雲ギンヌメール',type:'マクロスΔ',color:'#8b5cf6'},
+  {key:'kanu_ikkitousen',charId:'kanu',emoji:'🐉',name:'関羽雲長',type:'一騎当千',color:'#991b1b'},
+  {key:'hestia_danmachi',charId:'hestia',emoji:'🔵',name:'ヘスティア',type:'ダンまち',color:'#3b82f6'}
+];
+
+const SCENE_META=[
+  {id:'sex',label:'💕 SEX'},{id:'masturbation',label:'✋ オナニー'},
+  {id:'blowjob',label:'👄 フェラ'},{id:'paizuri',label:'🎯 パイズリ'},
+  {id:'threesome',label:'👥 3P'},{id:'cosplay',label:'🎭 コスプレ'}
+];
+
+let selectedChar=null,selectedCharId=null,selectedScene=null;
+
+function buildCharUI(){
+  const cg=document.getElementById('charGrid');
+  if(!cg)return;
+  cg.innerHTML=CHAR_META.map(c=>`<div class="char-card" id="charcard-${c.key}" onclick="selectChar('${c.key}','${c.charId||''}',${c.isCrusha?'true':'false'})" style="border-color:${c.color}33">
+<div class="char-emoji">${c.emoji}</div>
+<div class="char-name">${c.name}</div>
+<div class="char-type">${c.type}</div>
+</div>`).join('');
+  const sg=document.getElementById('sceneGrid');
+  if(sg)sg.innerHTML=SCENE_META.map(s=>`<button class="scene-pill" id="scenepill-${s.id}" onclick="selectScene('${s.id}')">${s.label}</button>`).join('');
+  const csg=document.getElementById('charSceneGrid');
+  if(csg){
+    let h='';
+    CHAR_META.filter(c=>!c.isCrusha).forEach(c=>{
+      SCENE_META.forEach(s=>{
+        const k=c.charId+'_'+s.id;
+        if(typeof PRESETS!=='undefined'&&PRESETS[k])
+          h+=`<button class="preset-btn" onclick="quickPreset('${k}')" style="font-size:7px;padding:0.18rem;background:rgba(30,10,40,0.9)" id="qp-${k}">${c.emoji}${c.name.slice(0,3)} ${s.label.split(' ')[0]}</button>`;
+      });
+    });
+    csg.innerHTML=h;
+  }
+}
+
+function quickPreset(key){
+  clearPresetsVisual();
+  currentPresets=[key];currentPreset=key;
+  document.getElementById('presetName').textContent=key;
+  const el=document.getElementById('qp-'+key);
+  if(el)el.style.background='rgba(236,72,153,0.4)';
+  gen();showFeedback('✅ '+key,'#22c55e');
+}
+
+function switchCharTab(tab){
+  document.querySelectorAll('.char-tab').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('tab-'+tab);
+  if(btn)btn.classList.add('active');
+  ['chars','all'].forEach(t=>{
+    const el=document.getElementById('charTab-'+t);
+    if(el)el.style.display=(t===tab)?'block':'none';
+  });
+}
+
+function selectChar(key,charId,isCrusha){
+  selectedChar=key;selectedCharId=charId;
+  document.querySelectorAll('.char-card').forEach(c=>c.classList.remove('active'));
+  const card=document.getElementById('charcard-'+key);
+  if(card)card.classList.add('active');
+  if(isCrusha){
+    setCharacterMode('crusha');
+    const ss=document.getElementById('sceneSelector');
+    if(ss)ss.style.display='none';
+    showFeedback('🦔 CRUSHA!','#ec4899');return;
+  }
+  const ss=document.getElementById('sceneSelector');
+  if(ss)ss.style.display='block';
+  if(selectedScene){
+    const k=charId+'_'+selectedScene;
+    if(typeof PRESETS!=='undefined'&&PRESETS[k]){
+      clearPresetsVisual();
+      currentPresets=[k];currentPreset=k;
+      document.getElementById('presetName').textContent=k;
+      gen();showFeedback('✅ '+k,'#22c55e');
+    }
+  }
+}
+
+function selectScene(sceneId){
+  selectedScene=sceneId;
+  document.querySelectorAll('.scene-pill').forEach(b=>b.classList.remove('active'));
+  const pill=document.getElementById('scenepill-'+sceneId);
+  if(pill)pill.classList.add('active');
+  if(selectedCharId){
+    const k=selectedCharId+'_'+sceneId;
+    if(typeof PRESETS!=='undefined'&&PRESETS[k]){
+      clearPresetsVisual();
+      currentPresets=[k];currentPreset=k;
+      document.getElementById('presetName').textContent=k;
+      gen();showFeedback('✅ '+k,'#22c55e');
+    }else{
+      showFeedback('⚠️ '+k+' not found','#f59e0b');
+    }
+  }
+}
+
+function clearPresetsVisual(){
+  document.querySelectorAll('.preset-btn.active,[id^="qp-"]').forEach(b=>{
+    b.classList.remove('active');
+    if(b.id&&b.id.startsWith('qp-'))b.style.background='rgba(30,10,40,0.9)';
+  });
+}
+
+function clearCharScene(){
+  selectedChar=null;selectedCharId=null;selectedScene=null;
+  document.querySelectorAll('.char-card').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.scene-pill').forEach(b=>b.classList.remove('active'));
+  const ss=document.getElementById('sceneSelector');
+  if(ss)ss.style.display='none';
+  clearPreset();
+}
+
+// =============================================================================
+// COMPOSITION BUILDER ENGINE
+// Professional cinematography — ComfyUI commercial quality prompt system
+// Reference: SD/ComfyUI pro workflows, film production standards
+// =============================================================================
+const compState={shotSize:'',angle:'',pov:'',lens:'',dof:'',frame:'',light:''};
+
+const COMP_DATA={
+  shotSize:{
+    ecu:'extreme close-up shot, face fills entire frame, ultra-intimate distance, pore-level skin detail, eye iris micro detail, breath-close perspective',
+    bcu:'bust shot, chest and face framing, bust and above, intimate portrait distance, décolletage and above, close personal space',
+    cu:'close-up shot, face and upper chest, head and neck prominent, facial features fill frame, portrait standard',
+    mcu:'medium close-up, waist up framing, chest to crown, upper body shot, professional headshot range',
+    ms:'medium shot, hips to head, half body, character-focused with environmental context beginning',
+    mls:'medium long shot, knees to head, three-quarter body, full torso and most of legs visible',
+    ls:'full body long shot, entire figure head to toe, generous space around subject, environment contextual',
+    ews:'extreme wide shot, establishing shot, vast environment dominant, subject tiny in grand space'
+  },
+  angle:{
+    eye:'eye level shot, camera at subject eye height, natural comfortable viewing angle, straight-on neutral perspective',
+    low:'low angle shot, camera below subject looking upward, empowering dominant perspective, subject towering powerful commanding',
+    high:'high angle shot, camera above looking downward, intimate vulnerable perspective, subject smaller diminutive submissive',
+    birds:"bird's eye view, directly overhead, top-down aerial perspective, floor plane visible, God-view angle",
+    worms:"worm's eye view, extreme upward from ground level, looking up dramatically, underside visible, maximum upward angle",
+    dutch:'dutch angle, camera tilted 15 to 30 degrees, dynamic diagonal tension, psychological intensity compositional drama',
+    side:'profile shot, camera 90 degrees lateral, side silhouette, curves and body line prominent, pure side view',
+    rear:'rear view shot, behind subject, back and posterior visible, over-the-back perspective, back profile'
+  },
+  pov:{
+    std:'third-person perspective, observer viewpoint, cinematic neutral framing, standard camera distance relationship',
+    pov:"first-person POV, viewer's direct perspective, immersive point of view, subject looking directly at viewer, intimate engagement",
+    os:'over-the-shoulder shot, camera positioned behind and above shoulder, depth relationship implied, voyeur proximity',
+    voyeur:'voyeur perspective, hidden observation, peephole or gap framing, partially obscured view, secret watching, candid private moment',
+    mirror:'mirror reflection composition, subject and reflection simultaneously visible, dual perspective, self-awareness doubled image',
+    under:'between-legs upward angle, crotch-level perspective looking up, intimate low position, looking up from below through thighs',
+    glass:'through-glass perspective, barrier between viewer and subject, window or transparent wall framing, separation with visibility'
+  },
+  lens:{
+    wide:'14mm ultra-wide angle lens, expansive field of view, environmental immersion, slight barrel distortion edges, dynamic spatial depth, architectural scale',
+    std:'35mm standard lens, natural human eye perspective, minimal distortion, versatile neutral framing, documentary cinematic feel',
+    port:'85mm portrait lens, gentle flattering compression, beautiful background separation, natural face proportions, standard professional glamour',
+    tele:'135mm telephoto, strong background compression, subject isolation, narrow field of view, flattering facial geometry, subject-background separation',
+    macro:'macro photography, 1:1 magnification ratio, extreme micro detail, ultra-sharp surface texture and skin detail, razor-thin depth',
+    fish:'fisheye lens, 8mm extreme wide, 180 degree field, circular fisheye distortion, immersive spherical perspective, extreme barrel distortion curves'
+  },
+  dof:{
+    shallow:'shallow depth of field, f/1.4 wide aperture, creamy bokeh background blur, subject in sharp focus, dreamy soft background, subject isolation perfected',
+    normal:'moderate depth of field, f/4 aperture, natural background separation, balanced environment context, professional standard portrait depth',
+    deep:'deep depth of field, f/11 stopped down, front-to-back sharp focus, every element crisp clear, environmental detail fully preserved, landscape sharpness'
+  },
+  frame:{
+    center:'centered composition, subject centered in frame, symmetrical balance, strong direct frontal impact, formal powerful presentation',
+    rule3:'rule of thirds, subject at intersection points, dynamic off-center balance, natural pleasing asymmetry, photographic standard',
+    golden:'golden ratio spiral, Fibonacci compositional guide, classical aesthetic harmony, naturally beautiful proportions, fine art standard',
+    symm:'perfect bilateral symmetry, mirror-image balance, architectural precision, formal imposing composition, Wes Anderson style',
+    diag:'diagonal leading lines composition, strong directional energy, dynamic triangle or diagonal framing, visual movement and flow'
+  },
+  light:{
+    '3pt':'three-point lighting, key light main source, fill light shadow reduction, rim backlight separation, professional studio standard setup',
+    rembrandt:'Rembrandt lighting, 45-degree key light, small triangle of highlight on shadow-side cheek, dramatic chiaroscuro, classical portrait mastery',
+    butterfly:'butterfly lighting, key light directly above camera axis, symmetrical nose shadow like butterfly wings, glamour photography beauty standard',
+    backlight:'backlight rim lighting, strong light source behind subject, glowing halo outline, hair light separation, dramatic figure isolation from background',
+    neon:'neon color lighting, pink and purple neon glow, cyberpunk atmosphere, hard colored light contrast, rim lighting in saturated hues, night city aesthetic',
+    golden:'golden hour lighting, magic hour warm orange-gold sunlight, soft directional warmth, long shadows, cinematic golden atmosphere, sunset glow'
+  }
+};
+
+function setComp(type,val){
+  const prev=compState[type];
+  if(prev===val){
+    compState[type]='';
+    const b=document.getElementById('cs-'+type+'-'+val);
+    if(b)b.classList.remove('active');
+  }else{
+    if(prev){const pb=document.getElementById('cs-'+type+'-'+prev);if(pb)pb.classList.remove('active');}
+    compState[type]=val;
+    const b=document.getElementById('cs-'+type+'-'+val);
+    if(b)b.classList.add('active');
+  }
+  updateCompPreview();
+  gen();
+}
+
+function updateCompPreview(){
+  const labels={shotSize:'SZ',angle:'ANG',pov:'POV',lens:'LENS',dof:'DOF',frame:'FRAME',light:'LIGHT'};
+  const parts=[];
+  Object.entries(compState).forEach(([k,v])=>{
+    if(v&&COMP_DATA[k]&&COMP_DATA[k][v]){
+      const preview=COMP_DATA[k][v].split(',').slice(0,2).join(',').trim();
+      parts.push('['+labels[k]+': '+preview+']');
+    }
+  });
+  const el=document.getElementById('compPreview');
+  if(el)el.textContent=parts.length?parts.join(' '):' (未選択)';
+}
+
+function clearComp(){
+  Object.keys(compState).forEach(k=>{
+    if(compState[k]){
+      const b=document.getElementById('cs-'+k+'-'+compState[k]);
+      if(b)b.classList.remove('active');
+      compState[k]='';
+    }
+  });
+  updateCompPreview();gen();
+}
+
+function getCompPrompt(){
+  const parts=[];
+  Object.entries(COMP_DATA).forEach(([type,vals])=>{
+    if(compState[type]&&vals[compState[type]])parts.push(vals[compState[type]]);
+  });
+  return parts.join(', ');
 }
 
 

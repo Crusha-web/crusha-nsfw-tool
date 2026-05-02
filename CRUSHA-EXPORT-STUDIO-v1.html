@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<title>CRUSHA EXPORT STUDIO v1</title>
+<style>
+/* ===== RESET & VARS ===== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:    #0a0a1a;
+  --card:  rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.08);
+  --gold:  #ffd700;
+  --green: #00ff88;
+  --cyan:  #00f5ff;
+  --pink:  #ff00aa;
+  --purple:#8b00ff;
+  --accent:#ffd700;
+  --accent2:#ff8c00;
+  --text:  rgba(255,255,255,0.85);
+  --sub:   rgba(255,255,255,0.45);
+  --sidebar:220px;
+}
+
+body {
+  font-family:'Segoe UI','Hiragino Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ===== BACKGROUND ===== */
+.bg-fx {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(255,215,0,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(255,140,0,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,255,136,0.04) 0%, transparent 60%);
+}
+
+/* ===== LAYOUT ===== */
+.app { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width:var(--sidebar);
+  flex:0 0 var(--sidebar);
+  background:rgba(0,0,0,0.4);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  padding:20px 0;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+
+.logo-area {
+  padding:0 16px 20px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:12px;
+}
+.logo-top {
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--sub);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.logo-main {
+  font-size:17px;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1.2;
+}
+.logo-sub {
+  font-size:9px;
+  color:var(--sub);
+  letter-spacing:1px;
+  margin-top:3px;
+}
+
+.nav-section {
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--sub);
+  text-transform:uppercase;
+  padding:8px 16px 4px;
+  margin-top:8px;
+}
+
+.nav-btn {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--sub);
+  background:none;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  text-align:left;
+  border-left:3px solid transparent;
+  transition:all 0.15s;
+}
+.nav-btn:hover { color:var(--text); background:rgba(255,255,255,0.04); }
+.nav-btn.active {
+  color:var(--gold);
+  border-left-color:var(--gold);
+  background:rgba(255,215,0,0.06);
+}
+.nav-icon { font-size:16px; flex:0 0 20px; text-align:center; }
+
+.hub-btn {
+  margin:auto 16px 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px;
+  background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:10px;
+  color:var(--gold);
+  font-size:12px;
+  font-weight:700;
+  text-decoration:none;
+  transition:all 0.15s;
+}
+.hub-btn:hover { background:rgba(255,215,0,0.18); }
+
+/* ===== MAIN ===== */
+.main { flex:1; min-width:0; padding:24px; overflow-y:auto; }
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  margin-bottom:24px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.page-title-area {}
+.stage-badge {
+  display:inline-block;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  color:#000;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:2px;
+  padding:3px 10px;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+.page-title {
+  font-size:clamp(20px,4vw,28px);
+  font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--accent2),var(--green));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1.2;
+}
+.page-desc { font-size:12px; color:var(--sub); margin-top:6px; }
+
+.header-stats {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.stat-chip {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 14px;
+  text-align:center;
+}
+.stat-num { font-size:18px; font-weight:900; color:var(--gold); }
+.stat-lbl { font-size:9px; color:var(--sub); text-transform:uppercase; letter-spacing:1px; }
+
+/* ===== TABS (hidden, controlled by sidebar nav) ===== */
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ===== SECTION ===== */
+.section {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+}
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.section-title {
+  font-size:13px;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* ===== FORM ELEMENTS ===== */
+label {
+  display:block;
+  font-size:11px;
+  color:var(--sub);
+  margin-bottom:5px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+input[type=text], input[type=number], textarea, select {
+  width:100%;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;
+  color:var(--text);
+  font-size:13px;
+  padding:9px 12px;
+  outline:none;
+  transition:border-color 0.15s;
+  font-family:inherit;
+}
+input:focus, textarea:focus, select:focus {
+  border-color:rgba(255,215,0,0.5);
+  box-shadow:0 0 0 3px rgba(255,215,0,0.06);
+}
+select option { background:#1a1a2e; }
+textarea { resize:vertical; min-height:100px; }
+
+.form-row { margin-bottom:14px; }
+
+.form-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+  gap:14px;
+  margin-bottom:14px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding:9px 18px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+  transition:all 0.15s;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.btn-primary {
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  color:#000;
+}
+.btn-primary:hover { opacity:0.85; }
+.btn-secondary {
+  background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.3);
+  color:var(--gold);
+}
+.btn-secondary:hover { background:rgba(255,215,0,0.18); }
+.btn-green {
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#000;
+}
+.btn-green:hover { opacity:0.85; }
+.btn-danger {
+  background:rgba(255,60,60,0.1);
+  border:1px solid rgba(255,60,60,0.3);
+  color:#ff6060;
+}
+.btn-sm { padding:6px 12px; font-size:11px; }
+.btn-group { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ===== CHECKLIST ===== */
+.checklist { display:flex; flex-direction:column; gap:8px; }
+.check-item {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px 14px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--border);
+  border-radius:10px;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.check-item:hover { border-color:rgba(255,215,0,0.3); }
+.check-item.checked {
+  border-color:rgba(0,255,136,0.35);
+  background:rgba(0,255,136,0.04);
+}
+.check-box {
+  width:20px; height:20px;
+  border-radius:5px;
+  border:2px solid rgba(255,255,255,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  transition:all 0.15s;
+  font-size:12px;
+}
+.check-item.checked .check-box {
+  background:var(--green);
+  border-color:var(--green);
+  color:#000;
+}
+.check-content {}
+.check-title { font-size:13px; font-weight:600; margin-bottom:2px; }
+.check-desc { font-size:11px; color:var(--sub); }
+.check-badge {
+  margin-left:auto;
+  flex:0 0 auto;
+  font-size:10px;
+  padding:2px 8px;
+  border-radius:6px;
+  font-weight:700;
+}
+.badge-critical { background:rgba(255,60,60,0.2); color:#ff8080; border:1px solid rgba(255,60,60,0.3); }
+.badge-important { background:rgba(255,215,0,0.15); color:var(--gold); border:1px solid rgba(255,215,0,0.25); }
+.badge-optional { background:rgba(255,255,255,0.06); color:var(--sub); border:1px solid var(--border); }
+
+.progress-bar-wrap {
+  background:rgba(255,255,255,0.05);
+  border-radius:10px;
+  height:8px;
+  overflow:hidden;
+  margin-top:16px;
+}
+.progress-bar-fill {
+  height:100%;
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--gold),var(--green));
+  transition:width 0.4s ease;
+}
+.progress-text {
+  font-size:11px;
+  color:var(--sub);
+  margin-top:6px;
+  display:flex;
+  justify-content:space-between;
+}
+
+/* ===== METADATA ===== */
+.char-count {
+  font-size:11px;
+  color:var(--sub);
+  text-align:right;
+  margin-top:3px;
+}
+.char-count.over { color:#ff6060; }
+
+.tag-editor {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  padding:10px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;
+  min-height:50px;
+  cursor:text;
+}
+.tag-chip {
+  background:rgba(255,215,0,0.12);
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:6px;
+  padding:3px 10px;
+  font-size:12px;
+  color:var(--gold);
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.tag-chip button {
+  background:none;
+  border:none;
+  color:rgba(255,215,0,0.5);
+  cursor:pointer;
+  font-size:12px;
+  padding:0;
+  line-height:1;
+}
+.tag-chip button:hover { color:#ff6060; }
+.tag-input {
+  flex:1;
+  min-width:100px;
+  background:none !important;
+  border:none !important;
+  padding:0 !important;
+  font-size:12px !important;
+  color:var(--text) !important;
+}
+.tag-input:focus { box-shadow:none !important; }
+
+.chapter-list { display:flex; flex-direction:column; gap:6px; }
+.chapter-row {
+  display:grid;
+  grid-template-columns:80px 1fr auto;
+  gap:8px;
+  align-items:center;
+}
+.chapter-row input { margin-bottom:0; }
+
+/* ===== THUMBNAIL ===== */
+.thumb-preview {
+  width:100%;
+  aspect-ratio:16/9;
+  background:linear-gradient(135deg,#0a0a2a,#1a0a1a);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.thumb-preview-inner {
+  text-align:center;
+  padding:20px;
+}
+.thumb-main-text {
+  font-size:clamp(20px,5vw,36px);
+  font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1.1;
+  margin-bottom:8px;
+  word-break:break-all;
+  text-shadow:none;
+}
+.thumb-sub-text {
+  font-size:clamp(12px,2.5vw,16px);
+  color:rgba(255,255,255,0.7);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+.thumb-overlay-glow {
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(255,215,0,0.2), transparent 60%),
+    radial-gradient(ellipse at 50% -20%, rgba(255,0,170,0.15), transparent 60%);
+}
+.thumb-corner {
+  position:absolute;
+  top:10px; right:10px;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  color:#000;
+  font-size:9px;
+  font-weight:900;
+  padding:3px 8px;
+  border-radius:5px;
+  letter-spacing:1px;
+}
+
+.prompt-output {
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(255,215,0,0.2);
+  border-radius:10px;
+  padding:14px;
+  font-family:'Consolas',monospace;
+  font-size:11px;
+  color:rgba(255,215,0,0.9);
+  line-height:1.6;
+  white-space:pre-wrap;
+  word-break:break-all;
+  min-height:80px;
+}
+
+/* ===== SNS POSTS ===== */
+.platform-tab-group {
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.platform-tab {
+  padding:7px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--sub);
+  transition:all 0.15s;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.platform-tab.active {
+  border-color:rgba(255,215,0,0.5);
+  background:rgba(255,215,0,0.1);
+  color:var(--gold);
+}
+.platform-panel { display:none; }
+.platform-panel.active { display:block; }
+
+.post-output {
+  background:rgba(0,0,0,0.3);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  font-size:13px;
+  line-height:1.7;
+  color:var(--text);
+  white-space:pre-wrap;
+  min-height:120px;
+  word-break:break-word;
+}
+
+/* ===== UPLOAD GUIDE ===== */
+.guide-step {
+  display:flex;
+  gap:16px;
+  padding:16px 0;
+  border-bottom:1px solid var(--border);
+}
+.guide-step:last-child { border-bottom:none; }
+.guide-num {
+  width:36px; height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:900;
+  color:#000;
+  flex:0 0 auto;
+}
+.guide-content {}
+.guide-title {
+  font-size:14px;
+  font-weight:700;
+  color:var(--gold);
+  margin-bottom:6px;
+}
+.guide-desc {
+  font-size:12px;
+  color:var(--sub);
+  line-height:1.7;
+}
+.guide-desc code {
+  background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.2);
+  border-radius:4px;
+  padding:1px 6px;
+  color:var(--gold);
+  font-size:11px;
+  font-family:'Consolas',monospace;
+}
+.guide-tips {
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.tip-chip {
+  font-size:10px;
+  padding:3px 8px;
+  border-radius:6px;
+  background:rgba(0,255,136,0.08);
+  border:1px solid rgba(0,255,136,0.2);
+  color:var(--green);
+}
+
+/* ===== COPY SUCCESS ===== */
+.copy-toast {
+  position:fixed;
+  bottom:24px; right:24px;
+  background:linear-gradient(135deg,var(--gold),var(--accent2));
+  color:#000;
+  font-size:13px;
+  font-weight:700;
+  padding:10px 20px;
+  border-radius:10px;
+  z-index:9999;
+  opacity:0;
+  transform:translateY(10px);
+  transition:all 0.3s;
+  pointer-events:none;
+}
+.copy-toast.show { opacity:1; transform:translateY(0); }
+
+/* ===== RATING BAR ===== */
+.rating-section {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.rating-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.rating-label {
+  font-size:12px;
+  color:var(--sub);
+  width:100px;
+  flex:0 0 100px;
+}
+.rating-track {
+  flex:1;
+  height:6px;
+  background:rgba(255,255,255,0.08);
+  border-radius:10px;
+  overflow:visible;
+  position:relative;
+  cursor:pointer;
+}
+.rating-fill {
+  height:100%;
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--gold),var(--green));
+  transition:width 0.2s;
+  position:relative;
+}
+.rating-fill::after {
+  content:'';
+  position:absolute;
+  right:-5px; top:50%;
+  transform:translateY(-50%);
+  width:12px; height:12px;
+  border-radius:50%;
+  background:var(--gold);
+  border:2px solid var(--bg);
+}
+.rating-value {
+  font-size:12px;
+  color:var(--gold);
+  font-weight:700;
+  width:30px;
+  text-align:right;
+}
+
+/* ===== FINAL CARD ===== */
+.final-card {
+  background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(0,255,136,0.06));
+  border:1px solid rgba(255,215,0,0.3);
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  margin-bottom:20px;
+}
+.final-icon { font-size:48px; margin-bottom:12px; }
+.final-title {
+  font-size:20px;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--green));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:8px;
+}
+.final-desc { font-size:13px; color:var(--sub); line-height:1.6; }
+
+/* ===== MOBILE ===== */
+@media(max-width:600px) {
+  .sidebar {
+    width:56px;
+    flex:0 0 56px;
+    padding:12px 0;
+  }
+  .logo-area, .nav-section, .hub-btn { display:none; }
+  .nav-btn { padding:12px; justify-content:center; }
+  .nav-icon { font-size:20px; flex:0 0 auto; }
+  .nav-btn span:not(.nav-icon) { display:none; }
+  .main { padding:14px; }
+  .form-grid { grid-template-columns:1fr; }
+  .chapter-row { grid-template-columns:70px 1fr auto; }
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="copy-toast" id="copyToast">✓ コピーしました</div>
+
+<div class="app">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo-top">CRUSHA PRODUCTION</div>
+    <div class="logo-main">EXPORT<br>STUDIO</div>
+    <div class="logo-sub">Stage 6 / Release</div>
+  </div>
+
+  <div class="nav-section">MENU</div>
+  <button class="nav-btn active" onclick="switchTab('tab-check')" id="btn-tab-check">
+    <span class="nav-icon">📋</span><span>最終チェック</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('tab-meta')" id="btn-tab-meta">
+    <span class="nav-icon">📝</span><span>メタデータ</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('tab-thumb')" id="btn-tab-thumb">
+    <span class="nav-icon">🖼️</span><span>サムネイル</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('tab-sns')" id="btn-tab-sns">
+    <span class="nav-icon">📣</span><span>SNS投稿</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('tab-guide')" id="btn-tab-guide">
+    <span class="nav-icon">🚀</span><span>配信ガイド</span>
+  </button>
+
+  <a href="index.html" class="hub-btn">🏠 HUB</a>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title-area">
+      <div class="stage-badge">STAGE 6 — EXPORT & RELEASE</div>
+      <div class="page-title">🚀 EXPORT STUDIO</div>
+      <div class="page-desc">配信前チェック → メタデータ → サムネイル → SNS投稿 → YouTube公開</div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-chip">
+        <div class="stat-num" id="checkCount">0/12</div>
+        <div class="stat-lbl">CHECKS</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-num" id="readyScore">0%</div>
+        <div class="stat-lbl">READY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: 最終チェック ===== -->
+  <div class="tab-panel active" id="tab-check">
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">📋 公開前チェックリスト</div>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="checkAll()">全てチェック</button>
+          <button class="btn btn-danger btn-sm" onclick="resetAll()">リセット</button>
+        </div>
+      </div>
+
+      <!-- CRITICAL -->
+      <div style="font-size:11px;color:#ff8080;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔴 Critical — 必須</div>
+      <div class="checklist" id="checklistCritical">
+        <div class="check-item" onclick="toggleCheck(this)" data-id="c1">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🎬 最終動画ファイルが存在する</div>
+            <div class="check-desc">FFmpegで書き出したMP4が正常に生成されている / 再生確認済み</div>
+          </div>
+          <span class="check-badge badge-critical">CRITICAL</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="c2">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🔊 音量レベルが適切か (-14 LUFS 目安)</div>
+            <div class="check-desc">BGM・ボイスのミックスバランスを確認。ピークが0dBFSを超えていないこと</div>
+          </div>
+          <span class="check-badge badge-critical">CRITICAL</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="c3">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">📐 解像度・フレームレートが正しい</div>
+            <div class="check-desc">1920×1080 / 24fps または 30fps / H.264 or H.265 でエンコード済み</div>
+          </div>
+          <span class="check-badge badge-critical">CRITICAL</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="c4">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">⏱️ 総再生時間を確認した</div>
+            <div class="check-desc">想定尺に対して大きくズレがないか / 冒頭・末尾のブラック区間がないか</div>
+          </div>
+          <span class="check-badge badge-critical">CRITICAL</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="c5">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🖼️ サムネイル画像が完成している</div>
+            <div class="check-desc">1280×720px / JPG 2MB以下 / テキスト可読性確認済み</div>
+          </div>
+          <span class="check-badge badge-critical">CRITICAL</span>
+        </div>
+      </div>
+
+      <!-- IMPORTANT -->
+      <div style="font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;">🟡 Important — 推奨</div>
+      <div class="checklist" id="checklistImportant">
+        <div class="check-item" onclick="toggleCheck(this)" data-id="i1">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">📌 チャプターマーカーを設定した</div>
+            <div class="check-desc">概要欄に「0:00 Opening」形式でタイムスタンプを記載</div>
+          </div>
+          <span class="check-badge badge-important">IMPORTANT</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="i2">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🔤 タイトル・概要欄・タグが入力済み</div>
+            <div class="check-desc">SEOキーワード含む / タグは30個以内 / 概要欄500文字以上推奨</div>
+          </div>
+          <span class="check-badge badge-important">IMPORTANT</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="i3">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">📅 公開スケジュールを設定した</div>
+            <div class="check-desc">土日 20:00-22:00 JST 投稿が最も視聴数を稼げる</div>
+          </div>
+          <span class="check-badge badge-important">IMPORTANT</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="i4">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🎵 BGM著作権・ライセンスを確認した</div>
+            <div class="check-desc">Suno AI生成曲は商用利用可 / 外部素材は許諾範囲を確認すること</div>
+          </div>
+          <span class="check-badge badge-important">IMPORTANT</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="i5">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">💬 エンドカード・字幕を確認した</div>
+            <div class="check-desc">エンドカード20秒設定 / 自動字幕の確認または手動字幕追加</div>
+          </div>
+          <span class="check-badge badge-important">IMPORTANT</span>
+        </div>
+      </div>
+
+      <!-- OPTIONAL -->
+      <div style="font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;">⚪ Optional</div>
+      <div class="checklist" id="checklistOptional">
+        <div class="check-item" onclick="toggleCheck(this)" data-id="o1">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">🎨 カラーグレーディングが適切か</div>
+            <div class="check-desc">Anime/Neonプリセット適用 / クリップ間の明るさが統一されているか</div>
+          </div>
+          <span class="check-badge badge-optional">OPTIONAL</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)" data-id="o2">
+          <div class="check-box"></div>
+          <div class="check-content">
+            <div class="check-title">📊 YouTube Analytics の通知設定</div>
+            <div class="check-desc">チャンネル登録者への通知ベルを有効化 / 予約公開時刻の確認</div>
+          </div>
+          <span class="check-badge badge-optional">OPTIONAL</span>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-bar-wrap" style="margin-top:20px">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="progress-text">
+        <span id="progressLabel">準備完了: 0 / 12項目</span>
+        <span id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- Quality Ratings -->
+    <div class="section">
+      <div class="section-title">⭐ クオリティ自己評価</div>
+      <div style="margin-top:16px" class="rating-section" id="ratingSection">
+        <div class="rating-row">
+          <div class="rating-label">映像品質</div>
+          <input type="range" min="0" max="100" value="75" class="rating-track" oninput="updateRating(this, 'rv')" style="background:none;border:none;accent-color:var(--gold);width:100%">
+          <div class="rating-value" id="rv">75</div>
+        </div>
+        <div class="rating-row">
+          <div class="rating-label">音声品質</div>
+          <input type="range" min="0" max="100" value="80" class="rating-track" oninput="updateRating(this, 'ra')" style="background:none;border:none;accent-color:var(--gold);width:100%">
+          <div class="rating-value" id="ra">80</div>
+        </div>
+        <div class="rating-row">
+          <div class="rating-label">演出・編集</div>
+          <input type="range" min="0" max="100" value="70" class="rating-track" oninput="updateRating(this, 're')" style="background:none;border:none;accent-color:var(--gold);width:100%">
+          <div class="rating-value" id="re">70</div>
+        </div>
+        <div class="rating-row">
+          <div class="rating-label">サムネイル</div>
+          <input type="range" min="0" max="100" value="85" class="rating-track" oninput="updateRating(this, 'rt')" style="background:none;border:none;accent-color:var(--gold);width:100%">
+          <div class="rating-value" id="rt">85</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-check -->
+
+  <!-- ===== TAB: メタデータ ===== -->
+  <div class="tab-panel" id="tab-meta">
+
+    <div class="section">
+      <div class="section-title">📝 YouTube 動画情報</div>
+      <div style="margin-top:16px">
+        <div class="form-row">
+          <label>動画タイトル</label>
+          <input type="text" id="metaTitle" placeholder="例: 【バーチャルライブ】CRUSHA 1st Live「FERRET BEAT」全曲フル / AI生成バーチャルVTuberライブ" oninput="updateCharCount(this,'titleCount',100)">
+          <div class="char-count" id="titleCount">0 / 100文字</div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>カテゴリ</label>
+            <select id="metaCategory">
+              <option value="10">音楽 (Music)</option>
+              <option value="1">映画とアニメ</option>
+              <option value="24">エンターテインメント</option>
+              <option value="20">ゲーム</option>
+            </select>
+          </div>
+          <div>
+            <label>公開設定</label>
+            <select id="metaPrivacy">
+              <option value="private">非公開 (Private)</option>
+              <option value="unlisted">限定公開 (Unlisted)</option>
+              <option value="public">公開 (Public)</option>
+              <option value="premiere">プレミア公開</option>
+            </select>
+          </div>
+          <div>
+            <label>言語</label>
+            <select id="metaLang">
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+              <option value="zh-CN">中文(简体)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>概要欄 (Description)</label>
+          <textarea id="metaDesc" rows="8" placeholder="概要欄テンプレートを「生成」ボタンで自動作成できます" oninput="updateCharCount(this,'descCount',5000)"></textarea>
+          <div class="char-count" id="descCount">0 / 5000文字</div>
+        </div>
+        <div class="btn-group" style="margin-bottom:14px">
+          <button class="btn btn-secondary" onclick="genDescription()">📄 概要欄テンプレート生成</button>
+          <button class="btn btn-secondary" onclick="copyField('metaDesc')">📋 コピー</button>
+        </div>
+        <div class="form-row">
+          <label>タグ (Enterで追加)</label>
+          <div class="tag-editor" id="tagEditor" onclick="document.getElementById('tagInput').focus()">
+            <input type="text" class="tag-input" id="tagInput" placeholder="タグを入力してEnter…" onkeydown="handleTagInput(event)">
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <button class="btn btn-secondary btn-sm" onclick="addDefaultTags()">🏷️ 推奨タグを追加</button>
+            <span style="font-size:11px;color:var(--sub)" id="tagCount">0 タグ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- チャプター -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">📌 チャプターマーカー</div>
+        <button class="btn btn-secondary btn-sm" onclick="addChapter()">+ 追加</button>
+      </div>
+      <div class="chapter-list" id="chapterList"></div>
+      <div class="btn-group" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="genChapterText()">📋 概要欄用テキスト生成</button>
+        <button class="btn btn-secondary" onclick="addDefaultChapters()">🎪 デフォルト章立て</button>
+      </div>
+      <div id="chapterOutput" style="margin-top:12px;display:none">
+        <div class="prompt-output" id="chapterText"></div>
+        <button class="btn btn-secondary btn-sm" onclick="copyEl('chapterText')" style="margin-top:8px">📋 コピー</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-meta -->
+
+  <!-- ===== TAB: サムネイル ===== -->
+  <div class="tab-panel" id="tab-thumb">
+
+    <div class="section">
+      <div class="section-title">🖼️ サムネイルプレビュー</div>
+      <div style="margin-top:16px">
+        <div class="thumb-preview" id="thumbPreview">
+          <div class="thumb-overlay-glow"></div>
+          <div class="thumb-corner">CRUSHA</div>
+          <div class="thumb-preview-inner">
+            <div class="thumb-main-text" id="thumbMainText">FERRET BEAT</div>
+            <div class="thumb-sub-text" id="thumbSubText">1st Virtual Live Concert</div>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>メインテキスト</label>
+            <input type="text" id="thumbMain" value="FERRET BEAT" oninput="updateThumbPreview()">
+          </div>
+          <div>
+            <label>サブテキスト</label>
+            <input type="text" id="thumbSub" value="1st Virtual Live Concert" oninput="updateThumbPreview()">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>背景スタイル</label>
+            <select id="thumbBg" onchange="updateThumbBg()">
+              <option value="0">サイバーネオン (デフォルト)</option>
+              <option value="1">ゴールドグラデーション</option>
+              <option value="2">ダークパープル</option>
+              <option value="3">フォレストグリーン</option>
+              <option value="4">ピンクドリーム</option>
+            </select>
+          </div>
+          <div>
+            <label>ライブ番号 / シリーズ名</label>
+            <input type="text" id="thumbCorner" value="CRUSHA" oninput="updateThumbCorner()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- サムネプロンプト -->
+    <div class="section">
+      <div class="section-title">🎨 CRUSHA SUPREME サムネプロンプト</div>
+      <div style="margin-top:16px">
+        <div class="form-grid">
+          <div>
+            <label>シーン/ポーズ</label>
+            <select id="thumbScene">
+              <option value="stage_center">ステージ中央・スポットライト</option>
+              <option value="close_face">顔アップ・感情クローズアップ</option>
+              <option value="dynamic_jump">ダイナミックジャンプ・アクション</option>
+              <option value="silhouette">シルエット・逆光</option>
+              <option value="crowd_bg">観客背景・俯瞰ショット</option>
+              <option value="sitting_solo">座りポーズ・ソロ</option>
+            </select>
+          </div>
+          <div>
+            <label>照明スタイル</label>
+            <select id="thumbLight">
+              <option value="neon">ネオン照明</option>
+              <option value="spotlight">スポットライト</option>
+              <option value="gold">ゴールドライト</option>
+              <option value="sunset">サンセット</option>
+              <option value="fireworks">花火・爆発エフェクト</option>
+            </select>
+          </div>
+          <div>
+            <label>衣装</label>
+            <select id="thumbCostume">
+              <option value="idol_white">アイドル衣装・白</option>
+              <option value="rock_black">ロック・黒レザー</option>
+              <option value="kawaii_pink">カワイイ・ピンク</option>
+              <option value="cyber_blue">サイバー・ブルー</option>
+              <option value="princess_gold">プリンセス・ゴールド</option>
+            </select>
+          </div>
+          <div>
+            <label>エフェクト</label>
+            <select id="thumbEffect">
+              <option value="sparkle">スパークル・キラキラ</option>
+              <option value="fire">炎エフェクト</option>
+              <option value="music_notes">音符・楽譜</option>
+              <option value="light_beams">光線・レーザー</option>
+              <option value="cherry_blossom">桜・花びら</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-group" style="margin-bottom:12px">
+          <button class="btn btn-primary" onclick="genThumbPrompt()">✨ プロンプト生成</button>
+          <button class="btn btn-secondary" onclick="genThumbPromptAlt()">🔀 バリエーション生成</button>
+        </div>
+
+        <div style="margin-bottom:8px;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Positive Prompt</div>
+        <div class="prompt-output" id="thumbPromptPos">← 上のオプションを選択して「プロンプト生成」を押してください</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyEl('thumbPromptPos')" style="margin-top:6px">📋 コピー</button>
+
+        <div style="margin:12px 0 8px;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Negative Prompt (固定)</div>
+        <div class="prompt-output" id="thumbPromptNeg">(human ears:1.5),(cat ears:1.5),(dog ears:1.5),(fox ears:1.5),(turquoise ears:1.3),(low positioned ears:1.2),worst quality,low quality,blurry,watermark,text,logo,jpeg artifacts,bad anatomy,deformed,extra limbs</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyEl('thumbPromptNeg')" style="margin-top:6px">📋 コピー</button>
+
+        <div style="margin-top:16px;padding:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;">📐 サムネイル仕様</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.8">
+            解像度: <code style="background:rgba(255,215,0,0.1);padding:1px 6px;border-radius:3px;color:var(--gold)">1280 × 720 px</code>
+            アスペクト比: <code style="background:rgba(255,215,0,0.1);padding:1px 6px;border-radius:3px;color:var(--gold)">16:9</code>
+            最大ファイルサイズ: <code style="background:rgba(255,215,0,0.1);padding:1px 6px;border-radius:3px;color:var(--gold)">2MB</code><br>
+            形式: JPG / PNG　　テキストは画面端から10%以上余白を確保
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-thumb -->
+
+  <!-- ===== TAB: SNS投稿 ===== -->
+  <div class="tab-panel" id="tab-sns">
+
+    <div class="section">
+      <div class="section-title">📣 SNS投稿テンプレート生成</div>
+      <div style="margin-top:16px">
+        <div class="form-grid">
+          <div>
+            <label>動画タイトル (短縮)</label>
+            <input type="text" id="snsTitle" value="CRUSHA 1st Live「FERRET BEAT」">
+          </div>
+          <div>
+            <label>YouTubeリンク</label>
+            <input type="text" id="snsUrl" value="https://youtu.be/XXXXXXXXXX">
+          </div>
+          <div>
+            <label>公開日時</label>
+            <input type="text" id="snsDate" value="2026年5月10日 21:00">
+          </div>
+          <div>
+            <label>ハッシュタグ</label>
+            <input type="text" id="snsHashtags" value="#CRUSHA #VTuber #バーチャルライブ #AI生成">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="genAllPosts()">🚀 全SNS投稿文を生成</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="platform-tab-group">
+        <button class="platform-tab active" onclick="switchPlatform('yt')" id="ptab-yt">▶️ YouTube</button>
+        <button class="platform-tab" onclick="switchPlatform('tw')" id="ptab-tw">🐦 Twitter/X</button>
+        <button class="platform-tab" onclick="switchPlatform('tw2')" id="ptab-tw2">🧵 スレッド</button>
+        <button class="platform-tab" onclick="switchPlatform('bili')" id="ptab-bili">📺 Bilibili</button>
+        <button class="platform-tab" onclick="switchPlatform('nico')" id="ptab-nico">🎌 ニコニコ</button>
+        <button class="platform-tab" onclick="switchPlatform('note')" id="ptab-note">📓 note</button>
+      </div>
+
+      <div class="platform-panel active" id="pp-yt">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">コミュニティ投稿 / プレミア告知用</div>
+        <div class="post-output" id="post-yt">ここにYouTubeコミュニティ投稿文が生成されます</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-yt')">📋 コピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPlatform('https://studio.youtube.com')">🔗 YouTube Studio</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" id="pp-tw">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">Twitter/X — 140文字以内</div>
+        <div class="post-output" id="post-tw">ここにTwitter/X投稿文が生成されます</div>
+        <div class="char-count" id="tw-count">0 / 280文字</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-tw')">📋 コピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPlatform('https://x.com/compose/tweet')">🔗 X に投稿</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" id="pp-tw2">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">連続スレッド投稿 (複数ツイート)</div>
+        <div class="post-output" id="post-tw2">ここにスレッド投稿文が生成されます</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-tw2')">📋 コピー</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" id="pp-bili">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">Bilibili — 動画投稿タイトル・説明文</div>
+        <div class="post-output" id="post-bili">ここにBilibili用テキストが生成されます</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-bili')">📋 コピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPlatform('https://member.bilibili.com/platform/upload/video/frame')">🔗 Bilibili 投稿</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" id="pp-nico">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">ニコニコ動画 — タグ・説明文</div>
+        <div class="post-output" id="post-nico">ここにニコニコ用テキストが生成されます</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-nico')">📋 コピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPlatform('https://nicovideo.jp')">🔗 ニコニコ</button>
+        </div>
+      </div>
+
+      <div class="platform-panel" id="pp-note">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">note — ライブレポート記事テンプレート</div>
+        <div class="post-output" id="post-note">ここにnote記事テンプレートが生成されます</div>
+        <div class="btn-group" style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('post-note')">📋 コピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPlatform('https://note.com/notes/new')">🔗 note 作成</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-sns -->
+
+  <!-- ===== TAB: 配信ガイド ===== -->
+  <div class="tab-panel" id="tab-guide">
+
+    <!-- 完成おめでとうカード -->
+    <div class="final-card">
+      <div class="final-icon">🎉</div>
+      <div class="final-title">CRUSHA バーチャルライブ — 制作完了！</div>
+      <div class="final-desc">
+        Music → Character → Voice → Video Gen → Edit → Export<br>
+        全6ステージのパイプラインを完走しました。以下の手順でYouTubeに公開してください。
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🚀 YouTube アップロード手順</div>
+      <div style="margin-top:8px">
+        <div class="guide-step">
+          <div class="guide-num">1</div>
+          <div class="guide-content">
+            <div class="guide-title">YouTube Studio を開く</div>
+            <div class="guide-desc">
+              <a href="https://studio.youtube.com" target="_blank" style="color:var(--gold)">studio.youtube.com</a> にアクセス →「作成」→「動画をアップロード」<br>
+              書き出した <code>CRUSHA_live_final.mp4</code> をドラッグ&ドロップ
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ H.264 推奨</span>
+              <span class="tip-chip">✓ 最大128GB対応</span>
+              <span class="tip-chip">✓ アップロード中に詳細設定可</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-num">2</div>
+          <div class="guide-content">
+            <div class="guide-title">詳細設定を入力</div>
+            <div class="guide-desc">
+              タイトル、概要欄、タグを「メタデータ」タブからコピーして貼り付ける。<br>
+              言語設定: <code>日本語</code>　字幕言語: <code>ja (自動生成)</code>
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ SEOタグ30個以内</span>
+              <span class="tip-chip">✓ 概要欄チャプター記載</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-num">3</div>
+          <div class="guide-content">
+            <div class="guide-title">サムネイル設定</div>
+            <div class="guide-desc">
+              「サムネイル」タブで生成したプロンプトで CRUSHA SUPREME から 1280×720 の画像を生成。<br>
+              YouTube Studio の「カスタムサムネイル」にアップロードする。
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ JPG 2MB以内</span>
+              <span class="tip-chip">✓ 文字は縁取り推奨</span>
+              <span class="tip-chip">✓ A/Bテストあり</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-num">4</div>
+          <div class="guide-content">
+            <div class="guide-title">公開スケジュール設定</div>
+            <div class="guide-desc">
+              「公開設定」→「スケジュール」→ 土日 <code>20:00 JST</code> を推奨。<br>
+              プレミア公開: 本番前15分で告知 → リアルタイムチャットで交流可能
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ 土日夜が最高</span>
+              <span class="tip-chip">✓ プレミア公開推奨</span>
+              <span class="tip-chip">✓ 24h前に予告ツイート</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-num">5</div>
+          <div class="guide-content">
+            <div class="guide-title">SNS 同時告知</div>
+            <div class="guide-desc">
+              YouTube 公開と同時に Twitter/X + ニコニコ + Bilibili に「SNS投稿」タブのテンプレートで投稿。<br>
+              公開 24時間以内の拡散が再生数に最も影響する。
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ 公開直後即ツイート</span>
+              <span class="tip-chip">✓ ハッシュタグ必須</span>
+              <span class="tip-chip">✓ サムネ画像添付</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-num">6</div>
+          <div class="guide-content">
+            <div class="guide-title">次回ライブの計画開始</div>
+            <div class="guide-desc">
+              公開後 48時間でアナリティクスを確認。視聴維持率が低いシーンは次回改善。<br>
+              次回ライブは <a href="CRUSHA-VIDEO-STUDIO-v1.html" style="color:var(--gold)">VIDEO STUDIO</a> から再スタート!
+            </div>
+            <div class="guide-tips">
+              <span class="tip-chip">✓ 48h後アナリティクス確認</span>
+              <span class="tip-chip">✓ コメント返信</span>
+              <span class="tip-chip">✓ 次回予告動画</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 推奨動画スペック -->
+    <div class="section">
+      <div class="section-title">📊 YouTube 推奨エンコード設定</div>
+      <div style="margin-top:16px">
+        <div class="prompt-output">
+# FFmpeg YouTube 最適化エクスポートコマンド
+
+ffmpeg -i CRUSHA_live_edit.mp4 \
+  -c:v libx264 \
+  -preset slow \
+  -crf 18 \
+  -profile:v high \
+  -level 4.2 \
+  -pix_fmt yuv420p \
+  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \
+  -r 30 \
+  -c:a aac \
+  -b:a 320k \
+  -ar 48000 \
+  -movflags +faststart \
+  CRUSHA_live_final.mp4
+
+# 4K版 (チャンネル成長後)
+# -vf "scale=3840:2160" -crf 16 -b:v 40M</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyEl('dummy-ffmpeg')" style="margin-top:8px" onclick="copyFFmpegExport()">📋 コマンドをコピー</button>
+      </div>
+    </div>
+
+    <!-- パイプライン完了 -->
+    <div class="section" style="border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.03)">
+      <div class="section-title" style="color:var(--green)">✅ CRUSHA PRODUCTION PIPELINE — COMPLETE</div>
+      <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px">
+        <a href="CRUSHA-MUSIC-STUDIO-v1.html" class="btn btn-secondary btn-sm">🎵 Music Studio</a>
+        <a href="CRUSHA-NSFW-SUPREME-v13.html" class="btn btn-secondary btn-sm">✨ CRUSHA Supreme</a>
+        <a href="CRUSHA-VOICE-STUDIO-v1.html" class="btn btn-secondary btn-sm">🎙️ Voice Studio</a>
+        <a href="CRUSHA-VIDEO-GEN-STUDIO-v1.html" class="btn btn-secondary btn-sm">🎞️ Video Gen</a>
+        <a href="CRUSHA-EDIT-STUDIO-v1.html" class="btn btn-secondary btn-sm">✂️ Edit Studio</a>
+        <a href="index.html" class="btn btn-primary btn-sm">🏠 HUBに戻る</a>
+      </div>
+    </div>
+
+  </div><!-- /tab-guide -->
+
+</main>
+</div><!-- /app -->
+
+<script>
+// ===== STORAGE =====
+const STORAGE_KEY = 'crusha_export_v1';
+let state = {
+  checks: {},
+  tags: [],
+  chapters: [],
+  meta: {},
+  ratings: { rv:75, ra:80, re:70, rt:85 }
+};
+
+function saveState() {
+  try {
+    state.meta = {
+      title: document.getElementById('metaTitle').value,
+      desc: document.getElementById('metaDesc').value,
+      category: document.getElementById('metaCategory').value,
+      privacy: document.getElementById('metaPrivacy').value,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      const parsed = JSON.parse(s);
+      Object.assign(state, parsed);
+    }
+  } catch(e) {}
+}
+
+// ===== TAB SWITCHING =====
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('btn-' + id).classList.add('active');
+  saveState();
+}
+
+// ===== CHECKLIST =====
+let checkData = {};
+
+function toggleCheck(el) {
+  const id = el.dataset.id;
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) {
+    el.querySelector('.check-box').textContent = '✓';
+    checkData[id] = true;
+  } else {
+    el.querySelector('.check-box').textContent = '';
+    checkData[id] = false;
+  }
+  updateProgress();
+  saveState();
+}
+
+function checkAll() {
+  document.querySelectorAll('.check-item').forEach(el => {
+    el.classList.add('checked');
+    el.querySelector('.check-box').textContent = '✓';
+    checkData[el.dataset.id] = true;
+  });
+  updateProgress();
+}
+
+function resetAll() {
+  document.querySelectorAll('.check-item').forEach(el => {
+    el.classList.remove('checked');
+    el.querySelector('.check-box').textContent = '';
+    checkData[el.dataset.id] = false;
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.check-item').length;
+  const done = document.querySelectorAll('.check-item.checked').length;
+  const pct = all > 0 ? Math.round(done / all * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `準備完了: ${done} / ${all}項目`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('checkCount').textContent = `${done}/${all}`;
+  document.getElementById('readyScore').textContent = pct + '%';
+}
+
+// ===== RATINGS =====
+function updateRating(el, id) {
+  document.getElementById(id).textContent = el.value;
+  state.ratings[id] = parseInt(el.value);
+  saveState();
+}
+
+// ===== CHAR COUNT =====
+function updateCharCount(el, countId, max) {
+  const len = el.value.length;
+  const el2 = document.getElementById(countId);
+  el2.textContent = `${len} / ${max}文字`;
+  el2.classList.toggle('over', len > max);
+  saveState();
+}
+
+// ===== TAGS =====
+const tags = [];
+
+function handleTagInput(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/, '');
+    if (val && !tags.includes(val)) addTag(val);
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && e.target.value === '' && tags.length > 0) {
+    removeTag(tags[tags.length - 1]);
+  }
+}
+
+function addTag(text) {
+  if (tags.length >= 30) { showToast('タグは30個まで'); return; }
+  tags.push(text);
+  renderTags();
+  saveState();
+}
+
+function removeTag(text) {
+  const idx = tags.indexOf(text);
+  if (idx > -1) tags.splice(idx, 1);
+  renderTags();
+  saveState();
+}
+
+function renderTags() {
+  const editor = document.getElementById('tagEditor');
+  const input = document.getElementById('tagInput');
+  // Clear all chips
+  editor.querySelectorAll('.tag-chip').forEach(c => c.remove());
+  tags.forEach(t => {
+    const chip = document.createElement('div');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${t}<button onclick="removeTag('${t.replace(/'/g,"\\'")}')" type="button">×</button>`;
+    editor.insertBefore(chip, input);
+  });
+  document.getElementById('tagCount').textContent = `${tags.length} タグ`;
+}
+
+function addDefaultTags() {
+  const defaults = ['CRUSHA','クルーシャ','VTuber','バーチャルライブ','AI生成','バーチャルYouTuber',
+    'バーチャルコンサート','AnimateDiff','Wan2.2','AI動画','フェレット耳','ターコイズ',
+    'VOICEVOX','SunoAI','Vライブ'];
+  defaults.forEach(t => { if (!tags.includes(t) && tags.length < 30) addTag(t); });
+}
+
+// ===== CHAPTERS =====
+const chapters = [
+  { time:'0:00', title:'Opening — 開幕' },
+  { time:'0:05', title:'1曲目「FERRET BEAT」' },
+  { time:'2:30', title:'2曲目「Neon Waltz」' },
+  { time:'5:10', title:'3曲目「Midnight Code」' },
+  { time:'7:45', title:'MCトーク' },
+  { time:'9:00', title:'4曲目「EGOIST DREAMER」' },
+  { time:'11:20', title:'5曲目「Into the Light」(アンコール)' },
+  { time:'13:50', title:'エンディング' },
+];
+
+function renderChapters() {
+  const list = document.getElementById('chapterList');
+  list.innerHTML = '';
+  chapters.forEach((ch, i) => {
+    const row = document.createElement('div');
+    row.className = 'chapter-row';
+    row.innerHTML = `
+      <input type="text" value="${ch.time}" placeholder="0:00" oninput="chapters[${i}].time=this.value">
+      <input type="text" value="${ch.title}" placeholder="チャプター名" oninput="chapters[${i}].title=this.value">
+      <button class="btn btn-danger btn-sm" onclick="removeChapter(${i})">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function addChapter() {
+  chapters.push({ time:'0:00', title:'新しいチャプター' });
+  renderChapters();
+}
+
+function removeChapter(i) {
+  chapters.splice(i, 1);
+  renderChapters();
+}
+
+function addDefaultChapters() {
+  chapters.length = 0;
+  chapters.push(
+    { time:'0:00', title:'Opening — 開幕' },
+    { time:'0:05', title:'1曲目「FERRET BEAT」' },
+    { time:'2:30', title:'2曲目「Neon Waltz」' },
+    { time:'5:10', title:'3曲目「Midnight Code」' },
+    { time:'7:45', title:'MCトーク' },
+    { time:'9:00', title:'4曲目「EGOIST DREAMER」' },
+    { time:'11:20', title:'5曲目「Into the Light」(アンコール)' },
+    { time:'13:50', title:'エンディング' }
+  );
+  renderChapters();
+}
+
+function genChapterText() {
+  const text = chapters.map(ch => `${ch.time} ${ch.title}`).join('\n');
+  document.getElementById('chapterText').textContent = text;
+  document.getElementById('chapterOutput').style.display = 'block';
+}
+
+// ===== DESCRIPTION GENERATOR =====
+function genDescription() {
+  const title = document.getElementById('metaTitle').value || 'CRUSHA 1st Virtual Live「FERRET BEAT」';
+  const chapterText = chapters.map(ch => `${ch.time} ${ch.title}`).join('\n');
+  const desc = `🎤 ${title}
+
+CRUSHAの初バーチャルライブをお届けします！
+AI生成映像・AI作曲・VOICEVOXで制作した完全AI制作ライブです。
+
+━━━━━━━━━━━━━━━━━
+⏱️ チャプター
+━━━━━━━━━━━━━━━━━
+${chapterText}
+
+━━━━━━━━━━━━━━━━━
+🎵 使用楽曲
+━━━━━━━━━━━━━━━━━
+全楽曲 Suno AI で生成 / 商用利用可
+
+━━━━━━━━━━━━━━━━━
+🎬 制作ツール
+━━━━━━━━━━━━━━━━━
+• キャラクター生成: CRUSHA SUPREME (ComfyUI + illustriousXL)
+• 動画生成: Wan2.2 / AnimateDiff-XL (ComfyUI)
+• 音声: VOICEVOX / AivisSpeech + RVC変換
+• 楽曲: Suno AI
+• 編集: CRUSHA EDIT STUDIO + FFmpeg
+• 制作支援: CRUSHA PRODUCTION SYSTEM
+
+━━━━━━━━━━━━━━━━━
+💬 フォロー・チャンネル登録よろしく！
+━━━━━━━━━━━━━━━━━
+
+#CRUSHA #VTuber #バーチャルライブ #AI生成 #AnimateDiff #Wan2.2`;
+  document.getElementById('metaDesc').value = desc;
+  updateCharCount(document.getElementById('metaDesc'), 'descCount', 5000);
+}
+
+// ===== COPY =====
+function copyEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.textContent || el.value;
+  navigator.clipboard.writeText(text).then(() => showToast('コピーしました'));
+}
+
+function copyField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(() => showToast('コピーしました'));
+}
+
+function copyFFmpegExport() {
+  const cmd = `ffmpeg -i CRUSHA_live_edit.mp4 \\
+  -c:v libx264 \\
+  -preset slow \\
+  -crf 18 \\
+  -profile:v high \\
+  -level 4.2 \\
+  -pix_fmt yuv420p \\
+  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \\
+  -r 30 \\
+  -c:a aac \\
+  -b:a 320k \\
+  -ar 48000 \\
+  -movflags +faststart \\
+  CRUSHA_live_final.mp4`;
+  navigator.clipboard.writeText(cmd).then(() => showToast('コマンドをコピーしました'));
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('copyToast');
+  toast.textContent = '✓ ' + msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function openPlatform(url) {
+  window.open(url, '_blank');
+}
+
+// ===== THUMBNAIL =====
+const BG_STYLES = [
+  'linear-gradient(135deg, #0a0a2a, #1a0a1a)',
+  'linear-gradient(135deg, #1a1000, #2a2000)',
+  'linear-gradient(135deg, #100028, #200040)',
+  'linear-gradient(135deg, #002010, #004020)',
+  'linear-gradient(135deg, #280028, #200040)',
+];
+
+function updateThumbPreview() {
+  document.getElementById('thumbMainText').textContent = document.getElementById('thumbMain').value;
+  document.getElementById('thumbSubText').textContent = document.getElementById('thumbSub').value;
+}
+
+function updateThumbBg() {
+  const idx = parseInt(document.getElementById('thumbBg').value);
+  document.getElementById('thumbPreview').style.background = BG_STYLES[idx];
+}
+
+function updateThumbCorner() {
+  document.querySelector('.thumb-corner').textContent = document.getElementById('thumbCorner').value;
+}
+
+function genThumbPrompt() {
+  const sceneMap = {
+    stage_center: 'standing on center stage, dramatic spotlight from above, arms spread wide, concert pose',
+    close_face: 'extreme close-up face portrait, emotive expression, tears of joy, sparkles in eyes',
+    dynamic_jump: 'jumping mid-air, dynamic action pose, hair flowing, motion blur, energy burst',
+    silhouette: 'silhouette against bright backlight, concert stage, dramatic backlighting, atmospheric fog',
+    crowd_bg: 'crowd cheering in background, overhead shot, sea of glowsticks, festival atmosphere',
+    sitting_solo: 'sitting gracefully, looking at viewer, intimate solo portrait, bokeh background',
+  };
+  const lightMap = {
+    neon: 'neon pink and cyan stage lighting, RGB light beams, laser shows',
+    spotlight: 'dramatic white spotlight, pool of light on dark stage',
+    gold: 'warm golden hour lighting, soft glowing aura',
+    sunset: 'sunset gradient sky, orange and pink atmospheric light',
+    fireworks: 'colorful fireworks exploding in background, celebration atmosphere',
+  };
+  const costumeMap = {
+    idol_white: 'white idol costume, frilly dress, ribbons and bows, cute performance outfit',
+    rock_black: 'black leather jacket, ripped jeans, rock concert outfit, edgy fashion',
+    kawaii_pink: 'pink fluffy kawaii outfit, strawberry accessories, harajuku style',
+    cyber_blue: 'futuristic blue cyber outfit, holographic fabric, techno fashion',
+    princess_gold: 'golden princess gown, tiara, elegant royal performance dress',
+  };
+  const effectMap = {
+    sparkle: 'magical sparkles floating, glitter particles, twinkling stars',
+    fire: 'fire and flame effects, pyrotechnics, orange glow',
+    music_notes: 'musical notes floating, treble clef, sheet music aesthetic',
+    light_beams: 'light beams shooting outward, laser show, concert lighting array',
+    cherry_blossom: 'cherry blossom petals falling, sakura festival atmosphere',
+  };
+
+  const scene = sceneMap[document.getElementById('thumbScene').value];
+  const light = lightMap[document.getElementById('thumbLight').value];
+  const costume = costumeMap[document.getElementById('thumbCostume').value];
+  const effect = effectMap[document.getElementById('thumbEffect').value];
+  const mainText = document.getElementById('thumbMain').value || 'FERRET BEAT';
+
+  const prompt = `(ferret ears:1.5), crusha_v1, 1girl, pale pastel turquoise green long straight hair, side-swept bangs, black ribbon hair accessory, turquoise irises, large expressive eyes, long eyelashes, shojo manga eyes, 173cm tall, ${costume}, ${scene}, ${light}, ${effect}, concert stage, professional photography, ultra detailed, masterpiece, best quality, 8k, cinematic composition, rule of thirds, vibrant colors, high contrast`;
+
+  document.getElementById('thumbPromptPos').textContent = prompt;
+}
+
+function genThumbPromptAlt() {
+  const scenes = ['stage_center','close_face','dynamic_jump','silhouette','crowd_bg'];
+  const randScene = scenes[Math.floor(Math.random() * scenes.length)];
+  document.getElementById('thumbScene').value = randScene;
+  genThumbPrompt();
+  showToast('バリエーションを生成しました');
+}
+
+// ===== SNS POSTS =====
+function switchPlatform(id) {
+  document.querySelectorAll('.platform-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pp-' + id).classList.add('active');
+  document.getElementById('ptab-' + id).classList.add('active');
+}
+
+function genAllPosts() {
+  const title = document.getElementById('snsTitle').value;
+  const url = document.getElementById('snsUrl').value;
+  const date = document.getElementById('snsDate').value;
+  const hashtags = document.getElementById('snsHashtags').value;
+
+  // YouTube Community
+  document.getElementById('post-yt').textContent =
+`📣 公開のお知らせ！
+
+「${title}」が公開されました！🎉
+
+AIで全部作ったバーチャルライブ、ぜひ観てみてください！
+フェレット耳のCRUSHAが歌って踊ります🐾✨
+
+▶️ ${url}
+
+${hashtags}`;
+
+  // Twitter/X
+  const twText =
+`🎤【公開！】「${title}」
+AI生成バーチャルライブ🐾✨
+${url}
+${hashtags}`;
+  document.getElementById('post-tw').textContent = twText;
+  document.getElementById('tw-count').textContent = `${twText.length} / 280文字`;
+
+  // Thread
+  document.getElementById('post-tw2').textContent =
+`【1/4】🎉「${title}」公開！
+CRUSHAの初バーチャルライブです！全部AIで作りました🤖✨
+${url}
+
+【2/4】🎬 制作ツール
+・キャラ: ComfyUI + illustriousXL
+・動画: Wan2.2 / AnimateDiff
+・音声: VOICEVOX + RVC
+・楽曲: Suno AI
+
+【3/4】📌 全部1人で作れるんです
+CRUSHA PRODUCTION SYSTEMというツールセットを使えば、
+企画→制作→配信まで全工程をAIで完結できます！
+
+【4/4】次回ライブもお楽しみに！
+チャンネル登録で最新情報をゲット🔔
+${hashtags}`;
+
+  // Bilibili
+  document.getElementById('post-bili').textContent =
+`【标题】「${title}」AI生成虚拟演唱会🐾
+
+【简介】
+使用AI全程制作的虚拟演唱会！
+・角色生成: ComfyUI + Wan2.2
+・声音: VOICEVOX
+・音乐: Suno AI
+
+YouTube原版: ${url}
+
+${hashtags.replace(/#/g,'#')} #AI生成 #虚拟演唱会 #VTuber`;
+
+  // NicoNico
+  document.getElementById('post-nico').textContent =
+`【タイトル】${title}【AI生成バーチャルライブ】
+
+【説明文】
+AIで作ったバーチャルライブです！
+フェレット耳のVTuber「CRUSHA」が5曲フルライブ！
+
+使用ツール:
+・ComfyUI / Wan2.2 / AnimateDiff
+・VOICEVOX / AivisSpeech
+・Suno AI
+
+【タグ】
+CRUSHA VTuber バーチャルライブ AI生成 AnimateDiff Wan2.2 VOICEVOX SunoAI バーチャルコンサート`;
+
+  // note
+  document.getElementById('post-note').textContent =
+`# 「${title}」公開レポート
+
+## はじめに
+
+先日公開した「${title}」について、制作の裏話をお届けします。
+
+## 制作期間と使用ツール
+
+今回は CRUSHA PRODUCTION SYSTEM という自作ツールセットを使い、
+企画から配信まで全工程をAIで行いました。
+
+### 使用した主なツール
+
+- **CRUSHA MUSIC STUDIO** — Suno AI で5曲生成
+- **CRUSHA SUPREME** — キャラクタープロンプト生成
+- **CRUSHA VOICE STUDIO** — VOICEVOX MCスクリプト
+- **CRUSHA VIDEO GEN** — Wan2.2 / AnimateDiff ワークフロー
+- **CRUSHA EDIT STUDIO** — FFmpeg タイムライン編集
+- **CRUSHA EXPORT STUDIO** — 配信設定・SNS投稿
+
+## 動画リンク
+
+${url}
+
+## まとめ
+
+AIを組み合わせれば1人でもバーチャルライブが作れる時代になりました。
+次回はさらに品質を上げていきます！応援よろしくお願いします🐾
+
+${hashtags}`;
+
+  showToast('全プラットフォーム投稿文を生成しました');
+}
+
+// ===== INIT =====
+function init() {
+  loadState();
+  updateProgress();
+  renderChapters();
+
+  // 保存されたメタデータを復元
+  if (state.meta) {
+    if (state.meta.title) document.getElementById('metaTitle').value = state.meta.title;
+    if (state.meta.desc) document.getElementById('metaDesc').value = state.meta.desc;
+    if (state.meta.category) document.getElementById('metaCategory').value = state.meta.category;
+    if (state.meta.privacy) document.getElementById('metaPrivacy').value = state.meta.privacy;
+  }
+
+  // デフォルトタグ
+  if (tags.length === 0) addDefaultTags();
+
+  // 自動保存
+  setInterval(saveState, 10000);
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUSHA VIDEO STUDIO v1</title>
+<style>
+  :root {
+    --bg: #080c14;
+    --bg2: #0d1220;
+    --bg3: #111827;
+    --bg4: #1a2235;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #ec4899;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --border: rgba(0,229,255,0.15);
+    --glow: 0 0 20px rgba(0,229,255,0.3);
+    --glow2: 0 0 20px rgba(124,58,237,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== ヘッダー ===== */
+  .header {
+    background: linear-gradient(135deg, #080c14 0%, #1a0a2e 50%, #080c14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: var(--glow);
+  }
+  .logo-text h1 {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .logo-text span { font-size: 11px; color: var(--text2); letter-spacing: 1px; }
+  .header-right { display: flex; gap: 10px; align-items: center; }
+  .project-badge {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .project-badge:hover { border-color: var(--accent); color: var(--accent); }
+  .save-btn {
+    background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    border: none; border-radius: 8px;
+    padding: 7px 16px; font-size: 13px;
+    color: #fff; cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .save-btn:hover { transform: translateY(-1px); box-shadow: var(--glow2); }
+
+  /* ===== ナビゲーション ===== */
+  .nav {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    padding: 14px 20px;
+    background: none; border: none;
+    color: var(--text2); cursor: pointer;
+    font-size: 13px; font-weight: 600;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 7px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { color: var(--text); background: var(--bg3); }
+  .nav-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--bg3);
+  }
+  .stage-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .nav-btn.active .stage-num {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* ===== メインレイアウト ===== */
+  .main { display: flex; height: calc(100vh - 107px); }
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .content {
+    flex: 1; overflow-y: auto;
+    padding: 20px;
+    background: var(--bg);
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  /* ===== セクション ===== */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section-title {
+    font-size: 22px; font-weight: 800;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .section-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+  /* ===== カード ===== */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--accent); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .icon { font-size: 16px; }
+
+  /* ===== フォーム要素 ===== */
+  label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 600; }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,229,255,0.1);
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ===== スライダー ===== */
+  .slider-group { margin-bottom: 12px; }
+  .slider-label { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .slider-label span:first-child { font-size: 12px; color: var(--text2); font-weight: 600; }
+  .slider-label span:last-child { font-size: 12px; color: var(--accent); font-weight: 700; }
+  input[type="range"] {
+    width: 100%; height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0,229,255,0.5);
+  }
+
+  /* ===== ボタン ===== */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #0080ff); color: var(--bg); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--glow); }
+  .btn-purple { background: linear-gradient(135deg, var(--accent2), var(--accent3)); color: #fff; }
+  .btn-purple:hover { transform: translateY(-1px); box-shadow: var(--glow2); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-green { background: linear-gradient(135deg, var(--green), #059669); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ===== タグ選択 ===== */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+  .tag {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 12px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tag:hover { border-color: var(--accent); color: var(--accent); }
+  .tag.selected {
+    background: rgba(0,229,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tag.selected-purple {
+    background: rgba(124,58,237,0.15);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* ===== 出力エリア ===== */
+  .output-area {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 60px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    font-family: 'Consolas', monospace;
+    margin-top: 8px;
+  }
+  .output-label {
+    font-size: 11px; color: var(--text2);
+    margin-bottom: 5px; font-weight: 600;
+    letter-spacing: 0.5px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .copy-btn {
+    background: var(--bg4); border: 1px solid var(--border);
+    color: var(--text2); border-radius: 5px;
+    padding: 3px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ===== ダッシュボード ===== */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.c1::before { background: linear-gradient(90deg, var(--accent), #0080ff); }
+  .stat-card.c2::before { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+  .stat-card.c3::before { background: linear-gradient(90deg, var(--gold), #f97316); }
+  .stat-card.c4::before { background: linear-gradient(90deg, var(--green), #059669); }
+  .stat-card.c5::before { background: linear-gradient(90deg, var(--accent3), #be185d); }
+  .stat-card.c6::before { background: linear-gradient(90deg, #6366f1, var(--accent2)); }
+  .stat-icon { font-size: 28px; margin-bottom: 8px; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--text); }
+  .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* ===== パイプラインフロー ===== */
+  .pipeline {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .pipe-step {
+    flex: 1; min-width: 120px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 14px 10px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pipe-step:first-child { border-radius: 10px 0 0 10px; }
+  .pipe-step:last-child { border-radius: 0 10px 10px 0; }
+  .pipe-step:not(:last-child)::after {
+    content: '▶';
+    position: absolute;
+    right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--border);
+    font-size: 14px;
+    z-index: 1;
+  }
+  .pipe-step:hover { background: var(--bg3); border-color: var(--accent); }
+  .pipe-step.done { border-color: var(--green); }
+  .pipe-step.done .pipe-icon { color: var(--green); }
+  .pipe-icon { font-size: 22px; margin-bottom: 6px; }
+  .pipe-name { font-size: 11px; color: var(--text2); font-weight: 600; }
+  .pipe-status {
+    font-size: 10px; margin-top: 4px;
+    color: var(--text2);
+  }
+  .pipe-status.done { color: var(--green); }
+
+  /* ===== サイドバー部品 ===== */
+  .sb-section { margin-bottom: 20px; }
+  .sb-title { font-size: 11px; color: var(--text2); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+  .sb-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sb-item:hover { border-color: var(--accent); }
+  .sb-item-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .sb-item-sub { font-size: 11px; color: var(--text2); }
+  .progress-bar {
+    height: 4px; background: var(--bg4);
+    border-radius: 2px; margin-top: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+
+  /* ===== シーンカード ===== */
+  .scene-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .scene-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .scene-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .scene-thumb {
+    height: 120px;
+    background: linear-gradient(135deg, var(--bg3), var(--bg4));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scene-body { padding: 12px; }
+  .scene-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .scene-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .scene-footer {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .scene-time { font-size: 11px; color: var(--gold); font-weight: 600; }
+
+  /* ===== タイムライン ===== */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+    border-radius: 1px;
+  }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot {
+    position: absolute;
+    left: -20px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 8px rgba(0,229,255,0.5);
+  }
+  .tl-time { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .tl-desc { font-size: 12px; color: var(--text2); }
+
+  /* ===== チャンクテーブル ===== */
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    text-align: left; padding: 10px 12px;
+    font-size: 11px; color: var(--text2);
+    font-weight: 700; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .table tr:hover td { background: rgba(0,229,255,0.03); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-blue { background: rgba(0,229,255,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(124,58,237,0.15); color: var(--accent2); }
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-gold { background: rgba(245,158,11,0.15); color: var(--gold); }
+
+  /* ===== チェックリスト ===== */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 18px; height: 18px; min-width: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+  .check-box.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .check-box.checked::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+
+  /* ===== ツール比較テーブル ===== */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .tool-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .tool-card:hover { border-color: var(--accent); }
+  .tool-card.recommended { border-color: var(--green); }
+  .tool-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .tool-tag {
+    font-size: 11px; color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .tool-pros { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .tool-link {
+    font-size: 11px; color: var(--accent);
+    margin-top: 8px; display: block;
+    text-decoration: none;
+  }
+  .tool-link:hover { text-decoration: underline; }
+  .rec-badge {
+    font-size: 10px; background: var(--green);
+    color: #fff; padding: 2px 6px;
+    border-radius: 4px; margin-left: 6px;
+    font-weight: 700;
+  }
+
+  /* ===== コピー通知 ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    background: var(--green);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ===== スクロールバー ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .main { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; min-width: auto; border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+    .form-row, .form-row3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🎬</div>
+    <div class="logo-text">
+      <h1>CRUSHA VIDEO STUDIO</h1>
+      <span>AI VIRTUAL LIVE CONCERT PRODUCTION SYSTEM v1.0</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="project-badge" onclick="loadProject()">📁 プロジェクト: <strong id="projName">New Project</strong></div>
+    <button class="save-btn" onclick="saveAll()">💾 全保存</button>
+  </div>
+</div>
+
+<!-- ナビ -->
+<div class="nav">
+  <button class="nav-btn active" onclick="switchPanel('dash', this)"><span class="stage-num">🏠</span>ダッシュボード</button>
+  <button class="nav-btn" onclick="switchPanel('char', this)"><span class="stage-num">1</span>キャラクター</button>
+  <button class="nav-btn" onclick="switchPanel('voice', this)"><span class="stage-num">2</span>音声・MC</button>
+  <button class="nav-btn" onclick="switchPanel('music', this)"><span class="stage-num">3</span>音楽生成</button>
+  <button class="nav-btn" onclick="switchPanel('video', this)"><span class="stage-num">4</span>映像生成</button>
+  <button class="nav-btn" onclick="switchPanel('edit', this)"><span class="stage-num">5</span>編集・合成</button>
+  <button class="nav-btn" onclick="switchPanel('tools', this)"><span class="stage-num">⚡</span>ツール解説</button>
+</div>
+
+<!-- メイン -->
+<div class="main">
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-title">プロジェクト状態</div>
+      <div class="sb-item">
+        <div class="sb-item-title">🎨 キャラクター</div>
+        <div class="sb-item-sub">プロンプト設定済み</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:80%;background:linear-gradient(90deg,var(--accent),#0080ff)"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-item-title">🎙️ 音声・MC</div>
+        <div class="sb-item-sub">スクリプト未作成</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:10%;background:linear-gradient(90deg,var(--accent2),var(--accent3))"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-item-title">🎵 音楽</div>
+        <div class="sb-item-sub">プロンプト設定中</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:40%;background:linear-gradient(90deg,var(--gold),#f97316)"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-item-title">🎬 映像</div>
+        <div class="sb-item-sub">シーン設計中</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:30%;background:linear-gradient(90deg,var(--green),#059669)"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-item-title">✂️ 編集</div>
+        <div class="sb-item-sub">未着手</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:linear-gradient(90deg,var(--accent3),#be185d)"></div></div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">クイックアクション</div>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="switchPanel('char',document.querySelectorAll('.nav-btn')[1])">
+        → キャラ設定を開く
+      </button>
+      <button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="switchPanel('video',document.querySelectorAll('.nav-btn')[4])">
+        → 映像設計を開く
+      </button>
+      <button class="btn btn-outline" style="width:100%" onclick="exportAll()">
+        📤 設定エクスポート
+      </button>
+    </div>
+  </div>
+
+  <!-- コンテンツ -->
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="panel active" id="panel-dash">
+      <div class="section-title">🎬 PRODUCTION DASHBOARD</div>
+      <div class="section-sub">AIrisスタイルのバーチャルライブコンサート動画制作 — 全6ステージ統合管理システム</div>
+
+      <!-- 統計 -->
+      <div class="dashboard-grid">
+        <div class="stat-card c1">
+          <div class="stat-icon">🎨</div>
+          <div class="stat-num">1</div>
+          <div class="stat-label">キャラクター設定済み</div>
+        </div>
+        <div class="stat-card c2">
+          <div class="stat-icon">🎙️</div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">MC スクリプト</div>
+        </div>
+        <div class="stat-card c3">
+          <div class="stat-icon">🎵</div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">楽曲生成済み</div>
+        </div>
+        <div class="stat-card c4">
+          <div class="stat-icon">🎬</div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">映像シーン完成</div>
+        </div>
+        <div class="stat-card c5">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-num">0:00</div>
+          <div class="stat-label">総尺</div>
+        </div>
+        <div class="stat-card c6">
+          <div class="stat-icon">📊</div>
+          <div class="stat-num">15%</div>
+          <div class="stat-label">全体進捗</div>
+        </div>
+      </div>
+
+      <!-- パイプライン -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔄</span>制作パイプライン</div>
+        <div class="pipeline">
+          <div class="pipe-step" onclick="switchPanel('char',document.querySelectorAll('.nav-btn')[1])">
+            <div class="pipe-icon">🎨</div>
+            <div class="pipe-name">STAGE 1<br>キャラクター</div>
+            <div class="pipe-status">設定中</div>
+          </div>
+          <div class="pipe-step" onclick="switchPanel('voice',document.querySelectorAll('.nav-btn')[2])">
+            <div class="pipe-icon">🎙️</div>
+            <div class="pipe-name">STAGE 2<br>音声・MC</div>
+            <div class="pipe-status">未着手</div>
+          </div>
+          <div class="pipe-step" onclick="switchPanel('music',document.querySelectorAll('.nav-btn')[3])">
+            <div class="pipe-icon">🎵</div>
+            <div class="pipe-name">STAGE 3<br>音楽生成</div>
+            <div class="pipe-status">設定中</div>
+          </div>
+          <div class="pipe-step" onclick="switchPanel('video',document.querySelectorAll('.nav-btn')[4])">
+            <div class="pipe-icon">🎬</div>
+            <div class="pipe-name">STAGE 4<br>映像生成</div>
+            <div class="pipe-status">設計中</div>
+          </div>
+          <div class="pipe-step" onclick="switchPanel('edit',document.querySelectorAll('.nav-btn')[5])">
+            <div class="pipe-icon">✂️</div>
+            <div class="pipe-name">STAGE 5<br>編集・合成</div>
+            <div class="pipe-status">未着手</div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-icon">📤</div>
+            <div class="pipe-name">STAGE 6<br>エクスポート</div>
+            <div class="pipe-status">未着手</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AIrisから学ぶ構成 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📌</span>AIris First Live 2026 — 参照構成分析</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">00:00 — 00:25</div>
+            <div class="tl-title">0. Intro</div>
+            <div class="tl-desc">暗転からキャラクター登場。環境光・ステージセット。ビジュアル重視。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">00:25 — 04:16</div>
+            <div class="tl-title">1. NO QUIT（新曲）</div>
+            <div class="tl-desc">テンポ感の高いアニソンロック。カメラワーク多め。エネルギッシュな照明。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">04:16 — 07:41</div>
+            <div class="tl-title">2. NOVA（新曲）</div>
+            <div class="tl-desc">宇宙・星空テーマ。クールダウン→盛り上がり。映像エフェクト強め。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">07:41 — 11:58</div>
+            <div class="tl-title">3. MC + Feelin' It</div>
+            <div class="tl-desc">MCトーク（視聴者との会話風）→曲へ繋げる。温かい雰囲気。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">11:58 — 23:32</div>
+            <div class="tl-title">4-6. リマスター曲 ×3</div>
+            <div class="tl-desc">既存楽曲をライブアレンジで披露。舞台演出切り替え。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">23:32 — 27:29</div>
+            <div class="tl-title">7. MC + Refrain</div>
+            <div class="tl-desc">感謝MCから締めの曲へ。感動的な演出。</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-time">27:29 —</div>
+            <div class="tl-title">予告 ACT2</div>
+            <div class="tl-desc">次回予告で継続視聴を促す。シリーズ化戦略。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 制作チェックリスト -->
+      <div class="card">
+        <div class="card-title"><span class="icon">✅</span>制作チェックリスト</div>
+        <ul class="checklist" id="checklist">
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>キャラクタービジュアル確定（衣装・表情・ポーズ）</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>オープニング曲の生成（Suno/Udio）</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>MCスクリプト作成（VOICEVOX用）</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>映像シーン設計（コンテ作成）</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>Wan2.2でステージ映像生成</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>キャラクターアニメーション合成</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>BGM・SE・ボイスのミックス</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>字幕・チャプターマーカー追加</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>最終エンコード（1080p/4K）</span></li>
+          <li><div class="check-box" onclick="toggleCheck(this)"></div><span>YouTube サムネイル・説明文作成</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 1: キャラクター ===== -->
+    <div class="panel" id="panel-char">
+      <div class="section-title">🎨 STAGE 1 — キャラクタービジュアル生成</div>
+      <div class="section-sub">ComfyUI向けプロンプトビルダー。ライブコンサート衣装・表情・ポーズを設計する。</div>
+
+      <div class="form-row">
+        <!-- 左カラム -->
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">👘</span>衣装設定</div>
+            <label>ステージ衣装コンセプト</label>
+            <div class="tag-grid" id="outfit-tags">
+              <span class="tag" onclick="toggleTag(this,'outfit')">white idol dress</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">black concert outfit</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">cyber bodysuit</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">maid concert outfit</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">gothic lolita</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">futuristic armor</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">school uniform</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">kimono fusion</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">neon accent outfit</span>
+              <span class="tag" onclick="toggleTag(this,'outfit')">casual streetwear</span>
+            </div>
+            <label>衣装カスタム</label>
+            <input type="text" id="outfit-custom" placeholder="例: glowing white dress with cyan trim, holographic fabric">
+
+            <label>ステージ小物</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'prop')">microphone</span>
+              <span class="tag" onclick="toggleTag(this,'prop')">wireless mic stand</span>
+              <span class="tag" onclick="toggleTag(this,'prop')">light wand</span>
+              <span class="tag" onclick="toggleTag(this,'prop')">headset mic</span>
+              <span class="tag" onclick="toggleTag(this,'prop')">guitar</span>
+              <span class="tag" onclick="toggleTag(this,'prop')">glowstick</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">😊</span>表情設定</div>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'face')">happy smile</span>
+              <span class="tag" onclick="toggleTag(this,'face')">passionate expression</span>
+              <span class="tag" onclick="toggleTag(this,'face')">cool gaze</span>
+              <span class="tag" onclick="toggleTag(this,'face')">excited open mouth</span>
+              <span class="tag" onclick="toggleTag(this,'face')">gentle smile</span>
+              <span class="tag" onclick="toggleTag(this,'face')">intense focus</span>
+              <span class="tag" onclick="toggleTag(this,'face')">singing expression</span>
+              <span class="tag" onclick="toggleTag(this,'face')">winking</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右カラム -->
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">🕺</span>ポーズ・アングル</div>
+            <label>ポーズ</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'pose')">singing on stage</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">arms raised up</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">dynamic dance pose</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">pointing at camera</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">microphone held up</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">jumping pose</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">spinning pose</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">hand reaching out</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">kneeling pose</span>
+              <span class="tag" onclick="toggleTag(this,'pose')">standing tall</span>
+            </div>
+            <label>カメラアングル</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'camera')">front view</span>
+              <span class="tag" onclick="toggleTag(this,'camera')">low angle shot</span>
+              <span class="tag" onclick="toggleTag(this,'camera')">close-up face</span>
+              <span class="tag" onclick="toggleTag(this,'camera')">full body shot</span>
+              <span class="tag" onclick="toggleTag(this,'camera')">side profile</span>
+              <span class="tag" onclick="toggleTag(this,'camera')">3/4 view</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">🌟</span>ライティング・背景</div>
+            <label>ステージライト</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'light')">concert spotlights</span>
+              <span class="tag" onclick="toggleTag(this,'light')">neon stage lights</span>
+              <span class="tag" onclick="toggleTag(this,'light')">laser beams</span>
+              <span class="tag" onclick="toggleTag(this,'light')">colorful led lighting</span>
+              <span class="tag" onclick="toggleTag(this,'light')">backlit silhouette</span>
+              <span class="tag" onclick="toggleTag(this,'light')">holographic effects</span>
+              <span class="tag" onclick="toggleTag(this,'light')">particle effects</span>
+            </div>
+            <label>背景ステージ</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'bg')">concert hall stage</span>
+              <span class="tag" onclick="toggleTag(this,'bg')">galaxy sky</span>
+              <span class="tag" onclick="toggleTag(this,'bg')">cyberpunk city</span>
+              <span class="tag" onclick="toggleTag(this,'bg')">floating platforms</span>
+              <span class="tag" onclick="toggleTag(this,'bg')">digital world</span>
+              <span class="tag" onclick="toggleTag(this,'bg')">anime stylized</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 生成ボタン -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⚡</span>プロンプト生成</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generateCharPrompt()">🎨 ポジティブ生成</button>
+          <button class="btn btn-outline" onclick="copyPrompt('char-pos')">📋 コピー</button>
+          <button class="btn btn-outline btn-sm" onclick="clearChar()">🗑️ クリア</button>
+        </div>
+        <div class="output-label" style="margin-top:14px">
+          POSITIVE PROMPT
+          <button class="copy-btn" onclick="copyPrompt('char-pos')">Copy</button>
+        </div>
+        <div class="output-area" id="char-pos">プロンプトを生成してください...</div>
+
+        <div class="output-label" style="margin-top:12px">
+          NEGATIVE PROMPT
+          <button class="copy-btn" onclick="copyPrompt('char-neg')">Copy</button>
+        </div>
+        <div class="output-area" id="char-neg" style="color:var(--red)">
+(human ears:1.5), (cat ears:1.5), (dog ears:1.5), (fox ears:1.5), (turquoise ears:1.3), (colored ears:1.3), (low positioned ears:1.2), extra ears, multiple ears, wrong ear color, ear on side of head, gal style, gyaru, heavy makeup, low quality, bad anatomy, blurry, watermark, text, signature, extra limbs, deformed, mutated, nsfw, nude</div>
+
+        <div class="form-row3" style="margin-top:14px">
+          <div>
+            <label>解像度</label>
+            <select id="char-res">
+              <option value="832x1216">832×1216 (Portrait)</option>
+              <option value="1024x1024">1024×1024 (Square)</option>
+              <option value="1216x832">1216×832 (Landscape)</option>
+              <option value="768x1280">768×1280 (Tall)</option>
+            </select>
+          </div>
+          <div>
+            <div class="slider-group">
+              <div class="slider-label"><span>CFG Scale</span><span id="cfg-val">7.0</span></div>
+              <input type="range" min="4" max="12" step="0.5" value="7" oninput="document.getElementById('cfg-val').textContent=parseFloat(this.value).toFixed(1)">
+            </div>
+          </div>
+          <div>
+            <div class="slider-group">
+              <div class="slider-label"><span>Steps</span><span id="steps-val">25</span></div>
+              <input type="range" min="10" max="50" step="1" value="25" oninput="document.getElementById('steps-val').textContent=this.value">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 2: 音声・MC ===== -->
+    <div class="panel" id="panel-voice">
+      <div class="section-title">🎙️ STAGE 2 — 音声・MCスクリプト</div>
+      <div class="section-sub">ライブMCのスクリプトを作成し、音声合成ツールへのプロンプトを生成する。</div>
+
+      <div class="form-row">
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">📝</span>MCスクリプトエディタ</div>
+            <label>シーン</label>
+            <select id="mc-scene">
+              <option>オープニング挨拶</option>
+              <option>曲間MC①（1曲目後）</option>
+              <option>曲間MC②（中盤）</option>
+              <option>クライマックス前MC</option>
+              <option>エンディング挨拶</option>
+              <option>次回予告</option>
+            </select>
+            <label>雰囲気・トーン</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'tone')">元気・エネルギッシュ</span>
+              <span class="tag" onclick="toggleTag(this,'tone')">感謝・感動</span>
+              <span class="tag" onclick="toggleTag(this,'tone')">クール・ミステリアス</span>
+              <span class="tag" onclick="toggleTag(this,'tone')">カジュアル・親しみやすい</span>
+              <span class="tag" onclick="toggleTag(this,'tone')">詩的・文学的</span>
+            </div>
+            <label>スクリプト（日本語）</label>
+            <textarea id="mc-script" style="min-height:140px" placeholder="例:
+みんな、来てくれてありがとう！
+今日は最高の夜にしようね。
+準備できてる？それじゃあ行くよ——！"></textarea>
+            <label>英語スクリプト（オプション）</label>
+            <textarea id="mc-script-en" style="min-height:80px" placeholder="English version (optional)..."></textarea>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="generateMCScript()">✨ AI生成</button>
+              <button class="btn btn-outline" onclick="copyPrompt('mc-voicevox')">📋 VOICEVOX用コピー</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">🔧</span>音声合成設定</div>
+            <label>使用ツール</label>
+            <select id="voice-tool">
+              <option>VOICEVOX（無料・高品質）</option>
+              <option>Style-BERT-VITS2（感情豊か）</option>
+              <option>RVC（ボイスクローン）</option>
+              <option>Eleven Labs（英語対応）</option>
+              <option>COEIROINK</option>
+            </select>
+            <label>キャラクター声質</label>
+            <select id="voice-char">
+              <option>四国めたん（ノーマル）</option>
+              <option>ずんだもん（ノーマル）</option>
+              <option>春日部つむぎ</option>
+              <option>雨晴はう</option>
+              <option>波音リツ</option>
+              <option>WhiteCUL</option>
+              <option>カスタム（RVC使用）</option>
+            </select>
+            <div class="slider-group">
+              <div class="slider-label"><span>話す速さ</span><span id="speed-val">1.0</span></div>
+              <input type="range" min="0.5" max="2.0" step="0.05" value="1.0" oninput="document.getElementById('speed-val').textContent=parseFloat(this.value).toFixed(2)">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>ピッチ</span><span id="pitch-val">0</span></div>
+              <input type="range" min="-20" max="20" step="1" value="0" oninput="document.getElementById('pitch-val').textContent=this.value">
+            </div>
+            <div class="slider-group">
+              <div class="slider-label"><span>イントネーション強度</span><span id="intonation-val">1.0</span></div>
+              <input type="range" min="0" max="2" step="0.1" value="1.0" oninput="document.getElementById('intonation-val').textContent=parseFloat(this.value).toFixed(1)">
+            </div>
+            <label>VOICEVOX設定出力</label>
+            <div class="output-area" id="mc-voicevox" style="min-height:80px">スクリプトを入力後、設定が表示されます</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>セリフ一覧</div>
+            <div id="mc-list">
+              <table class="table">
+                <thead><tr><th>シーン</th><th>時間</th><th>状態</th></tr></thead>
+                <tbody>
+                  <tr><td>オープニング</td><td>〜00:25</td><td><span class="badge badge-red">未作成</span></td></tr>
+                  <tr><td>MC①</td><td>07:41〜</td><td><span class="badge badge-red">未作成</span></td></tr>
+                  <tr><td>MC②</td><td>23:32〜</td><td><span class="badge badge-red">未作成</span></td></tr>
+                  <tr><td>エンディング</td><td>〜27:29</td><td><span class="badge badge-red">未作成</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 3: 音楽生成 ===== -->
+    <div class="panel" id="panel-music">
+      <div class="section-title">🎵 STAGE 3 — 音楽生成</div>
+      <div class="section-sub">Suno / Udio向けの楽曲プロンプトを設計する。AIrisスタイルのAnime J-Popを生成。</div>
+
+      <div class="form-row">
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">🎸</span>楽曲設定</div>
+            <label>楽曲タイトル</label>
+            <input type="text" id="song-title" placeholder="例: NO QUIT / NOVA / Feelin' It">
+            <label>ジャンル</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'genre')">Anime Pop</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Anime Rock</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">J-Pop</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Electronic</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Synthpop</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Cinematic</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Ballad</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">EDM</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Lo-fi</span>
+              <span class="tag" onclick="toggleTag(this,'genre')">Orchestral</span>
+            </div>
+            <label>雰囲気・感情</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'mood')">energetic</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">emotional</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">uplifting</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">melancholic</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">dreamy</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">intense</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">epic</span>
+              <span class="tag" onclick="toggleTag(this,'mood')">cute</span>
+            </div>
+            <label>ボーカルスタイル</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'vocal')">female vocalist</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">clear voice</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">breathy</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">powerful</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">anime style</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">harmonies</span>
+              <span class="tag" onclick="toggleTag(this,'vocal')">falsetto</span>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>BPM</label>
+                <input type="number" id="song-bpm" value="140" min="60" max="220">
+              </div>
+              <div>
+                <label>キー</label>
+                <select id="song-key">
+                  <option>C Major</option><option>A Minor</option>
+                  <option>D Major</option><option>B Minor</option>
+                  <option>G Major</option><option>E Minor</option>
+                  <option>F Major</option><option>D Minor</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">📝</span>歌詞設計</div>
+            <label>歌詞テーマ</label>
+            <input type="text" id="lyric-theme" placeholder="例: 諦めない心 / 夜明けを目指して / 君への想い">
+            <label>サビ（キーフレーズ）</label>
+            <textarea id="lyric-chorus" placeholder="例:
+もう諦めない、前を向いて走る
+この声が届くまで叫び続ける
+NO QUIT, NO QUIT, 光を掴め
+一緒に進もう、この夜を越えて"></textarea>
+            <label>曲構成</label>
+            <div class="tag-grid">
+              <span class="tag selected" onclick="toggleTag(this,'struct')">Intro</span>
+              <span class="tag selected" onclick="toggleTag(this,'struct')">Verse</span>
+              <span class="tag selected" onclick="toggleTag(this,'struct')">Pre-Chorus</span>
+              <span class="tag selected" onclick="toggleTag(this,'struct')">Chorus</span>
+              <span class="tag" onclick="toggleTag(this,'struct')">Bridge</span>
+              <span class="tag selected" onclick="toggleTag(this,'struct')">Outro</span>
+              <span class="tag" onclick="toggleTag(this,'struct')">Rap Section</span>
+              <span class="tag" onclick="toggleTag(this,'struct')">Instrumental Break</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="generateMusicPrompt()">🎵 Sunoプロンプト生成</button>
+              <button class="btn btn-outline" onclick="generateMusicPrompt('udio')">🎵 Udioプロンプト生成</button>
+            </div>
+          </div>
+
+          <!-- セットリスト -->
+          <div class="card">
+            <div class="card-title"><span class="icon">🎤</span>セットリスト管理</div>
+            <div id="setlist">
+              <table class="table">
+                <thead><tr><th>#</th><th>タイトル</th><th>尺</th><th>状態</th></tr></thead>
+                <tbody id="setlist-body">
+                  <tr><td>1</td><td>オープニング曲</td><td>〜4分</td><td><span class="badge badge-red">未生成</span></td></tr>
+                  <tr><td>2</td><td>2曲目</td><td>〜4分</td><td><span class="badge badge-red">未生成</span></td></tr>
+                  <tr><td>3</td><td>中盤曲</td><td>〜5分</td><td><span class="badge badge-red">未生成</span></td></tr>
+                  <tr><td>4</td><td>クライマックス曲</td><td>〜5分</td><td><span class="badge badge-red">未生成</span></td></tr>
+                  <tr><td>5</td><td>エンディング曲</td><td>〜5分</td><td><span class="badge badge-red">未生成</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addSong()">+ 楽曲追加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- プロンプト出力 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📤</span>生成プロンプト出力</div>
+        <div class="output-label">SUNO / UDIO STYLE PROMPT <button class="copy-btn" onclick="copyPrompt('music-out')">Copy</button></div>
+        <div class="output-area" id="music-out">設定を入力してプロンプトを生成してください...</div>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 4: 映像生成 ===== -->
+    <div class="panel" id="panel-video">
+      <div class="section-title">🎬 STAGE 4 — 映像シーン生成</div>
+      <div class="section-sub">Wan2.2 / AnimateDiff / ComfyUI向けの映像プロンプトとシーン設計を行う。</div>
+
+      <!-- シーンプランナー -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎞️</span>シーン設計</div>
+        <div class="form-row">
+          <div>
+            <label>シーン番号</label>
+            <input type="text" id="scene-num" placeholder="例: SC001">
+            <label>楽曲パート</label>
+            <select id="scene-song">
+              <option>オープニング</option>
+              <option>1曲目 — Verse</option>
+              <option>1曲目 — Chorus</option>
+              <option>MC①</option>
+              <option>2曲目 — Verse</option>
+              <option>2曲目 — Chorus</option>
+              <option>MC②</option>
+              <option>クライマックス</option>
+              <option>エンディング</option>
+            </select>
+            <label>シーン尺</label>
+            <input type="text" id="scene-dur" placeholder="例: 3秒 / 5秒 / 8秒">
+          </div>
+          <div>
+            <label>カメラワーク</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'cam')">static shot</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">slow zoom in</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">pan left to right</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">dolly push in</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">orbit around</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">handheld shake</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">aerial drone shot</span>
+              <span class="tag" onclick="toggleTag(this,'cam')">whip pan</span>
+            </div>
+            <label>映像エフェクト</label>
+            <div class="tag-grid">
+              <span class="tag" onclick="toggleTag(this,'fx')">motion blur</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">lens flare</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">depth of field</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">chromatic aberration</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">film grain</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">god rays</span>
+              <span class="tag" onclick="toggleTag(this,'fx')">bloom glow</span>
+            </div>
+          </div>
+        </div>
+        <label>シーン説明（英語）</label>
+        <textarea id="scene-desc" placeholder="例: A girl in white idol dress stands on a glowing concert stage, spotlights shine from above, neon particles floating in the air, she raises her hand holding a microphone toward the sky, cinematic anime style, dynamic shot"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generateVideoPrompt()">🎬 映像プロンプト生成</button>
+          <button class="btn btn-outline" onclick="addScene()">+ シーン追加</button>
+          <button class="btn btn-outline" onclick="copyPrompt('video-out')">📋 コピー</button>
+        </div>
+      </div>
+
+      <!-- 映像プロンプト出力 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📤</span>Wan2.2 / AnimateDiff プロンプト</div>
+        <div class="output-label">VIDEO GENERATION PROMPT <button class="copy-btn" onclick="copyPrompt('video-out')">Copy</button></div>
+        <div class="output-area" id="video-out">映像プロンプトを生成してください...</div>
+
+        <div class="form-row3" style="margin-top:14px">
+          <div>
+            <label>解像度</label>
+            <select id="vid-res">
+              <option>1280x720 (HD)</option>
+              <option>1920x1080 (Full HD)</option>
+              <option>832x480 (Wan標準)</option>
+              <option>480x832 (縦動画)</option>
+            </select>
+          </div>
+          <div>
+            <label>FPS</label>
+            <select id="vid-fps">
+              <option>24 fps (映画的)</option>
+              <option>30 fps (標準)</option>
+              <option>60 fps (滑らか)</option>
+            </select>
+          </div>
+          <div>
+            <label>フレーム数</label>
+            <input type="number" id="vid-frames" value="81" min="16" max="200">
+          </div>
+        </div>
+      </div>
+
+      <!-- シーンリスト -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span>シーン一覧</div>
+        <div id="scene-list">
+          <div class="scene-grid">
+            <div class="scene-card">
+              <div class="scene-thumb">🌟</div>
+              <div class="scene-body">
+                <div class="scene-name">SC001 — オープニング</div>
+                <div class="scene-desc">暗転からステージ出現。キャラクター登場カット。</div>
+              </div>
+              <div class="scene-footer">
+                <div class="scene-time">〜00:25</div>
+                <span class="badge badge-gold">設計中</span>
+              </div>
+            </div>
+            <div class="scene-card" style="border:2px dashed var(--border);cursor:pointer;align-items:center;justify-content:center;display:flex;min-height:200px" onclick="addScene()">
+              <div style="text-align:center;color:var(--text2)">
+                <div style="font-size:32px;margin-bottom:8px">+</div>
+                <div style="font-size:13px">シーンを追加</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 5: 編集 ===== -->
+    <div class="panel" id="panel-edit">
+      <div class="section-title">✂️ STAGE 5 — 編集・合成設計</div>
+      <div class="section-sub">タイムライン設計・チャプター構成・エクスポート設定。FFmpeg / DaVinci Resolve向け。</div>
+
+      <div class="form-row">
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">🎞️</span>チャプター構成</div>
+            <div id="chapters">
+              <table class="table">
+                <thead><tr><th>タイムコード</th><th>チャプター名</th><th>操作</th></tr></thead>
+                <tbody id="chapter-body">
+                  <tr><td><input type="text" value="00:00" style="width:80px;margin-bottom:0"></td><td><input type="text" value="0. Intro" style="margin-bottom:0"></td><td><button class="btn btn-outline btn-sm" onclick="removeRow(this)">−</button></td></tr>
+                  <tr><td><input type="text" value="00:25" style="width:80px;margin-bottom:0"></td><td><input type="text" value="1. 曲名①" style="margin-bottom:0"></td><td><button class="btn btn-outline btn-sm" onclick="removeRow(this)">−</button></td></tr>
+                  <tr><td><input type="text" value="04:16" style="width:80px;margin-bottom:0"></td><td><input type="text" value="2. 曲名②" style="margin-bottom:0"></td><td><button class="btn btn-outline btn-sm" onclick="removeRow(this)">−</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="btn-row" style="margin-top:10px">
+              <button class="btn btn-outline btn-sm" onclick="addChapter()">+ チャプター追加</button>
+              <button class="btn btn-primary btn-sm" onclick="exportChapters()">📋 YouTube形式で出力</button>
+            </div>
+            <div class="output-label" style="margin-top:12px">YOUTUBE CHAPTER FORMAT <button class="copy-btn" onclick="copyPrompt('chapter-out')">Copy</button></div>
+            <div class="output-area" id="chapter-out" style="min-height:60px">チャプターを入力して出力してください</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">🖥️</span>エクスポート設定</div>
+            <div class="form-row">
+              <div>
+                <label>最終解像度</label>
+                <select id="export-res">
+                  <option>1920x1080 (Full HD)</option>
+                  <option>3840x2160 (4K)</option>
+                  <option>1280x720 (HD)</option>
+                </select>
+              </div>
+              <div>
+                <label>フォーマット</label>
+                <select id="export-fmt">
+                  <option>MP4 (H.264)</option>
+                  <option>MP4 (H.265/HEVC)</option>
+                  <option>WebM (VP9)</option>
+                  <option>MOV (ProRes)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div>
+                <label>ビットレート</label>
+                <select>
+                  <option>8 Mbps (YouTube推奨)</option>
+                  <option>16 Mbps (高品質)</option>
+                  <option>50 Mbps (マスター)</option>
+                </select>
+              </div>
+              <div>
+                <label>音声</label>
+                <select>
+                  <option>AAC 192kbps</option>
+                  <option>AAC 320kbps</option>
+                  <option>FLAC (可逆)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateFFmpegCmd()">⚡ FFmpegコマンド生成</button>
+            <div class="output-area" id="ffmpeg-out" style="margin-top:10px;min-height:50px;font-size:12px">ffmpegコマンドが表示されます...</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-title"><span class="icon">📌</span>YouTube投稿設定</div>
+            <label>動画タイトル</label>
+            <input type="text" id="yt-title" placeholder="例: ♫ First Live 2026 - Act I | [キャラ名]">
+            <label>動画説明文</label>
+            <textarea id="yt-desc" style="min-height:200px" placeholder="▶ チャプター&#10;00:00 Intro&#10;..."></textarea>
+            <label>タグ</label>
+            <input type="text" id="yt-tags" placeholder="VTuber, Anime, J-Pop, Virtual Live, AIart (カンマ区切り)">
+            <label>サムネイル用プロンプト（ComfyUI）</label>
+            <textarea id="yt-thumb" style="min-height:80px" placeholder="サムネイル画像生成プロンプト..."></textarea>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="generateYTDesc()">📝 説明文テンプレ生成</button>
+              <button class="btn btn-outline" onclick="copyPrompt('yt-desc')">📋 コピー</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TOOLS ===== -->
+    <div class="panel" id="panel-tools">
+      <div class="section-title">⚡ ツール解説 & 推奨環境</div>
+      <div class="section-sub">動画生成に必要なすべてのツールと使い方。初回セットアップから本番制作まで。</div>
+
+      <!-- キャラクター生成 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎨</span>キャラクター・イラスト生成ツール</div>
+        <div class="tool-grid">
+          <div class="tool-card recommended">
+            <div class="tool-name">ComfyUI <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">ローカル / 高カスタマイズ性</div>
+            <div class="tool-pros">
+              ✅ 完全無料・無制限生成<br>
+              ✅ ワークフロー自動化<br>
+              ✅ Wan2.2との統合<br>
+              ✅ LoRA・ControlNet対応
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">Stable Diffusion WebUI</div>
+            <div class="tool-tag">AUTOMATIC1111</div>
+            <div class="tool-pros">
+              ✅ 操作簡単<br>
+              ✅ 大量のプラグイン<br>
+              ✅ ADetailer対応
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">Live2D Cubism</div>
+            <div class="tool-tag">キャラクターアニメーション</div>
+            <div class="tool-pros">
+              ✅ イラストを動かす<br>
+              ✅ 表情・呼吸アニメ<br>
+              ⚠️ 有料（Pro必要）
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 音声生成 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎙️</span>音声合成・ボイス生成ツール</div>
+        <div class="tool-grid">
+          <div class="tool-card recommended">
+            <div class="tool-name">VOICEVOX <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">無料 / 日本語特化</div>
+            <div class="tool-pros">
+              ✅ 完全無料<br>
+              ✅ 高品質な日本語TTS<br>
+              ✅ 感情・速度調整可<br>
+              ✅ API連携対応
+            </div>
+          </div>
+          <div class="tool-card recommended">
+            <div class="tool-name">Style-BERT-VITS2 <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">ローカル / 感情豊か</div>
+            <div class="tool-pros">
+              ✅ 自然な感情表現<br>
+              ✅ カスタム学習可<br>
+              ✅ 無料・ローカル動作
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">RVC (Retrieval Voice Cloning)</div>
+            <div class="tool-tag">ボイスクローン</div>
+            <div class="tool-pros">
+              ✅ 任意の声を学習<br>
+              ✅ リアルタイム変換<br>
+              ⚠️ 学習データ必要
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 音楽生成 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎵</span>音楽・BGM生成ツール</div>
+        <div class="tool-grid">
+          <div class="tool-card recommended">
+            <div class="tool-name">Suno AI <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">Web / 高品質楽曲生成</div>
+            <div class="tool-pros">
+              ✅ 歌詞+曲を同時生成<br>
+              ✅ Anime J-Pop対応<br>
+              ✅ 無料プランあり<br>
+              ✅ AIrisスタイルに最も近い
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">Udio</div>
+            <div class="tool-tag">Web / 細かい制御</div>
+            <div class="tool-pros">
+              ✅ 詳細なスタイル制御<br>
+              ✅ セクション別生成<br>
+              ✅ 無料プランあり
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">AudioCraft (MusicGen)</div>
+            <div class="tool-tag">Meta / ローカル</div>
+            <div class="tool-pros">
+              ✅ 完全無料・ローカル<br>
+              ✅ BGM・SE生成<br>
+              ⚠️ 歌なし（インスト）
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 映像生成 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🎬</span>映像・動画生成ツール</div>
+        <div class="tool-grid">
+          <div class="tool-card recommended">
+            <div class="tool-name">Wan2.2 <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">ローカル / 最高品質</div>
+            <div class="tool-pros">
+              ✅ 1080p映像生成可<br>
+              ✅ テキスト→動画<br>
+              ✅ ComfyUI統合<br>
+              ✅ キャラクター一貫性高
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">AnimateDiff</div>
+            <div class="tool-tag">ComfyUI / アニメ特化</div>
+            <div class="tool-pros">
+              ✅ アニメスタイル最適<br>
+              ✅ SDキャラを動かす<br>
+              ✅ LoRA対応
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">Kling AI / Runway</div>
+            <div class="tool-tag">Web / 高品質</div>
+            <div class="tool-pros">
+              ✅ 簡単操作<br>
+              ✅ 高品質映像<br>
+              ⚠️ 有料・クレジット制
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 編集 -->
+      <div class="card">
+        <div class="card-title"><span class="icon">✂️</span>映像編集ツール</div>
+        <div class="tool-grid">
+          <div class="tool-card recommended">
+            <div class="tool-name">DaVinci Resolve <span class="rec-badge">推奨</span></div>
+            <div class="tool-tag">無料 / プロ品質</div>
+            <div class="tool-pros">
+              ✅ 完全無料（基本機能）<br>
+              ✅ カラーグレーディング<br>
+              ✅ Fusionエフェクト<br>
+              ✅ 業界標準ツール
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">FFmpeg</div>
+            <div class="tool-tag">CLI / 自動化向け</div>
+            <div class="tool-pros">
+              ✅ 完全無料<br>
+              ✅ バッチ処理<br>
+              ✅ 変換・結合・切り出し<br>
+              ✅ スクリプト自動化
+            </div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-name">CapCut / Premiere</div>
+            <div class="tool-tag">一般向け</div>
+            <div class="tool-pros">
+              ✅ 操作簡単<br>
+              ✅ テンプレート豊富<br>
+              ⚠️ Premiere は有料
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- セットアップガイド -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🚀</span>最速セットアップ順序</div>
+        <ol style="padding-left:20px;line-height:2.2;font-size:14px;color:var(--text2)">
+          <li><strong style="color:var(--text)">ComfyUI + Wan2.2</strong> をインストール（映像の核心）</li>
+          <li><strong style="color:var(--text)">VOICEVOX</strong> をインストール（MC音声）</li>
+          <li><strong style="color:var(--text)">Suno AI</strong> アカウント作成（楽曲生成）</li>
+          <li><strong style="color:var(--text)">DaVinci Resolve</strong> インストール（編集）</li>
+          <li>このツールで<strong style="color:var(--accent)">全ステージのプロンプト</strong>を設計</li>
+          <li>生成した素材を<strong style="color:var(--accent)">タイムラインに組み込む</strong></li>
+          <li>エクスポート → YouTube投稿</li>
+        </ol>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- トースト通知 -->
+<div class="toast" id="toast">✅ コピーしました！</div>
+
+<script>
+// ===== STATE =====
+const state = {
+  project: { name: 'New Project', created: new Date().toISOString() },
+  tags: {},
+  char: { pos: '', neg: '' },
+  music: { genre: [], mood: [], vocal: [] },
+  scenes: [],
+  chapters: []
+};
+
+// ===== パネル切替 =====
+function switchPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ===== タグ選択 =====
+function toggleTag(el, group) {
+  el.classList.toggle('selected');
+  if (!state.tags[group]) state.tags[group] = new Set();
+  const val = el.textContent;
+  if (state.tags[group].has(val)) state.tags[group].delete(val);
+  else state.tags[group].add(val);
+}
+
+function getTags(group) {
+  if (!state.tags[group]) return [];
+  return [...state.tags[group]];
+}
+
+// ===== キャラプロンプト生成 =====
+function generateCharPrompt() {
+  const outfit = getTags('outfit').join(', ');
+  const prop = getTags('prop').join(', ');
+  const face = getTags('face').join(', ');
+  const pose = getTags('pose').join(', ');
+  const camera = getTags('camera').join(', ');
+  const light = getTags('light').join(', ');
+  const bg = getTags('bg').join(', ');
+  const custom = document.getElementById('outfit-custom').value;
+
+  const pos = [
+    'masterpiece, best quality, ultra highres, 8k, highly detailed',
+    '1girl, solo',
+    'small perfectly rounded ferret ears on top of head, white outer ear fur soft pink inner ear',
+    'soft pale pastel turquoise green long straight hair, side-swept bangs, black ribbon',
+    'shojo manga-style large eyes, vivid turquoise irises, long lashes',
+    outfit, custom, prop, face, pose, camera, light, bg,
+    'concert performance, anime style, cinematic lighting, professional photography',
+    'depth of field, bokeh background, vibrant colors'
+  ].filter(Boolean).join(', ').replace(/,\s*,/g, ',').trim();
+
+  document.getElementById('char-pos').textContent = pos;
+}
+
+function clearChar() {
+  document.querySelectorAll('#panel-char .tag.selected').forEach(t => t.classList.remove('selected'));
+  state.tags = {};
+  document.getElementById('outfit-custom').value = '';
+  document.getElementById('char-pos').textContent = 'プロンプトを生成してください...';
+}
+
+// ===== 音楽プロンプト生成 =====
+function generateMusicPrompt(tool = 'suno') {
+  const genre = getTags('genre').join(', ') || 'Anime Rock, J-Pop';
+  const mood = getTags('mood').join(', ') || 'energetic, uplifting';
+  const vocal = getTags('vocal').join(', ') || 'female vocalist, anime style';
+  const struct = getTags('struct').join(', ') || 'Intro, Verse, Chorus, Outro';
+  const title = document.getElementById('song-title').value;
+  const bpm = document.getElementById('song-bpm').value;
+  const key = document.getElementById('song-key').value;
+  const theme = document.getElementById('lyric-theme').value;
+  const chorus = document.getElementById('lyric-chorus').value;
+
+  let prompt = '';
+  if (tool === 'suno') {
+    prompt = `[Style] ${genre}, ${mood}\n[Vocal] ${vocal}\n[Tempo] ${bpm} BPM, ${key}\n[Structure] ${struct}\n[Theme] ${theme || 'Keep moving forward, never give up'}\n\n`;
+    if (chorus) prompt += `[Chorus]\n${chorus}\n\n`;
+    prompt += `[Tags for Suno]\n${genre}, ${mood}, ${vocal}, japanese lyrics, anime opening style, ${bpm}bpm`;
+  } else {
+    prompt = `Genre: ${genre}\nMood: ${mood}\nVocal: ${vocal}\nTempo: ${bpm}BPM\nKey: ${key}\nTheme: ${theme}\nStyle notes: Anime-inspired J-Pop, energetic chorus, memorable melody, ${key} key, cinematic production`;
+  }
+
+  document.getElementById('music-out').textContent = prompt;
+}
+
+// ===== 映像プロンプト生成 =====
+function generateVideoPrompt() {
+  const cam = getTags('cam').join(', ') || 'cinematic camera movement';
+  const fx = getTags('fx').join(', ') || 'depth of field, bloom glow';
+  const desc = document.getElementById('scene-desc').value || 'A virtual idol on a concert stage, anime style';
+  const res = document.getElementById('vid-res').value;
+  const fps = document.getElementById('vid-fps').value;
+  const frames = document.getElementById('vid-frames').value;
+
+  const prompt = `${desc}
+
+Camera: ${cam}
+Visual effects: ${fx}
+Style: anime cinematic, high quality, vibrant colors, concert atmosphere
+Lighting: dynamic stage lighting, spotlights, neon accents, particle effects
+
+[Wan2.2 Settings]
+Resolution: ${res}
+FPS: ${fps}
+Frames: ${frames}
+Negative: blurry, low quality, static, no movement, ugly, deformed`;
+
+  document.getElementById('video-out').textContent = prompt;
+}
+
+// ===== MCスクリプト生成 =====
+function generateMCScript() {
+  const scene = document.getElementById('mc-scene').value;
+  const tone = getTags('tone')[0] || '元気・エネルギッシュ';
+  const templates = {
+    'オープニング挨拶': `みんな、今夜来てくれてありがとう！\n${tone === '元気・エネルギッシュ' ? '最高の夜にするよ！準備はいい？さあ、行くよ——！！' : 'この瞬間を、ずっと忘れないでいてね。'}`,
+    'クライマックス前MC': `ここまで来てくれて、本当にありがとう。\n次の曲、私の全部を込めて歌うから……聴いてて。`,
+    'エンディング挨拶': `今夜は最高だったよ……！\nまた絶対会おうね。ありがとう！`
+  };
+  const script = templates[scene] || `【${scene}】\n${tone}なトーンで、視聴者への感謝と次の曲への期待感を込めたセリフを入力してください。`;
+  document.getElementById('mc-script').value = script;
+
+  const tool = document.getElementById('voice-tool').value;
+  const speed = document.getElementById('speed-val').textContent;
+  const pitch = document.getElementById('pitch-val').textContent;
+  document.getElementById('mc-voicevox').textContent = `ツール: ${tool}\n速度: ${speed}\nピッチ: ${pitch}\n\n【入力テキスト】\n${script}`;
+}
+
+// ===== チャプター出力 =====
+function exportChapters() {
+  const rows = document.querySelectorAll('#chapter-body tr');
+  let out = '';
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="text"]');
+    if (inputs.length >= 2) {
+      out += `${inputs[0].value}  ${inputs[1].value}\n`;
+    }
+  });
+  document.getElementById('chapter-out').textContent = out.trim();
+}
+
+function addChapter() {
+  const tbody = document.getElementById('chapter-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input type="text" value="00:00" style="width:80px;margin-bottom:0"></td><td><input type="text" value="新チャプター" style="margin-bottom:0"></td><td><button class="btn btn-outline btn-sm" onclick="removeRow(this)">−</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function removeRow(btn) {
+  btn.closest('tr').remove();
+}
+
+// ===== YouTube説明文生成 =====
+function generateYTDesc() {
+  const title = document.getElementById('yt-title').value || 'Virtual Live Concert';
+  const desc = `★高画質設定＆ヘッドフォン、イヤフォン推奨。
+
+━━━━━━━━━━━━━━━━
+▶ チャプター
+━━━━━━━━━━━━━━━━
+00:00  0. Intro
+[チャプターを追加してください]
+
+━━━━━━━━━━━━━━━━
+▶ チャンネル登録 & フォロー
+━━━━━━━━━━━━━━━━
+🔔 新曲・MVの更新をいち早く受け取る
+→ チャンネル登録 + 通知ONがおすすめです！
+
+━━━━━━━━━━━━━━━━
+▶ クレジット / ポリシー
+━━━━━━━━━━━━━━━━
+【Licensed AI tools used / original edit & mastering】
+・作詞・作曲・MV制作: ${title.split('|')[0].trim() || 'Creator'}
+・本チャンネルはYouTubeのポリシーに基づき運営しています。
+・イラスト、映像、曲の無断利用はご遠慮下さい。`;
+
+  document.getElementById('yt-desc').value = desc;
+}
+
+// ===== FFmpegコマンド生成 =====
+function generateFFmpegCmd() {
+  const res = document.getElementById('export-res').value.split(' ')[0];
+  const fmt = document.getElementById('export-fmt').value.includes('H.265') ? 'libx265' : 'libx264';
+  const cmd = `ffmpeg -i input_video.mp4 -i audio_mix.wav \\
+  -c:v ${fmt} -preset slow -crf 18 \\
+  -s ${res.replace('×','x')} \\
+  -c:a aac -b:a 192k \\
+  -map 0:v:0 -map 1:a:0 \\
+  -movflags +faststart \\
+  output_final.mp4`;
+  document.getElementById('ffmpeg-out').textContent = cmd;
+}
+
+// ===== シーン追加 =====
+function addScene() {
+  const num = document.getElementById('scene-num').value || 'SC00' + (state.scenes.length + 2);
+  const song = document.getElementById('scene-song').value;
+  const dur = document.getElementById('scene-dur').value || '5秒';
+  const desc = document.getElementById('scene-desc').value || 'シーン説明を入力してください';
+
+  state.scenes.push({ num, song, dur, desc });
+
+  const grid = document.querySelector('.scene-grid');
+  const addBtn = grid.querySelector('[onclick="addScene()"]');
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+  card.innerHTML = `
+    <div class="scene-thumb">🎬</div>
+    <div class="scene-body">
+      <div class="scene-name">${num} — ${song}</div>
+      <div class="scene-desc">${desc.substring(0,80)}...</div>
+    </div>
+    <div class="scene-footer">
+      <div class="scene-time">${dur}</div>
+      <span class="badge badge-gold">設計中</span>
+    </div>`;
+  grid.insertBefore(card, addBtn);
+  showToast('シーンを追加しました');
+}
+
+// ===== チェックリスト =====
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+// ===== コピー =====
+function copyPrompt(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.value || el.textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('コピーしました！'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✅ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== 保存・読込 =====
+function saveAll() {
+  const data = {
+    project: state.project,
+    charPos: document.getElementById('char-pos').textContent,
+    charNeg: document.getElementById('char-neg').textContent,
+    mcScript: document.getElementById('mc-script').value,
+    mcScriptEn: document.getElementById('mc-script-en').value,
+    songTitle: document.getElementById('song-title').value,
+    lyricTheme: document.getElementById('lyric-theme').value,
+    lyricChorus: document.getElementById('lyric-chorus').value,
+    musicOut: document.getElementById('music-out').textContent,
+    videoOut: document.getElementById('video-out').textContent,
+    ytTitle: document.getElementById('yt-title').value,
+    ytDesc: document.getElementById('yt-desc').value,
+    ytTags: document.getElementById('yt-tags').value,
+    scenes: state.scenes,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem('crusha_video_studio', JSON.stringify(data));
+  showToast('全データを保存しました');
+}
+
+function loadProject() {
+  const raw = localStorage.getItem('crusha_video_studio');
+  if (!raw) { showToast('保存データが見つかりません'); return; }
+  try {
+    const data = JSON.parse(raw);
+    if (data.charPos) document.getElementById('char-pos').textContent = data.charPos;
+    if (data.charNeg) document.getElementById('char-neg').textContent = data.charNeg;
+    if (data.mcScript) document.getElementById('mc-script').value = data.mcScript;
+    if (data.mcScriptEn) document.getElementById('mc-script-en').value = data.mcScriptEn;
+    if (data.songTitle) document.getElementById('song-title').value = data.songTitle;
+    if (data.lyricTheme) document.getElementById('lyric-theme').value = data.lyricTheme;
+    if (data.lyricChorus) document.getElementById('lyric-chorus').value = data.lyricChorus;
+    if (data.musicOut) document.getElementById('music-out').textContent = data.musicOut;
+    if (data.videoOut) document.getElementById('video-out').textContent = data.videoOut;
+    if (data.ytTitle) document.getElementById('yt-title').value = data.ytTitle;
+    if (data.ytDesc) document.getElementById('yt-desc').value = data.ytDesc;
+    if (data.ytTags) document.getElementById('yt-tags').value = data.ytTags;
+    showToast('プロジェクトを読み込みました');
+  } catch(e) { showToast('読み込みエラー: ' + e.message); }
+}
+
+function exportAll() {
+  saveAll();
+  const raw = localStorage.getItem('crusha_video_studio');
+  const blob = new Blob([raw], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'crusha-video-project-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  showToast('エクスポートしました');
+}
+
+function addSong() {
+  const tbody = document.getElementById('setlist-body');
+  const num = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${num}</td><td>曲名${num}</td><td>〜4分</td><td><span class="badge badge-red">未生成</span></td>`;
+  tbody.appendChild(tr);
+}
+
+// ===== 初期化 =====
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('crusha_video_studio');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (data.project && data.project.name) {
+        document.getElementById('projName').textContent = data.project.name;
+      }
+    } catch(e) {}
+  }
+});
+</script>
+</body>
+</html>

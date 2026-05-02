@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUSHA MUSIC STUDIO — STAGE 3</title>
+<style>
+  :root {
+    --bg:     #07080f;
+    --bg2:    #0d1020;
+    --bg3:    #111525;
+    --bg4:    #181d30;
+    --bg5:    #1e243a;
+    --acc:    #a855f7;   /* purple main */
+    --acc2:   #ec4899;   /* pink sub */
+    --acc3:   #06b6d4;   /* cyan */
+    --gold:   #f59e0b;
+    --green:  #10b981;
+    --red:    #ef4444;
+    --text:   #e2e8f0;
+    --text2:  #94a3b8;
+    --border: rgba(168,85,247,0.18);
+    --glow:   0 0 24px rgba(168,85,247,0.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* ─── HEADER ─── */
+  .hd{
+    background:linear-gradient(135deg,#07080f 0%,#1a0a2e 60%,#07080f 100%);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:100;
+    box-shadow:0 4px 40px rgba(0,0,0,.6);
+  }
+  .hd-left{display:flex;align-items:center;gap:14px}
+  .hd-icon{
+    width:44px;height:44px;border-radius:12px;
+    background:linear-gradient(135deg,var(--acc),var(--acc2));
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;box-shadow:var(--glow);
+  }
+  .hd-title{font-size:19px;font-weight:900;letter-spacing:2px;
+    background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc3));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hd-sub{font-size:11px;color:var(--text2);letter-spacing:1px}
+  .hd-badge{
+    background:linear-gradient(135deg,var(--acc),var(--acc2));
+    color:#fff;border-radius:20px;padding:5px 16px;
+    font-size:12px;font-weight:700;letter-spacing:1px;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto}
+  .nav::-webkit-scrollbar{display:none}
+  .nb{
+    padding:13px 18px;background:none;border:none;border-bottom:3px solid transparent;
+    color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;
+    white-space:nowrap;display:flex;align-items:center;gap:7px;transition:all .2s;
+    font-family:inherit;
+  }
+  .nb:hover{color:var(--text);background:var(--bg3)}
+  .nb.on{color:var(--acc);border-bottom-color:var(--acc);background:var(--bg3)}
+
+  /* ─── LAYOUT ─── */
+  .wrap{display:flex;gap:0;height:calc(100vh - 107px)}
+  .side{width:250px;min-width:250px;background:var(--bg2);border-right:1px solid var(--border);
+    overflow-y:auto;padding:16px}
+  .side::-webkit-scrollbar{width:3px}
+  .side::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .cnt{flex:1;overflow-y:auto;padding:22px}
+  .cnt::-webkit-scrollbar{width:6px}
+  .cnt::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+  /* ─── PANELS ─── */
+  .panel{display:none}.panel.on{display:block}
+  .ptitle{font-size:22px;font-weight:900;margin-bottom:3px;
+    background:linear-gradient(90deg,var(--acc),var(--acc2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .psub{font-size:13px;color:var(--text2);margin-bottom:20px}
+
+  /* ─── CARD ─── */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card-t{font-size:14px;font-weight:700;color:var(--acc);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px}
+
+  /* ─── FORM ─── */
+  label{display:block;font-size:11px;color:var(--text2);font-weight:700;
+    letter-spacing:.5px;margin-bottom:5px}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;background:var(--bg3);border:1px solid var(--border);
+    border-radius:8px;padding:9px 12px;color:var(--text);
+    font-size:13px;font-family:inherit;outline:none;
+    transition:border-color .2s;margin-bottom:12px;
+  }
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--acc);box-shadow:0 0 0 2px rgba(168,85,247,.12)}
+  textarea{resize:vertical;min-height:80px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+  /* ─── TAGS ─── */
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .tag{
+    padding:5px 13px;border-radius:20px;border:1px solid var(--border);
+    background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;
+    transition:all .15s;user-select:none;
+  }
+  .tag:hover{border-color:var(--acc);color:var(--acc)}
+  .tag.on{background:rgba(168,85,247,.18);border-color:var(--acc);color:var(--acc);font-weight:600}
+
+  /* ─── SLIDER ─── */
+  .sl{margin-bottom:14px}
+  .sl-top{display:flex;justify-content:space-between;margin-bottom:5px}
+  .sl-top span:first-child{font-size:12px;color:var(--text2);font-weight:600}
+  .sl-top span:last-child{font-size:13px;color:var(--acc);font-weight:700}
+  input[type=range]{
+    width:100%;height:4px;background:var(--bg4);border-radius:2px;
+    outline:none;cursor:pointer;-webkit-appearance:none;margin-bottom:0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;
+    background:var(--acc);border-radius:50%;
+    box-shadow:0 0 8px rgba(168,85,247,.5);
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn{
+    padding:9px 18px;border-radius:8px;border:none;
+    font-size:13px;font-weight:700;cursor:pointer;
+    transition:all .2s;font-family:inherit;letter-spacing:.3px;
+  }
+  .btn-p{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+  .btn-p:hover{transform:translateY(-1px);box-shadow:var(--glow)}
+  .btn-c{background:linear-gradient(135deg,var(--acc3),#0080ff);color:#fff}
+  .btn-c:hover{transform:translateY(-1px);box-shadow:0 0 20px rgba(6,182,212,.35)}
+  .btn-g{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
+  .btn-o{background:transparent;border:1px solid var(--border);color:var(--text2)}
+  .btn-o:hover{border-color:var(--acc);color:var(--acc)}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .brow{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+
+  /* ─── OUTPUT ─── */
+  .out-wrap{margin-top:10px}
+  .out-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .out-label{font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px}
+  .cp-btn{
+    background:var(--bg4);border:1px solid var(--border);
+    color:var(--text2);border-radius:6px;padding:3px 10px;
+    font-size:11px;cursor:pointer;transition:all .15s;
+    font-family:inherit;font-weight:600;
+  }
+  .cp-btn:hover{border-color:var(--acc);color:var(--acc)}
+  .out{
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:14px;font-size:13px;color:var(--text);
+    line-height:1.75;min-height:60px;
+    white-space:pre-wrap;word-break:break-word;
+    font-family:'Consolas','Courier New',monospace;
+  }
+  .out.lyrics{
+    font-family:'Segoe UI',sans-serif;
+    font-size:14px;line-height:2;
+    background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%);
+  }
+
+  /* ─── SONG CARDS ─── */
+  .song-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:12px}
+  .song-card{
+    background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+    overflow:hidden;transition:all .2s;cursor:pointer;
+  }
+  .song-card:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:var(--glow)}
+  .song-card.active-song{border-color:var(--acc2);box-shadow:0 0 20px rgba(236,72,153,.3)}
+  .sc-top{
+    height:80px;display:flex;align-items:center;justify-content:center;
+    font-size:32px;position:relative;overflow:hidden;
+  }
+  .sc-num{
+    position:absolute;top:10px;left:12px;
+    font-size:11px;font-weight:700;color:rgba(255,255,255,.5);
+    letter-spacing:1px;
+  }
+  .sc-dur{
+    position:absolute;top:10px;right:12px;
+    font-size:11px;color:var(--gold);font-weight:700;
+  }
+  .sc-body{padding:12px}
+  .sc-name{font-size:15px;font-weight:800;margin-bottom:3px}
+  .sc-genre{font-size:11px;color:var(--text2);margin-bottom:8px}
+  .sc-bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:10px}
+  .sc-fill{height:100%;border-radius:2px;transition:width .5s}
+  .sc-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid rgba(255,255,255,.05)}
+  .sc-status{font-size:11px;font-weight:600}
+
+  /* ─── BADGE ─── */
+  .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700}
+  .badge-r{background:rgba(239,68,68,.15);color:var(--red)}
+  .badge-g{background:rgba(16,185,129,.15);color:var(--green)}
+  .badge-y{background:rgba(245,158,11,.15);color:var(--gold)}
+  .badge-p{background:rgba(168,85,247,.15);color:var(--acc)}
+
+  /* ─── SIDEBAR ─── */
+  .sb-sec{margin-bottom:20px}
+  .sb-ttl{font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;margin-bottom:10px}
+  .sb-item{
+    background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+    padding:9px 12px;margin-bottom:7px;cursor:pointer;transition:all .15s;
+  }
+  .sb-item:hover{border-color:var(--acc)}
+  .sb-item-t{font-size:13px;font-weight:700;margin-bottom:2px}
+  .sb-item-s{font-size:11px;color:var(--text2)}
+
+  /* ─── PROGRESS ─── */
+  .pb{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:5px}
+  .pbf{height:100%;border-radius:2px;transition:width .6s}
+
+  /* ─── SECTION DIVIDER ─── */
+  .divider{
+    display:flex;align-items:center;gap:12px;margin:18px 0;
+  }
+  .divider span{font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;white-space:nowrap}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* ─── PRESET CARD ─── */
+  .preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+  .preset{
+    background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+    padding:12px;cursor:pointer;transition:all .2s;
+  }
+  .preset:hover{border-color:var(--acc);background:var(--bg4)}
+  .preset.on{border-color:var(--acc);background:rgba(168,85,247,.1)}
+  .preset-name{font-size:13px;font-weight:700;margin-bottom:4px}
+  .preset-desc{font-size:11px;color:var(--text2);line-height:1.5}
+  .preset-tags{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px}
+  .preset-tag{font-size:10px;background:var(--bg4);color:var(--text2);padding:2px 7px;border-radius:4px}
+
+  /* ─── LYRIC EDITOR ─── */
+  .lyric-section{margin-bottom:12px}
+  .lyric-section-hd{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .lyric-section-name{
+    font-size:12px;font-weight:700;color:var(--acc);
+    background:rgba(168,85,247,.1);border:1px solid var(--border);
+    border-radius:6px;padding:3px 10px;
+  }
+  .lyric-section textarea{margin-bottom:0}
+
+  /* ─── SUNO READY ─── */
+  .suno-box{
+    background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(236,72,153,.08));
+    border:1px solid var(--acc);border-radius:14px;padding:18px;margin-bottom:14px;
+  }
+  .suno-box-t{
+    font-size:14px;font-weight:800;color:var(--acc);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .ready-badge{
+    background:var(--green);color:#fff;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:4px;
+  }
+
+  /* ─── TOAST ─── */
+  .toast{
+    position:fixed;bottom:28px;right:28px;
+    background:var(--green);color:#fff;padding:10px 22px;
+    border-radius:10px;font-size:14px;font-weight:700;
+    z-index:9999;opacity:0;transform:translateY(18px);
+    transition:all .3s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateY(0)}
+
+  /* ─── WAVEFORM ANIM ─── */
+  .wave{display:flex;align-items:flex-end;gap:3px;height:30px}
+  .wave span{
+    display:block;width:4px;border-radius:2px;
+    background:linear-gradient(to top,var(--acc),var(--acc2));
+    animation:wave-anim 1s ease-in-out infinite;
+  }
+  .wave span:nth-child(2){animation-delay:.1s}
+  .wave span:nth-child(3){animation-delay:.2s}
+  .wave span:nth-child(4){animation-delay:.3s}
+  .wave span:nth-child(5){animation-delay:.4s}
+  @keyframes wave-anim{
+    0%,100%{height:6px} 50%{height:28px}
+  }
+
+  @media(max-width:768px){
+    .wrap{flex-direction:column;height:auto}
+    .side{width:100%;min-width:auto;border-right:none;border-bottom:1px solid var(--border);max-height:180px}
+    .row2,.row3{grid-template-columns:1fr}
+    .song-grid{grid-template-columns:1fr}
+    .preset-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hd">
+  <div class="hd-left">
+    <div class="hd-icon">🎵</div>
+    <div>
+      <div class="hd-title">CRUSHA MUSIC STUDIO</div>
+      <div class="hd-sub">STAGE 3 — AI楽曲生成 / Suno AI · Udio 完全対応</div>
+    </div>
+  </div>
+  <div class="hd-badge">🎬 VIDEO STUDIO STAGE 3/6</div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nb on" onclick="sw('setlist',this)">🎤 セットリスト</button>
+  <button class="nb" onclick="sw('compose',this)">🎼 楽曲作成</button>
+  <button class="nb" onclick="sw('lyrics',this)">📝 歌詞エディタ</button>
+  <button class="nb" onclick="sw('suno',this)">⚡ Suno即貼りKit</button>
+  <button class="nb" onclick="sw('style',this)">🎸 スタイル辞典</button>
+</div>
+
+<div class="wrap">
+<!-- SIDEBAR -->
+<div class="side">
+  <div class="sb-sec">
+    <div class="sb-ttl">セットリスト進捗</div>
+    <div id="sb-list">
+      <!-- JS で生成 -->
+    </div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-ttl">合計尺</div>
+    <div style="font-size:28px;font-weight:900;color:var(--acc)" id="total-dur">0:00</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:3px">目標: 25〜30分</div>
+    <div class="pb"><div class="pbf" id="total-pb" style="width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2))"></div></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-ttl">クイック操作</div>
+    <button class="btn btn-p" style="width:100%;margin-bottom:8px" onclick="sw('suno',document.querySelectorAll('.nb')[3])">⚡ 即貼りKitへ</button>
+    <button class="btn btn-o" style="width:100%;margin-bottom:8px" onclick="exportAll()">📤 全データ保存</button>
+    <button class="btn btn-o" style="width:100%" onclick="loadAll()">📂 データ読込</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="cnt">
+
+<!-- ═══ SETLIST ═══ -->
+<div class="panel on" id="panel-setlist">
+  <div class="ptitle">🎤 セットリスト管理</div>
+  <div class="psub">AIrisスタイルの25〜30分ライブ構成。5曲＋MC×2が標準。</div>
+
+  <div class="song-grid" id="song-grid">
+    <!-- JS で生成 -->
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-t">📋 AIrisライブ構成 参照フォーマット</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:8px 10px;color:var(--text2);font-size:11px;font-weight:700">パート</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text2);font-size:11px;font-weight:700">内容</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text2);font-size:11px;font-weight:700">目標尺</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text2);font-size:11px;font-weight:700">エネルギー</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">Intro</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">暗転・ステージ登場</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">〜25秒</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">🔥🔥🔥🔥🔥</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">曲①</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">新曲・ハイテンポ開幕</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">3〜4分</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">🔥🔥🔥🔥🔥</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">曲②</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">新曲・シネマティック</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">3〜4分</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">🔥🔥🔥🔥</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">MC①</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">曲紹介・視聴者に話しかける</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">30〜60秒</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">💬</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">曲③</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">ミドル・感情的</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">4〜5分</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">🔥🔥🔥</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">曲④</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">ハイライト・クライマックス</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">4〜5分</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">🔥🔥🔥🔥🔥</td></tr>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">MC②</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">感謝・感動・次回予告へ</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gold)">30〜60秒</td><td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">💖</td></tr>
+        <tr><td style="padding:8px 10px">曲⑤</td><td style="padding:8px 10px">締め・エモーション最大</td><td style="padding:8px 10px;color:var(--gold)">4〜5分</td><td style="padding:8px 10px">🔥🔥🔥🔥🔥✨</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ COMPOSE ═══ -->
+<div class="panel" id="panel-compose">
+  <div class="ptitle">🎼 楽曲コンセプト設計</div>
+  <div class="psub">作りたい曲の方向性を決める。ここで決めた内容がSunoプロンプトに直結する。</div>
+
+  <!-- 編集対象曲選択 -->
+  <div class="card">
+    <div class="card-t">🎤 編集する曲</div>
+    <div class="tags" id="song-sel-tags"><!-- JS --></div>
+  </div>
+
+  <!-- スタイルプリセット -->
+  <div class="card">
+    <div class="card-t">🎸 スタイルプリセット（AIrisスタイル参照）</div>
+    <div class="preset-grid" id="presets">
+      <div class="preset" onclick="applyPreset('opener')">
+        <div class="preset-name">🔥 ハイテンポ開幕</div>
+        <div class="preset-desc">ライブ開幕に最適。疾走感とエネルギーが最大値。NO QUITタイプ。</div>
+        <div class="preset-tags"><span class="preset-tag">140-180 BPM</span><span class="preset-tag">Anime Rock</span><span class="preset-tag">energetic</span></div>
+      </div>
+      <div class="preset" onclick="applyPreset('cinematic')">
+        <div class="preset-name">🌌 シネマティック</div>
+        <div class="preset-desc">宇宙・壮大・映画的。感情の振れ幅が大きい。NOVAタイプ。</div>
+        <div class="preset-tags"><span class="preset-tag">120-140 BPM</span><span class="preset-tag">Cinematic Pop</span><span class="preset-tag">epic</span></div>
+      </div>
+      <div class="preset" onclick="applyPreset('midtempo')">
+        <div class="preset-name">💫 ミドルテンポ情感</div>
+        <div class="preset-desc">感情移入しやすいバランス型。中盤の繋ぎに最適。</div>
+        <div class="preset-tags"><span class="preset-tag">110-130 BPM</span><span class="preset-tag">J-Pop</span><span class="preset-tag">emotional</span></div>
+      </div>
+      <div class="preset" onclick="applyPreset('ballad')">
+        <div class="preset-name">💖 エモーションバラード</div>
+        <div class="preset-desc">ライブ締め・クライマックス向け。感動・余韻が最大。</div>
+        <div class="preset-tags"><span class="preset-tag">70-100 BPM</span><span class="preset-tag">Ballad</span><span class="preset-tag">melancholic</span></div>
+      </div>
+      <div class="preset" onclick="applyPreset('edm')">
+        <div class="preset-name">⚡ EDMアニソン</div>
+        <div class="preset-desc">ドロップで盛り上がるクラブ系。デジタルな未来感。</div>
+        <div class="preset-tags"><span class="preset-tag">128-150 BPM</span><span class="preset-tag">EDM Anime</span><span class="preset-tag">drop</span></div>
+      </div>
+      <div class="preset" onclick="applyPreset('refrain')">
+        <div class="preset-name">🌸 リフレインポップ</div>
+        <div class="preset-desc">耳に残るサビ重視。誰でも一緒に歌えるキャッチー設計。</div>
+        <div class="preset-tags"><span class="preset-tag">120-140 BPM</span><span class="preset-tag">Anime Pop</span><span class="preset-tag">catchy</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 詳細設定 -->
+  <div class="row2">
+    <div>
+      <div class="card">
+        <div class="card-t">🎵 基本設定</div>
+        <label>曲タイトル（仮）</label>
+        <input type="text" id="c-title" placeholder="例: NOVA / 星を掴め / Refrain">
+        <label>テーマ・キーワード</label>
+        <input type="text" id="c-theme" placeholder="例: 諦めない / 夜明け / 君への想い / 未来へ">
+        <div class="row2">
+          <div>
+            <label>BPM</label>
+            <input type="number" id="c-bpm" value="140" min="60" max="220">
+          </div>
+          <div>
+            <label>キー</label>
+            <select id="c-key">
+              <option>C Major</option><option>A Minor</option><option selected>D Major</option>
+              <option>B Minor</option><option>G Major</option><option>E Minor</option>
+              <option>F Major</option><option>D Minor</option><option>Eb Major</option>
+            </select>
+          </div>
+        </div>
+        <label>ジャンル（複数可）</label>
+        <div class="tags">
+          <span class="tag" onclick="t(this,'genre')">Anime Rock</span>
+          <span class="tag" onclick="t(this,'genre')">Anime Pop</span>
+          <span class="tag" onclick="t(this,'genre')">J-Pop</span>
+          <span class="tag" onclick="t(this,'genre')">Synthpop</span>
+          <span class="tag" onclick="t(this,'genre')">EDM</span>
+          <span class="tag" onclick="t(this,'genre')">Electronic</span>
+          <span class="tag" onclick="t(this,'genre')">Orchestral</span>
+          <span class="tag" onclick="t(this,'genre')">Ballad</span>
+          <span class="tag" onclick="t(this,'genre')">Cinematic</span>
+          <span class="tag" onclick="t(this,'genre')">Lo-fi</span>
+          <span class="tag" onclick="t(this,'genre')">City Pop</span>
+        </div>
+        <label>ムード（複数可）</label>
+        <div class="tags">
+          <span class="tag" onclick="t(this,'mood')">energetic</span>
+          <span class="tag" onclick="t(this,'mood')">emotional</span>
+          <span class="tag" onclick="t(this,'mood')">uplifting</span>
+          <span class="tag" onclick="t(this,'mood')">melancholic</span>
+          <span class="tag" onclick="t(this,'mood')">dreamy</span>
+          <span class="tag" onclick="t(this,'mood')">intense</span>
+          <span class="tag" onclick="t(this,'mood')">epic</span>
+          <span class="tag" onclick="t(this,'mood')">nostalgic</span>
+          <span class="tag" onclick="t(this,'mood')">hopeful</span>
+          <span class="tag" onclick="t(this,'mood')">powerful</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-t">🎤 ボーカル・サウンド</div>
+        <label>ボーカルスタイル</label>
+        <div class="tags">
+          <span class="tag on" onclick="t(this,'vocal')">female vocalist</span>
+          <span class="tag on" onclick="t(this,'vocal')">anime style</span>
+          <span class="tag" onclick="t(this,'vocal')">clear voice</span>
+          <span class="tag" onclick="t(this,'vocal')">powerful</span>
+          <span class="tag" onclick="t(this,'vocal')">breathy</span>
+          <span class="tag" onclick="t(this,'vocal')">harmonies</span>
+          <span class="tag" onclick="t(this,'vocal')">falsetto</span>
+          <span class="tag" onclick="t(this,'vocal')">rap section</span>
+        </div>
+        <label>楽器・サウンド</label>
+        <div class="tags">
+          <span class="tag" onclick="t(this,'inst')">electric guitar</span>
+          <span class="tag" onclick="t(this,'inst')">synthesizer</span>
+          <span class="tag" onclick="t(this,'inst')">piano</span>
+          <span class="tag" onclick="t(this,'inst')">drums</span>
+          <span class="tag" onclick="t(this,'inst')">bass</span>
+          <span class="tag" onclick="t(this,'inst')">strings</span>
+          <span class="tag" onclick="t(this,'inst')">choir</span>
+          <span class="tag" onclick="t(this,'inst')">violin</span>
+          <span class="tag" onclick="t(this,'inst')">EDM drops</span>
+          <span class="tag" onclick="t(this,'inst')">retro synth</span>
+        </div>
+        <label>曲構成</label>
+        <div class="tags">
+          <span class="tag on" onclick="t(this,'struct')">Intro</span>
+          <span class="tag on" onclick="t(this,'struct')">Verse</span>
+          <span class="tag" onclick="t(this,'struct')">Pre-Chorus</span>
+          <span class="tag on" onclick="t(this,'struct')">Chorus</span>
+          <span class="tag" onclick="t(this,'struct')">Bridge</span>
+          <span class="tag on" onclick="t(this,'struct')">Outro</span>
+          <span class="tag" onclick="t(this,'struct')">Breakdown</span>
+          <span class="tag" onclick="t(this,'struct')">Instrumental</span>
+        </div>
+        <div class="sl">
+          <div class="sl-top"><span>曲の長さ (分)</span><span id="dur-val">4.0分</span></div>
+          <input type="range" min="2" max="6" step="0.5" value="4" oninput="document.getElementById('dur-val').textContent=this.value+'分';updateTotalDur()">
+        </div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="buildSunoKit()">⚡ Suno即貼りKit生成</button>
+        <button class="btn btn-c" onclick="buildUdioKit()">🎵 Udioプロンプト生成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LYRICS ═══ -->
+<div class="panel" id="panel-lyrics">
+  <div class="ptitle">📝 歌詞エディタ</div>
+  <div class="psub">日本語歌詞を構成別に書く。完成したらSunoへ貼り付け。</div>
+
+  <div class="row2">
+    <div>
+      <div class="card">
+        <div class="card-t">✍️ 歌詞入力（曲: <span id="lyrics-song-name">選択中の曲</span>）</div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🎵 Intro</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('intro')">AI生成</button>
+          </div>
+          <textarea id="ly-intro" placeholder="例:&#10;（SE: 歓声・照明点灯）&#10;光が降り注ぐ この夜に..."></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🎵 Verse 1</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('v1')">AI生成</button>
+          </div>
+          <textarea id="ly-v1" placeholder="例:&#10;朝が来るたび 迷い続けて&#10;それでも足は 前を向いてた&#10;誰かの声が 背中を押した&#10;今夜 全部 ぶつけてやろう"></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🎶 Pre-Chorus</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('pre')">AI生成</button>
+          </div>
+          <textarea id="ly-pre" placeholder="例:&#10;震える手 握り締めて&#10;もう後戻りはできない"></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🔥 Chorus（サビ）</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('chorus')">AI生成</button>
+          </div>
+          <textarea id="ly-chorus" style="min-height:120px" placeholder="例:&#10;叫べ 諦めない この声を&#10;夜を切り裂いて 光を掴め&#10;NO QUIT, NO QUIT 前だけ見て走れ&#10;一緒に越えよう この夜を——！"></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🎵 Verse 2</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('v2')">AI生成</button>
+          </div>
+          <textarea id="ly-v2" placeholder="Verse 2 を入力..."></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🌊 Bridge</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('bridge')">AI生成</button>
+          </div>
+          <textarea id="ly-bridge" placeholder="例:&#10;（spoken）&#10;諦めないで 必ず届く&#10;この声が 君に届くまで..."></textarea>
+        </div>
+
+        <div class="lyric-section">
+          <div class="lyric-section-hd">
+            <span class="lyric-section-name">🎵 Outro</span>
+            <button class="btn btn-o btn-sm" onclick="genLyric('outro')">AI生成</button>
+          </div>
+          <textarea id="ly-outro" placeholder="例:&#10;ありがとう... また会おうね&#10;（フェードアウト）"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- 歌詞プレビュー -->
+      <div class="card">
+        <div class="card-t">👁️ 歌詞プレビュー（Suno貼付け形式）</div>
+        <div class="brow" style="margin-bottom:12px">
+          <button class="btn btn-p btn-sm" onclick="previewLyrics()">🔄 プレビュー更新</button>
+          <button class="btn btn-o btn-sm" onclick="copyText('lyrics-preview')">📋 コピー</button>
+        </div>
+        <div class="out lyrics" id="lyrics-preview">
+「プレビュー更新」を押すと Suno 貼付け形式で表示されます。
+        </div>
+      </div>
+
+      <!-- 歌詞ヒント -->
+      <div class="card">
+        <div class="card-t">💡 アニソン歌詞テクニック</div>
+        <div style="font-size:13px;color:var(--text2);line-height:2">
+          <div style="margin-bottom:8px">🔥 <strong style="color:var(--text)">サビは「動詞」で始める</strong><br>叫べ / 走れ / 掴め / 届け / 輝け</div>
+          <div style="margin-bottom:8px">💫 <strong style="color:var(--text)">英語フレーズを混ぜる</strong><br>NO QUIT / NEVER STOP / REACH THE SKY</div>
+          <div style="margin-bottom:8px">🎵 <strong style="color:var(--text)">繰り返しで記憶に残す</strong><br>同じフレーズを2〜3回繰り返す</div>
+          <div style="margin-bottom:8px">💖 <strong style="color:var(--text)">「君」「あなた」で共感</strong><br>視聴者に語りかける2人称を使う</div>
+          <div>⚡ <strong style="color:var(--text)">母音で終わらせる</strong><br>日本語は母音(a,i,u,e,o)で終わると歌いやすい</div>
+        </div>
+      </div>
+
+      <!-- テーマ別サビテンプレ -->
+      <div class="card">
+        <div class="card-t">📌 サビテンプレート（コピー可）</div>
+        <div id="chorus-templates">
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:5px">🔥 諦めない系</div>
+            <div class="out lyrics" style="min-height:auto;font-size:13px;padding:10px;cursor:pointer" onclick="copyText(this)">叫べ 諦めない この声を
+夜を切り裂いて 光を掴め
+NO QUIT, NO QUIT 前だけ見て走れ
+一緒に越えよう この夜を——！</div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--acc2);font-weight:700;margin-bottom:5px">🌌 宇宙・未来系</div>
+            <div class="out lyrics" style="min-height:auto;font-size:13px;padding:10px;cursor:pointer" onclick="copyText(this)">星になれ 消えない光に
+宇宙の果て まで届け この歌
+NOVA, NOVA 輝け今夜
+私たちの未来を 照らせ——！</div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:5px">💖 感謝・絆系</div>
+            <div class="out lyrics" style="min-height:auto;font-size:13px;padding:10px;cursor:pointer" onclick="copyText(this)">ありがとう この瞬間を
+忘れない 君と過ごした時間を
+Refrain, Refrain 繰り返す想い
+永遠に 続く この歌——！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUNO KIT ═══ -->
+<div class="panel" id="panel-suno">
+  <div class="ptitle">⚡ Suno 即貼りKit</div>
+  <div class="psub">このページのプロンプトをそのままSuno AIに貼るだけ。今すぐ曲が作れる。</div>
+
+  <!-- 曲選択 -->
+  <div class="card">
+    <div class="card-t">🎤 プロンプトを生成する曲</div>
+    <div class="tags" id="suno-song-sel"><!-- JS --></div>
+    <div class="brow">
+      <button class="btn btn-p" onclick="buildSunoKit()">⚡ Suno Kit 生成</button>
+      <button class="btn btn-c" onclick="buildUdioKit()">🎵 Udio Kit 生成</button>
+      <button class="btn btn-o" onclick="buildAll5()">🎯 全5曲まとめて生成</button>
+    </div>
+  </div>
+
+  <!-- Suno出力 -->
+  <div id="suno-output-area">
+    <div class="suno-box">
+      <div class="suno-box-t">
+        <div class="wave"><span></span><span></span><span></span><span></span><span></span></div>
+        Suno AI 即貼りKit
+        <span class="ready-badge">READY TO USE</span>
+      </div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px">
+        「Suno Kit 生成」を押してください。STYLEとLYRICSが自動生成されます。
+      </div>
+
+      <!-- Style Prompt -->
+      <div class="out-hd" style="margin-top:10px">
+        <span class="out-label">① STYLE PROMPT（スタイル欄に貼る）</span>
+        <button class="cp-btn" onclick="copyText('suno-style')">Copy</button>
+      </div>
+      <div class="out" id="suno-style">スタイルプロンプトがここに表示されます...</div>
+
+      <!-- Lyrics -->
+      <div class="out-hd" style="margin-top:14px">
+        <span class="out-label">② LYRICS（歌詞欄に貼る）</span>
+        <button class="cp-btn" onclick="copyText('suno-lyrics')">Copy</button>
+      </div>
+      <div class="out lyrics" id="suno-lyrics">歌詞がここに表示されます...</div>
+
+      <!-- Title -->
+      <div class="out-hd" style="margin-top:14px">
+        <span class="out-label">③ TITLE（タイトル欄に貼る）</span>
+        <button class="cp-btn" onclick="copyText('suno-title-out')">Copy</button>
+      </div>
+      <div class="out" id="suno-title-out" style="min-height:auto">タイトルがここに表示されます</div>
+    </div>
+
+    <!-- Suno操作手順 -->
+    <div class="card">
+      <div class="card-t">📋 Suno AI 操作手順</div>
+      <ol style="padding-left:18px;line-height:2.4;font-size:14px;color:var(--text2)">
+        <li><a href="https://suno.com" target="_blank" style="color:var(--acc)">suno.com</a> を開く → ログイン</li>
+        <li>「<strong style="color:var(--text)">Create</strong>」ボタンをクリック</li>
+        <li>「<strong style="color:var(--text)">Custom Mode</strong>」をONにする ← <span style="color:var(--red)">重要！</span></li>
+        <li>① <strong style="color:var(--text)">Style of Music</strong> 欄に STYLE PROMPT を貼る</li>
+        <li>② <strong style="color:var(--text)">Lyrics</strong> 欄に LYRICS を貼る</li>
+        <li>③ <strong style="color:var(--text)">Title</strong> 欄にタイトルを入力</li>
+        <li>「<strong style="color:var(--text)">Create ▶</strong>」を押す → 2バリエーション生成される</li>
+        <li>気に入ったほうを「<strong style="color:var(--text)">Extend</strong>」で延長してフル曲にする</li>
+        <li>「<strong style="color:var(--text)">Download</strong>」でMP3保存</li>
+      </ol>
+    </div>
+
+    <!-- Udio出力 -->
+    <div class="card">
+      <div class="card-t">🎵 Udio プロンプト</div>
+      <div class="out-hd">
+        <span class="out-label">UDIO PROMPT（Tags欄に貼る）</span>
+        <button class="cp-btn" onclick="copyText('udio-out')">Copy</button>
+      </div>
+      <div class="out" id="udio-out">「Udio Kit 生成」を押してください...</div>
+    </div>
+
+    <!-- 全5曲出力 -->
+    <div class="card" id="all5-area" style="display:none">
+      <div class="card-t">🎯 全5曲 Sunoプロンプト一覧</div>
+      <div id="all5-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STYLE DICT ═══ -->
+<div class="panel" id="panel-style">
+  <div class="ptitle">🎸 スタイル辞典</div>
+  <div class="psub">Suno / Udioで使えるタグと効果の完全リファレンス。</div>
+
+  <div class="row2">
+    <div>
+      <div class="card">
+        <div class="card-t">🎵 ジャンルタグ</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 10px;color:var(--text2);font-size:11px">タグ</th>
+            <th style="text-align:left;padding:7px 10px;color:var(--text2);font-size:11px">効果</th>
+            <th style="text-align:left;padding:7px 10px;color:var(--text2);font-size:11px">AIris例</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">anime rock</code></td><td style="padding:7px 10px;color:var(--text2)">疾走感、歪みギター、アニソンボーカル</td><td style="padding:7px 10px;color:var(--gold)">NO QUIT</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">anime pop</code></td><td style="padding:7px 10px;color:var(--text2)">明るくキャッチー、女性ボーカル</td><td style="padding:7px 10px;color:var(--gold)">Feelin' It</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">cinematic</code></td><td style="padding:7px 10px;color:var(--text2)">映画的・壮大・オーケストラ</td><td style="padding:7px 10px;color:var(--gold)">NOVA</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">j-pop</code></td><td style="padding:7px 10px;color:var(--text2)">J-Pop王道。清潔感のあるサウンド</td><td style="padding:7px 10px;color:var(--gold)">Refrain</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">edm</code></td><td style="padding:7px 10px;color:var(--text2)">電子ドロップ、4つ打ち</td><td style="padding:7px 10px;color:var(--gold)">-</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc)">synthpop</code></td><td style="padding:7px 10px;color:var(--text2)">80〜90s風シンセ。レトロ未来</td><td style="padding:7px 10px;color:var(--gold)">Drive into Tonight</td></tr>
+            <tr><td style="padding:7px 10px"><code style="color:var(--acc)">power ballad</code></td><td style="padding:7px 10px;color:var(--text2)">感動的スロー。クライマックス向け</td><td style="padding:7px 10px;color:var(--gold)">Fall</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-t">🎤 ボーカルタグ</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc2)">female vocalist</code></td><td style="padding:7px 10px;color:var(--text2)">女性ボーカル（必須）</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc2)">clear voice</code></td><td style="padding:7px 10px;color:var(--text2)">澄んだ透明感のある声</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc2)">powerful vocals</code></td><td style="padding:7px 10px;color:var(--text2)">力強い声。サビに最適</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc2)">breathy</code></td><td style="padding:7px 10px;color:var(--text2)">息づかいが聞こえる。エロい</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc2)">japanese lyrics</code></td><td style="padding:7px 10px;color:var(--text2)">日本語歌詞を認識させる</td></tr>
+            <tr><td style="padding:7px 10px"><code style="color:var(--acc2)">harmonies</code></td><td style="padding:7px 10px;color:var(--text2)">コーラスハーモニー</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-t">🎸 楽器・サウンドタグ</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc3)">driving electric guitar</code></td><td style="padding:7px 10px;color:var(--text2)">疾走感あるギターリフ</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc3)">soaring synth lead</code></td><td style="padding:7px 10px;color:var(--text2)">飛翔感のあるシンセ</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc3)">punchy drums</code></td><td style="padding:7px 10px;color:var(--text2)">パンチの効いたドラム</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc3)">orchestral strings</code></td><td style="padding:7px 10px;color:var(--text2)">シネマティックな弦楽器</td></tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:7px 10px"><code style="color:var(--acc3)">epic choir</code></td><td style="padding:7px 10px;color:var(--text2)">壮大なコーラス隊</td></tr>
+            <tr><td style="padding:7px 10px"><code style="color:var(--acc3)">808 bass</code></td><td style="padding:7px 10px;color:var(--text2)">低音EDMベース</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-t">💡 Sunoで使える構成タグ</div>
+        <div style="font-size:13px;color:var(--text2);line-height:2.2">
+          歌詞の中に直接書き込むと構成をコントロールできる：<br>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Verse]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Chorus]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Bridge]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Outro]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Instrumental]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[Pre-Chorus]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[spoken]</code>
+          <code style="color:var(--acc);background:var(--bg3);padding:2px 6px;border-radius:4px">[ad lib]</code>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t">⚠️ Sunoの注意点</div>
+        <ul style="padding-left:16px;font-size:13px;color:var(--text2);line-height:2.3">
+          <li>歌詞は<strong style="color:var(--text)">長すぎ禁止</strong>（1曲あたり最大約3000文字）</li>
+          <li>スタイル欄は<strong style="color:var(--text)">120文字以内</strong>推奨</li>
+          <li>日本語は<strong style="color:var(--text)">ひらがな/カタカナ混じり</strong>が安定</li>
+          <li>英語サビを混ぜると<strong style="color:var(--text)">発音が良くなる</strong></li>
+          <li>生成後は<strong style="color:var(--text)">Extend</strong>で延長 → フル曲化</li>
+          <li>2バリエーション生成される → <strong style="color:var(--text)">両方聴いて良い方を選ぶ</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /cnt -->
+</div><!-- /wrap -->
+
+<div class="toast" id="toast">✅ コピーしました！</div>
+
+<script>
+// ═══ DATA ═══
+const songs = [
+  { id:1, name:'曲①', title:'[曲タイトル未定]', genre:'Anime Rock', dur:4.0, bpm:150, key:'D Major', color:'linear-gradient(135deg,#7c3aed,#ec4899)', emoji:'🔥', status:'draft', theme:'諦めない' },
+  { id:2, name:'曲②', title:'[曲タイトル未定]', genre:'Cinematic Pop', dur:3.5, bpm:128, key:'E Minor', color:'linear-gradient(135deg,#0ea5e9,#7c3aed)', emoji:'🌌', status:'draft', theme:'宇宙・未来' },
+  { id:3, name:'曲③', title:'[曲タイトル未定]', genre:'J-Pop', dur:4.0, bpm:120, key:'G Major', color:'linear-gradient(135deg,#10b981,#0ea5e9)', emoji:'💫', status:'draft', theme:'感情・絆' },
+  { id:4, name:'曲④', title:'[曲タイトル未定]', genre:'Anime Rock', dur:4.5, bpm:160, key:'A Minor', color:'linear-gradient(135deg,#f59e0b,#ef4444)', emoji:'⚡', status:'draft', theme:'クライマックス' },
+  { id:5, name:'曲⑤', title:'[曲タイトル未定]', genre:'Power Ballad', dur:5.0, bpm:90, key:'C Major', color:'linear-gradient(135deg,#ec4899,#f59e0b)', emoji:'💖', status:'draft', theme:'感謝・締め' },
+];
+
+let currentSong = 0; // index
+const tags = {};
+
+// ═══ INIT ═══
+function init() {
+  renderSongGrid();
+  renderSidebar();
+  renderSongSelTags('song-sel-tags');
+  renderSongSelTags('suno-song-sel');
+  updateTotalDur();
+  loadAll();
+}
+
+// ═══ SONG GRID ═══
+function renderSongGrid() {
+  const g = document.getElementById('song-grid');
+  g.innerHTML = '';
+  songs.forEach((s, i) => {
+    const progress = s.status === 'done' ? 100 : s.status === 'draft' ? 30 : 0;
+    const statusHtml = s.status === 'done'
+      ? '<span class="badge badge-g">✅ 完成</span>'
+      : '<span class="badge badge-y">🖊 下書き</span>';
+    g.innerHTML += `
+    <div class="song-card ${i===currentSong?'active-song':''}" onclick="selectSong(${i})">
+      <div class="sc-top" style="background:${s.color}">
+        <span class="sc-num">TRACK ${s.id}</span>
+        <span style="font-size:36px">${s.emoji}</span>
+        <span class="sc-dur">${s.dur}分</span>
+      </div>
+      <div class="sc-body">
+        <div class="sc-name">${s.name} — ${s.title}</div>
+        <div class="sc-genre">${s.genre} · ${s.bpm}BPM · ${s.key}</div>
+        <div class="sc-bar"><div class="sc-fill" style="width:${progress}%;background:${s.color}"></div></div>
+        <div style="font-size:12px;color:var(--text2)">テーマ: ${s.theme}</div>
+      </div>
+      <div class="sc-foot">${statusHtml}<button class="btn btn-o btn-sm" onclick="event.stopPropagation();editSong(${i})">編集</button></div>
+    </div>`;
+  });
+}
+
+function renderSidebar() {
+  const el = document.getElementById('sb-list');
+  el.innerHTML = '';
+  songs.forEach((s, i) => {
+    el.innerHTML += `
+    <div class="sb-item" onclick="selectSong(${i});sw('compose',document.querySelectorAll('.nb')[1])">
+      <div class="sb-item-t">${s.emoji} ${s.name}</div>
+      <div class="sb-item-s">${s.title} · ${s.dur}分</div>
+      <div class="pb"><div class="pbf" style="width:${s.status==='done'?100:30}%;background:${s.color}"></div></div>
+    </div>`;
+  });
+}
+
+function renderSongSelTags(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  songs.forEach((s, i) => {
+    const span = document.createElement('span');
+    span.className = 'tag' + (i === currentSong ? ' on' : '');
+    span.textContent = `${s.emoji} ${s.name}`;
+    span.onclick = () => { selectSong(i); el.querySelectorAll('.tag').forEach(t => t.classList.remove('on')); span.classList.add('on'); };
+    el.appendChild(span);
+  });
+}
+
+function selectSong(i) {
+  currentSong = i;
+  const s = songs[i];
+  document.getElementById('c-title').value = s.title.replace('[曲タイトル未定]','');
+  document.getElementById('c-bpm').value = s.bpm;
+  document.getElementById('c-theme').value = s.theme;
+  document.getElementById('lyrics-song-name').textContent = `${s.name} — ${s.title}`;
+  renderSongGrid();
+  renderSidebar();
+}
+
+function editSong(i) {
+  selectSong(i);
+  sw('compose', document.querySelectorAll('.nb')[1]);
+}
+
+// ═══ TOTAL DURATION ═══
+function updateTotalDur() {
+  const total = songs.reduce((a, s) => a + s.dur, 0);
+  document.getElementById('total-dur').textContent = Math.floor(total) + ':' + String(Math.round((total%1)*60)).padStart(2,'0');
+  document.getElementById('total-pb').style.width = Math.min(100, total/30*100) + '%';
+}
+
+// ═══ TAG TOGGLE ═══
+function t(el, group) {
+  el.classList.toggle('on');
+  if (!tags[group]) tags[group] = new Set();
+  const v = el.textContent;
+  tags[group].has(v) ? tags[group].delete(v) : tags[group].add(v);
+}
+function getTags(g) { return tags[g] ? [...tags[g]] : []; }
+
+// ═══ PRESETS ═══
+const presets = {
+  opener: { genre:['Anime Rock','Electronic'], mood:['energetic','intense','uplifting'], inst:['electric guitar','synthesizer','drums','bass'], bpm:155, key:'D Major' },
+  cinematic: { genre:['Cinematic','Orchestral'], mood:['epic','dreamy','emotional'], inst:['orchestral strings','choir','piano','synthesizer'], bpm:128, key:'E Minor' },
+  midtempo: { genre:['J-Pop','Anime Pop'], mood:['emotional','hopeful','nostalgic'], inst:['piano','synthesizer','drums'], bpm:120, key:'G Major' },
+  ballad: { genre:['Ballad','Cinematic'], mood:['melancholic','emotional','nostalgic'], inst:['piano','strings','violin'], bpm:88, key:'C Major' },
+  edm: { genre:['EDM','Electronic','Anime Pop'], mood:['energetic','intense'], inst:['synthesizer','EDM drops','drums','bass'], bpm:140, key:'A Minor' },
+  refrain: { genre:['Anime Pop','J-Pop'], mood:['uplifting','hopeful','dreamy'], inst:['piano','synthesizer','drums'], bpm:130, key:'F Major' },
+};
+
+function applyPreset(key) {
+  const p = presets[key];
+  // タグをリセット
+  document.querySelectorAll('.tag.on').forEach(el => el.classList.remove('on'));
+  tags.genre = new Set(p.genre);
+  tags.mood = new Set(p.mood);
+  tags.inst = new Set(p.inst);
+  // UIに反映
+  document.querySelectorAll('.tag').forEach(el => {
+    const g = el.parentElement.previousElementSibling ? el.parentElement.previousElementSibling.textContent.toLowerCase() : '';
+    ['genre','mood','inst','vocal'].forEach(cat => {
+      if (tags[cat] && tags[cat].has(el.textContent)) el.classList.add('on');
+    });
+  });
+  document.getElementById('c-bpm').value = p.bpm;
+  document.getElementById('c-key').value = p.key;
+  // プリセットカードのUIフィードバック
+  document.querySelectorAll('.preset').forEach(el => el.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  toast('プリセット適用: ' + key);
+}
+
+// ═══ SUNO KIT BUILD ═══
+function buildSunoKit() {
+  const s = songs[currentSong];
+  const genre = getTags('genre').join(', ') || s.genre.toLowerCase();
+  const mood = getTags('mood').join(', ') || 'energetic, emotional';
+  const vocal = getTags('vocal').length ? getTags('vocal').join(', ') : 'female vocalist, anime style, clear voice';
+  const inst = getTags('inst').length ? getTags('inst').join(', ') : 'electric guitar, synthesizer, drums';
+  const bpm = document.getElementById('c-bpm').value || s.bpm;
+  const key = document.getElementById('c-key').value || s.key;
+  const title = document.getElementById('c-title').value || s.title;
+  const theme = document.getElementById('c-theme').value || s.theme;
+
+  // Style Prompt (120文字以内に収める)
+  const styleRaw = `${genre}, ${mood}, ${vocal}, ${inst}, ${bpm}bpm, ${key}, japanese lyrics, anime style`;
+  const style = styleRaw.length > 120 ? styleRaw.substring(0,117)+'...' : styleRaw;
+
+  // Lyrics を結合
+  const intro   = document.getElementById('ly-intro').value;
+  const v1      = document.getElementById('ly-v1').value;
+  const pre     = document.getElementById('ly-pre').value;
+  const chorus  = document.getElementById('ly-chorus').value;
+  const v2      = document.getElementById('ly-v2').value;
+  const bridge  = document.getElementById('ly-bridge').value;
+  const outro   = document.getElementById('ly-outro').value;
+
+  let lyrics = '';
+  if (intro)  lyrics += `[Intro]\n${intro}\n\n`;
+  if (v1)     lyrics += `[Verse]\n${v1}\n\n`;
+  if (pre)    lyrics += `[Pre-Chorus]\n${pre}\n\n`;
+  if (chorus) lyrics += `[Chorus]\n${chorus}\n\n`;
+  if (v2)     lyrics += `[Verse]\n${v2}\n\n`;
+  if (chorus) lyrics += `[Chorus]\n${chorus}\n\n`;
+  if (bridge) lyrics += `[Bridge]\n${bridge}\n\n`;
+  if (chorus) lyrics += `[Chorus]\n${chorus}\n\n`;
+  if (outro)  lyrics += `[Outro]\n${outro}`;
+
+  // デフォルト歌詞（何も入力がなければ）
+  if (!lyrics.trim()) {
+    lyrics = getDefaultLyrics(s, theme);
+  }
+
+  document.getElementById('suno-style').textContent = style;
+  document.getElementById('suno-lyrics').textContent = lyrics.trim();
+  document.getElementById('suno-title-out').textContent = title || `曲 ${currentSong+1} — ${theme}`;
+
+  sw('suno', document.querySelectorAll('.nb')[3]);
+  toast('Suno Kit 生成完了！');
+}
+
+function buildUdioKit() {
+  const s = songs[currentSong];
+  const genre = getTags('genre').join(', ') || s.genre.toLowerCase();
+  const mood = getTags('mood').join(', ') || 'energetic, emotional';
+  const bpm = document.getElementById('c-bpm').value || s.bpm;
+  const key = document.getElementById('c-key').value || s.key;
+  const theme = document.getElementById('c-theme').value || s.theme;
+
+  const prompt = `Genre: ${genre}
+Mood: ${mood}
+Tempo: ${bpm} BPM
+Key: ${key}
+Theme: ${theme}
+Vocal: female vocalist, anime style, japanese lyrics
+Style notes: Anime-inspired, catchy melody, powerful chorus, cinematic production
+Reference: AIris "Refrain Girl" style, J-Pop anime concert sound`;
+
+  document.getElementById('udio-out').textContent = prompt;
+  sw('suno', document.querySelectorAll('.nb')[3]);
+  toast('Udio Kit 生成完了！');
+}
+
+function buildAll5() {
+  const area = document.getElementById('all5-area');
+  const content = document.getElementById('all5-content');
+  area.style.display = 'block';
+  content.innerHTML = '';
+
+  songs.forEach((s, i) => {
+    const styleMap = ['anime rock, energetic, intense', 'cinematic, epic, dreamy', 'j-pop, emotional, hopeful', 'anime rock, powerful, intense', 'power ballad, emotional, melancholic'];
+    const style = `${styleMap[i]}, female vocalist, anime style, japanese lyrics, ${s.bpm}bpm, ${s.key}`;
+    const lyrics = getDefaultLyrics(s, s.theme);
+
+    content.innerHTML += `
+    <div style="margin-bottom:20px;padding:16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:10px">${s.emoji} TRACK ${s.id} — ${s.name}</div>
+      <div class="out-hd"><span class="out-label">STYLE</span><button class="cp-btn" onclick="copyText(this.nextElementSibling)">Copy</button></div>
+      <div class="out" style="margin-bottom:10px;min-height:auto">${style}</div>
+      <div class="out-hd"><span class="out-label">LYRICS</span><button class="cp-btn" onclick="copyText(this.nextElementSibling)">Copy</button></div>
+      <div class="out lyrics" style="font-size:12px">${lyrics}</div>
+    </div>`;
+  });
+  toast('全5曲のKit生成完了！');
+}
+
+function getDefaultLyrics(s, theme) {
+  const templates = {
+    '諦めない': `[Verse]\n朝が来るたび 迷い続けて\nそれでも足は 前を向いてた\n誰かの声が 背中を押した\n今夜 全部 ぶつけてやろう\n\n[Pre-Chorus]\n震える手 握り締めて\nもう後戻りはできない\n\n[Chorus]\n叫べ 諦めない この声を\n夜を切り裂いて 光を掴め\nNO QUIT, NO QUIT 前だけ見て走れ\n一緒に越えよう この夜を——！\n\n[Verse]\n転んでも立ち上がれば\nそれだけで充分だから\n弱さを抱えたままでいい\n共に行こう この先へ\n\n[Chorus]\n叫べ 諦めない この声を\n夜を切り裂いて 光を掴め\nNO QUIT, NO QUIT 前だけ見て走れ\n一緒に越えよう この夜を——！\n\n[Outro]\nありがとう また会おうね\nこの夜は 終わらない...`,
+    '宇宙・未来': `[Intro]\n（宇宙の静寂の中で...）\n\n[Verse]\n銀河の彼方 君の声が\n真っ暗な宇宙に 響いてくる\n星々が踊る この夜に\n私も輝く 光になる\n\n[Chorus]\n星になれ 消えない光に\n宇宙の果て まで届け この歌\nNOVA, NOVA 輝け今夜\n私たちの未来を 照らせ——！\n\n[Bridge]\n恐れないで 暗闇の中\n光を信じて 進んでいけ\n\n[Chorus]\n星になれ 消えない光に\n宇宙の果て まで届け この歌\nNOVA, NOVA 輝け今夜\n私たちの未来を 照らせ——！`,
+    '感情・絆': `[Verse]\nあの日交わした 約束が\nまだ胸の中で 生きている\n離れていても 繋がってる\n君と私の この絆が\n\n[Chorus]\n感じてる 君の温もりを\n心の奥で Feelin' it\nどこにいても 同じ空の下\n一緒にいるから 大丈夫\n\n[Outro]\nこの気持ち ずっと忘れない...`,
+    'クライマックス': `[Verse]\nここまで来た 長い旅路を\n振り返れば 涙が溢れる\n一人じゃなかった ずっと\n君がいたから 戦えた\n\n[Pre-Chorus]\n最後の一曲 全力で\nこの魂 全部込めて\n\n[Chorus]\nDRIVE, DRIVE, DRIVE into tonight\n限界突破 もっと高く\n燃え尽きるまで 走り続けろ\nこれが私の 全力だ——！！\n\n[Outro]\n最高だった... ありがとう！！`,
+    'クライマックス': `[Chorus]\nDRIVE, DRIVE, DRIVE into tonight\n限界突破 もっと高く\n燃え尽きるまで 走り続けろ\nこれが私の 全力だ——！！`,
+    '感謝・締め': `[Verse]\n今夜 最後の曲を\n全部の想いを込めて\n届けたい 君の心に\nこの声が 消えるまで\n\n[Chorus]\nありがとう この瞬間を\n忘れない 君と過ごした時間を\nRefrain, Refrain 繰り返す想い\n永遠に 続く この歌——！\n\n[Bridge]\n（spoken）\n来てくれて ありがとう\nまた会える日まで... ずっと待ってるよ\n\n[Chorus]\nありがとう この瞬間を\n忘れない 君と過ごした時間を\nRefrain, Refrain 繰り返す想い\n永遠に 続く この歌——！\n\n[Outro]\nさようなら... じゃなくて\nまたね——\n（フェードアウト）`,
+  };
+  return templates[theme] || templates['諦めない'];
+}
+
+// ═══ LYRIC GEN ═══
+function genLyric(section) {
+  const theme = document.getElementById('c-theme').value || songs[currentSong].theme;
+  const examples = {
+    intro: `（SE: 歓声・照明点灯）\n光が降り注ぐ この夜に\n始まりの鼓動が 聞こえてくる...`,
+    v1: `朝が来るたび 迷い続けて\nそれでも足は 前を向いてた\n誰かの声が 背中を押した\n今夜 全部 ぶつけてやろう`,
+    pre: `震える手 握り締めて\nもう後戻りはできない`,
+    chorus: `叫べ 諦めない この声を\n夜を切り裂いて 光を掴め\nNO QUIT, NO QUIT 前だけ見て走れ\n一緒に越えよう この夜を——！`,
+    v2: `転んでも立ち上がれば\nそれだけで充分だから\n弱さを抱えたままでいい\n共に行こう この先へ`,
+    bridge: `（spoken）\n諦めないで 必ず届く\nこの声が 君に届くまで...`,
+    outro: `ありがとう また会おうね\nこの夜は 終わらない...（フェードアウト）`,
+  };
+  document.getElementById('ly-' + section).value = examples[section] || `（${section}）\n${theme}に関連する歌詞を入力...`;
+  toast(section + ' を生成しました');
+}
+
+function previewLyrics() {
+  const sections = ['intro','v1','pre','chorus','v2','bridge','outro'];
+  const labels = { intro:'Intro', v1:'Verse', pre:'Pre-Chorus', chorus:'Chorus', v2:'Verse', bridge:'Bridge', outro:'Outro' };
+  let result = '';
+  sections.forEach(s => {
+    const val = document.getElementById('ly-' + s).value.trim();
+    if (val) result += `[${labels[s]}]\n${val}\n\n`;
+  });
+  // chorus repeats
+  const chorus = document.getElementById('ly-chorus').value.trim();
+  if (chorus) {
+    result = result.replace(/\[Bridge\]/, `[Chorus]\n${chorus}\n\n[Bridge]`);
+  }
+  document.getElementById('lyrics-preview').textContent = result.trim() || '歌詞が入力されていません。';
+  toast('プレビュー更新');
+}
+
+// ═══ NAV ═══
+function sw(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('panel-' + id).classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+// ═══ COPY ═══
+function copyText(target) {
+  let text = '';
+  if (typeof target === 'string') {
+    const el = document.getElementById(target);
+    text = el ? (el.value || el.textContent) : '';
+  } else if (target instanceof Element) {
+    text = target.value || target.textContent;
+    // クリック可能な要素の場合
+    if (!text && target.previousElementSibling) text = target.previousElementSibling.textContent;
+  }
+  navigator.clipboard.writeText(text.trim()).then(() => toast('コピーしました！'));
+}
+
+// ═══ SAVE / LOAD ═══
+function exportAll() {
+  const data = {
+    songs,
+    lyrics: {
+      intro: document.getElementById('ly-intro').value,
+      v1:    document.getElementById('ly-v1').value,
+      pre:   document.getElementById('ly-pre').value,
+      chorus:document.getElementById('ly-chorus').value,
+      v2:    document.getElementById('ly-v2').value,
+      bridge:document.getElementById('ly-bridge').value,
+      outro: document.getElementById('ly-outro').value,
+    },
+    compose: {
+      title: document.getElementById('c-title').value,
+      bpm:   document.getElementById('c-bpm').value,
+      key:   document.getElementById('c-key').value,
+      theme: document.getElementById('c-theme').value,
+    },
+    currentSong,
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem('crusha_music_studio', JSON.stringify(data));
+  // ファイルエクスポート
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'crusha-music-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  toast('保存しました！');
+}
+
+function loadAll() {
+  try {
+    const raw = localStorage.getItem('crusha_music_studio');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.lyrics) {
+      Object.keys(d.lyrics).forEach(k => {
+        const el = document.getElementById('ly-' + k);
+        if (el) el.value = d.lyrics[k];
+      });
+    }
+    if (d.compose) {
+      if (d.compose.title) document.getElementById('c-title').value = d.compose.title;
+      if (d.compose.bpm)   document.getElementById('c-bpm').value   = d.compose.bpm;
+      if (d.compose.key)   document.getElementById('c-key').value   = d.compose.key;
+      if (d.compose.theme) document.getElementById('c-theme').value = d.compose.theme;
+    }
+  } catch(e) { /* 初回は無視 */ }
+}
+
+// ═══ TOAST ═══
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = '✅ ' + msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ═══ START ═══
+init();
+</script>
+</body>
+</html>

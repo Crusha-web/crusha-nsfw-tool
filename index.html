@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CRUSHA STUDIO">
+<meta name="description" content="CRUSHA Virtual Live Production Suite — AI-powered anime concert creator">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>CRUSHA STUDIO HUB</title>
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --pink: #ff00aa;
+    --purple: #8b00ff;
+    --gold: #ffd700;
+    --dark: #0a0a1a;
+    --card: rgba(255,255,255,0.05);
+    --glass: rgba(0,245,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+    background: var(--dark);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── 背景アニメーション ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(0,245,255,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(255,0,170,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(139,0,255,0.08) 0%, transparent 60%);
+  }
+
+  .stars {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 30% 45%, rgba(0,245,255,0.6), transparent),
+      radial-gradient(1px 1px at 55% 25%, rgba(255,0,170,0.6), transparent),
+      radial-gradient(1px 1px at 75% 65%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 90% 10%, rgba(0,245,255,0.5), transparent),
+      radial-gradient(1px 1px at 15% 80%, rgba(255,215,0,0.6), transparent),
+      radial-gradient(2px 2px at 60% 90%, rgba(139,0,255,0.5), transparent),
+      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.4), transparent);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.6; }
+    to   { opacity: 1; }
+  }
+
+  /* ── レイアウト ── */
+  .wrapper {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── ヘッダー ── */
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .logo-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    padding: 2px;
+    border-radius: 50px;
+    margin-bottom: 16px;
+  }
+  .logo-inner {
+    background: var(--dark);
+    border-radius: 48px;
+    padding: 6px 20px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(28px, 8vw, 52px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--pink) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── ステータスバー ── */
+  .status-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .status-pill {
+    background: var(--glass);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(0.8); }
+  }
+
+  /* ── ツールカード グリッド ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 32px;
+  }
+
+  .tool-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .tool-card:hover, .tool-card:active {
+    transform: translateY(-3px);
+    border-color: rgba(0,245,255,0.4);
+    box-shadow: 0 12px 40px rgba(0,245,255,0.15);
+  }
+
+  .card-header {
+    padding: 24px 24px 16px;
+    position: relative;
+  }
+
+  .card-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+    padding: 0 24px 20px;
+  }
+
+  .card-features {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .feature-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+  }
+
+  .card-arrow {
+    position: absolute;
+    top: 24px; right: 20px;
+    font-size: 20px;
+    opacity: 0.4;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .tool-card:hover .card-arrow {
+    opacity: 0.9;
+    transform: translateX(4px);
+  }
+
+  /* 個別カラー */
+  .card-video .card-accent { background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+  .card-video .card-tag { background: rgba(0,245,255,0.15); color: var(--cyan); border: 1px solid rgba(0,245,255,0.3); }
+  .card-video .card-title { color: var(--cyan); }
+
+  .card-music .card-accent { background: linear-gradient(90deg, var(--pink), var(--gold)); }
+  .card-music .card-tag { background: rgba(255,0,170,0.15); color: var(--pink); border: 1px solid rgba(255,0,170,0.3); }
+  .card-music .card-title { color: var(--pink); }
+
+  .card-nsfw .card-accent { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+  .card-nsfw .card-tag { background: rgba(139,0,255,0.15); color: #bb88ff; border: 1px solid rgba(139,0,255,0.3); }
+  .card-nsfw .card-title { color: #bb88ff; }
+
+  .card-voice .card-accent { background: linear-gradient(90deg, #ff6b2d, var(--gold)); }
+  .card-voice .card-tag { background: rgba(255,107,45,0.15); color: #ff8c55; border: 1px solid rgba(255,107,45,0.3); }
+  .card-voice .card-title { color: #ff8c55; }
+
+  .card-vgen .card-accent { background: linear-gradient(90deg, #00ff88, var(--cyan)); }
+  .card-vgen .card-tag { background: rgba(0,255,136,0.15); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+  .card-vgen .card-title { color: #00ff88; }
+
+  .card-edit .card-accent { background: linear-gradient(90deg, #ff8c00, var(--gold)); }
+  .card-edit .card-tag { background: rgba(255,140,0,0.15); color: #ff8c00; border: 1px solid rgba(255,140,0,0.3); }
+  .card-edit .card-title { color: #ff8c00; }
+
+  .card-export .card-accent { background: linear-gradient(90deg, var(--gold), var(--green)); }
+  .card-export .card-tag { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+  .card-export .card-title { color: var(--gold); }
+
+  /* ── パイプライン進捗 ── */
+  .pipeline-section {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .pipeline::-webkit-scrollbar { display: none; }
+
+  .pipe-step {
+    flex: 0 0 auto;
+    text-align: center;
+    position: relative;
+  }
+
+  .pipe-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin: 0 auto 6px;
+    background: rgba(255,255,255,0.03);
+    position: relative;
+  }
+
+  .pipe-step.active .pipe-dot {
+    border-color: var(--cyan);
+    background: rgba(0,245,255,0.1);
+    box-shadow: 0 0 12px rgba(0,245,255,0.3);
+  }
+  .pipe-step.done .pipe-dot {
+    border-color: #00ff88;
+    background: rgba(0,255,136,0.1);
+  }
+
+  .pipe-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    max-width: 60px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pipe-step.active .pipe-label { color: var(--cyan); }
+  .pipe-step.done .pipe-label { color: #00ff88; }
+
+  .pipe-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    min-width: 20px;
+    margin-top: -22px;
+  }
+  .pipe-line.done { background: rgba(0,255,136,0.4); }
+
+  /* ── スマホ設定セクション ── */
+  .access-section {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(135deg, rgba(0,245,255,0.06), rgba(255,0,170,0.06));
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .access-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .access-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .deploy-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .deploy-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+
+  .step-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    padding-top: 3px;
+  }
+
+  .step-text code {
+    background: rgba(0,245,255,0.1);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    color: var(--cyan);
+    font-family: 'Consolas', monospace;
+  }
+
+  .url-display {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,245,255,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: all;
+  }
+
+  /* ── PWAインストールボタン ── */
+  #install-btn {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+  }
+  #install-btn:hover { opacity: 0.9; }
+  #install-btn.visible { display: block; }
+
+  /* ── フッター ── */
+  footer {
+    text-align: center;
+    color: rgba(255,255,255,0.2);
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  /* ── モバイル最適化 ── */
+  @media (max-width: 480px) {
+    .tools-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 32px; }
+    .pipeline-section { padding: 16px; }
+    .access-section { padding: 16px; }
+  }
+
+  /* ── タップエフェクト ── */
+  .tool-card:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="stars"></div>
+
+<div class="wrapper">
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="logo-badge">
+      <div class="logo-inner">CRUSHA PRODUCTION SYSTEM</div>
+    </div>
+    <h1>CRUSHA<br>STUDIO HUB</h1>
+    <p class="subtitle">Virtual Live Concert Production Suite</p>
+  </header>
+
+  <!-- ステータス -->
+  <div class="status-bar">
+    <div class="status-pill"><span class="status-dot"></span> SYSTEM ONLINE</div>
+    <div class="status-pill">🎌 AI-POWERED</div>
+    <div class="status-pill">📱 PWA READY</div>
+    <div class="status-pill">☁️ CLOUD HOSTED</div>
+  </div>
+
+  <!-- PWAインストールボタン -->
+  <button id="install-btn">📲 ホーム画面に追加してインストール</button>
+
+  <!-- ツールカード -->
+  <div class="tools-grid">
+
+    <a href="CRUSHA-VIDEO-STUDIO-v1.html" class="tool-card card-video">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">🎬</span>
+        <div class="card-tag">STAGE 1-6 PIPELINE</div>
+        <div class="card-title">VIDEO STUDIO</div>
+      </div>
+      <p class="card-desc">キャラ生成→声優→音楽→動画→編集→書き出しまで全工程を1つのダッシュボードで管理。AIrisスタイルのバーチャルライブを制作。</p>
+      <div class="card-features">
+        <span class="feature-chip">ComfyUI連携</span>
+        <span class="feature-chip">Wan2.2</span>
+        <span class="feature-chip">VOICEVOX</span>
+        <span class="feature-chip">FFmpeg</span>
+        <span class="feature-chip">6ステージ</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-MUSIC-STUDIO-v1.html" class="tool-card card-music">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">🎵</span>
+        <div class="card-tag">STAGE 3 MUSIC</div>
+        <div class="card-title">MUSIC STUDIO</div>
+      </div>
+      <p class="card-desc">5曲フルセットリスト完備。Suno AI即貼りKit・歌詞エディタ・スタイル辞典。ライブ用楽曲を一気に生成。</p>
+      <div class="card-features">
+        <span class="feature-chip">Suno AI</span>
+        <span class="feature-chip">5曲セット</span>
+        <span class="feature-chip">歌詞エディタ</span>
+        <span class="feature-chip">スタイル辞典</span>
+        <span class="feature-chip">Udio対応</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-NSFW-SUPREME-v13.html" class="tool-card card-nsfw">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">✨</span>
+        <div class="card-tag">CHARACTER GEN</div>
+        <div class="card-title">CRUSHA SUPREME</div>
+      </div>
+      <p class="card-desc">CRUSHAキャラクター専用プロンプト生成。フェレット耳固定・ターコイズヘア・少女漫画目。SD/ComfyUI対応。</p>
+      <div class="card-features">
+        <span class="feature-chip">SD XL</span>
+        <span class="feature-chip">illustriousXL</span>
+        <span class="feature-chip">LoRA設定</span>
+        <span class="feature-chip">CRUSHA v1</span>
+        <span class="feature-chip">プロンプト生成</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-VOICE-STUDIO-v1.html" class="tool-card card-voice">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">🎙️</span>
+        <div class="card-tag">STAGE 2 VOICE / MC</div>
+        <div class="card-title">VOICE STUDIO</div>
+      </div>
+      <p class="card-desc">6MCセグメントのスクリプトエディタ。VOICEVOX/AivisSpeech感情スライダー、RVCバッチコマンド生成、CRUSHA専用ボイス変換対応。</p>
+      <div class="card-features">
+        <span class="feature-chip">VOICEVOX</span>
+        <span class="feature-chip">AivisSpeech</span>
+        <span class="feature-chip">RVC変換</span>
+        <span class="feature-chip">6MCセグメント</span>
+        <span class="feature-chip">感情スライダー</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-VIDEO-GEN-STUDIO-v1.html" class="tool-card card-vgen">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">🎞️</span>
+        <div class="card-tag">STAGE 4 VIDEO GEN</div>
+        <div class="card-title">VIDEO GEN STUDIO</div>
+      </div>
+      <p class="card-desc">Wan2.2/AnimateDiff向けComfyUIワークフロービルダー。ショットリスト管理、プロンプト一括生成、バッチAPI送信まで完全対応。</p>
+      <div class="card-features">
+        <span class="feature-chip">Wan2.2</span>
+        <span class="feature-chip">AnimateDiff</span>
+        <span class="feature-chip">ComfyUI API</span>
+        <span class="feature-chip">I2V/T2V</span>
+        <span class="feature-chip">バッチ生成</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-EDIT-STUDIO-v1.html" class="tool-card card-edit">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">✂️</span>
+        <div class="card-tag">STAGE 5 EDIT</div>
+        <div class="card-title">EDIT STUDIO</div>
+      </div>
+      <p class="card-desc">ビジュアルタイムラインでクリップを並べ、FFmpegコマンドを自動生成。BGMミックス・カラーグレーディング・EDL/FCP XML出力まで対応。</p>
+      <div class="card-features">
+        <span class="feature-chip">FFmpeg</span>
+        <span class="feature-chip">タイムライン</span>
+        <span class="feature-chip">カラーグレーディング</span>
+        <span class="feature-chip">EDL出力</span>
+        <span class="feature-chip">FCP XML</span>
+      </div>
+    </a>
+
+    <a href="CRUSHA-EXPORT-STUDIO-v1.html" class="tool-card card-export">
+      <div class="card-accent"></div>
+      <span class="card-arrow">→</span>
+      <div class="card-header">
+        <span class="card-icon">🚀</span>
+        <div class="card-tag">STAGE 6 EXPORT</div>
+        <div class="card-title">EXPORT STUDIO</div>
+      </div>
+      <p class="card-desc">配信前チェックリスト、YouTubeメタデータ、サムネプロンプト生成、SNS投稿テンプレートまで。バーチャルライブを世界に公開する最終工程。</p>
+      <div class="card-features">
+        <span class="feature-chip">公開チェックリスト</span>
+        <span class="feature-chip">メタデータ</span>
+        <span class="feature-chip">サムネ生成</span>
+        <span class="feature-chip">SNS投稿</span>
+        <span class="feature-chip">YouTube</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- パイプライン進捗 -->
+  <div class="pipeline-section">
+    <div class="section-title">🎪 VIRTUAL LIVE PRODUCTION PIPELINE</div>
+    <div class="pipeline">
+      <div class="pipe-step done">
+        <div class="pipe-dot">🎵</div>
+        <div class="pipe-label">Music</div>
+      </div>
+      <div class="pipe-line done"></div>
+      <div class="pipe-step done">
+        <div class="pipe-dot">🎨</div>
+        <div class="pipe-label">Character</div>
+      </div>
+      <div class="pipe-line done"></div>
+      <div class="pipe-step done">
+        <div class="pipe-dot">🎙️</div>
+        <div class="pipe-label">Voice MC</div>
+      </div>
+      <div class="pipe-line done"></div>
+      <div class="pipe-step done">
+        <div class="pipe-dot">🎞️</div>
+        <div class="pipe-label">Video Gen</div>
+      </div>
+      <div class="pipe-line done"></div>
+      <div class="pipe-step done">
+        <div class="pipe-dot">✂️</div>
+        <div class="pipe-label">Edit</div>
+      </div>
+      <div class="pipe-line done"></div>
+      <div class="pipe-step active">
+        <div class="pipe-dot">🚀</div>
+        <div class="pipe-label">Export</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- スマホアクセス情報 -->
+  <div class="access-section">
+    <div class="access-title">📱 スマホ24時間アクセス設定</div>
+    <p class="access-desc">PCをシャットダウンしてもスマホからアクセスできるよう、GitHub Pagesにデプロイします。以下の手順で一度だけ設定すれば永久に使えます。</p>
+    <div class="deploy-steps">
+      <div class="deploy-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>GitHubにリポジトリ作成</strong><br>github.com → New repository → 名前を<code>crusha-studio</code>に設定 → Public → Create</div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>ファイルをアップロード</strong><br>このフォルダの全HTML + manifest.json + sw.js を「Add file → Upload files」でドラッグ&ドロップ</div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>GitHub Pages有効化</strong><br>Settings → Pages → Branch: <code>main</code> → /root → Save</div>
+      </div>
+      <div class="deploy-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>スマホからアクセス</strong><br>スマホブラウザで下記URLを開き、「ホーム画面に追加」でアプリとしてインストール完了</div>
+      </div>
+    </div>
+    <div class="url-display" id="site-url" onclick="copyUrl()">
+      🌐 https://[あなたのGitHubユーザー名].github.io/crusha-studio/
+    </div>
+  </div>
+
+  <footer>
+    CRUSHA VIRTUAL LIVE PRODUCTION SYSTEM<br>
+    Built with ❤️ by CRUSHA × Claude AI
+  </footer>
+
+</div>
+
+<!-- PWA: manifest + service worker -->
+<script>
+  // PWAインストールプロンプト
+  let deferredPrompt;
+  const installBtn = document.getElementById('install-btn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.add('visible');
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installBtn.classList.remove('visible');
+    }
+    deferredPrompt = null;
+  });
+
+  // Service Worker登録
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.log('SW error:', err));
+    });
+  }
+
+  // URL表示（現在のホスト名から自動判定）
+  function updateUrl() {
+    const el = document.getElementById('site-url');
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.hostname !== '') {
+      el.textContent = '🌐 ' + location.origin + location.pathname;
+    }
+  }
+  updateUrl();
+
+  function copyUrl() {
+    const el = document.getElementById('site-url');
+    const text = el.textContent.replace('🌐 ', '').trim();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        el.style.borderColor = '#00ff88';
+        setTimeout(() => el.style.borderColor = '', 1500);
+      });
+    }
+  }
+
+  // タッチフィードバック
+  document.querySelectorAll('.tool-card').forEach(card => {
+    card.addEventListener('touchstart', () => card.classList.add('touch'));
+    card.addEventListener('touchend', () => card.classList.remove('touch'));
+  });
+</script>
+
+</body>
+</html>

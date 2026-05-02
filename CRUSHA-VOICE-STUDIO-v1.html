@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUSHA VOICE STUDIO v1</title>
+<style>
+:root {
+  --bg: #080814;
+  --panel: #0f0f1e;
+  --card: #141428;
+  --border: rgba(255,255,255,0.08);
+  --cyan: #00f5ff;
+  --pink: #ff00aa;
+  --purple: #8b00ff;
+  --gold: #ffd700;
+  --green: #00ff88;
+  --text: #e8e8f0;
+  --muted: rgba(255,255,255,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Hiragino Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── ヘッダー ── */
+.header {
+  background: linear-gradient(135deg, #0d0d20, #1a0828);
+  border-bottom: 1px solid rgba(0,245,255,0.15);
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.header-left { display:flex; align-items:center; gap:14px; }
+.logo { font-size:22px; font-weight:900; background:linear-gradient(135deg,var(--cyan),var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.5px; }
+.stage-badge { background:rgba(0,245,255,0.12); border:1px solid rgba(0,245,255,0.3); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--cyan); letter-spacing:2px; }
+.header-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.btn { padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-size:12px; font-weight:700; letter-spacing:1px; transition:all .2s; }
+.btn-primary { background:linear-gradient(135deg,var(--cyan),var(--purple)); color:#fff; }
+.btn-secondary { background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); }
+.btn:hover { opacity:.85; transform:translateY(-1px); }
+
+/* ── タブ ── */
+.tabs { display:flex; gap:0; border-bottom:1px solid var(--border); background:var(--panel); padding:0 24px; overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { padding:14px 20px; font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .2s; letter-spacing:.5px; }
+.tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+.tab:hover:not(.active) { color:var(--text); }
+
+/* ── メインレイアウト ── */
+.main { display:flex; gap:0; height:calc(100vh - 113px); overflow:hidden; }
+.sidebar { width:260px; flex:0 0 260px; background:var(--panel); border-right:1px solid var(--border); overflow-y:auto; padding:16px; }
+.content { flex:1; overflow-y:auto; padding:20px 24px; }
+
+/* ── サイドバー ── */
+.sidebar-title { font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; padding-left:4px; }
+.segment-list { display:flex; flex-direction:column; gap:4px; margin-bottom:20px; }
+.seg-item {
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:10px 12px; cursor:pointer; transition:all .2s;
+  display:flex; align-items:center; gap:10px;
+}
+.seg-item:hover { border-color:rgba(0,245,255,0.3); }
+.seg-item.active { border-color:var(--cyan); background:rgba(0,245,255,0.06); }
+.seg-num { width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex:0 0 auto; }
+.seg-item.active .seg-num { background:var(--cyan); color:#000; }
+.seg-info { flex:1; min-width:0; }
+.seg-name { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.seg-time { font-size:10px; color:var(--muted); }
+.seg-status { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.1); flex:0 0 auto; }
+.seg-status.done { background:var(--green); box-shadow:0 0 6px var(--green); }
+
+/* ── セクション ── */
+.section { margin-bottom:24px; }
+.section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.section-title { font-size:13px; font-weight:700; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; }
+.section-desc { font-size:11px; color:var(--muted); }
+
+/* ── カード ── */
+.card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; }
+.card-title { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+
+/* ── フォームUI ── */
+label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; letter-spacing:.5px; }
+input[type=text], input[type=number], select, textarea {
+  width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); padding:9px 12px; font-size:13px; font-family:inherit;
+  transition:border-color .2s; outline:none;
+}
+input:focus, select:focus, textarea:focus { border-color:rgba(0,245,255,0.4); }
+select option { background:#1a1a2e; }
+textarea { resize:vertical; line-height:1.6; }
+
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-group { margin-bottom:12px; }
+
+/* ── スクリプトエディタ ── */
+.script-editor-wrap { position:relative; }
+.script-editor {
+  width:100%; min-height:180px; background:rgba(0,0,0,0.3);
+  border:1px solid var(--border); border-radius:10px;
+  color:var(--text); padding:14px; font-size:14px; font-family:inherit;
+  resize:vertical; line-height:1.8; transition:border-color .2s; outline:none;
+}
+.script-editor:focus { border-color:rgba(0,245,255,0.4); }
+.editor-toolbar { display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+.tool-btn {
+  padding:4px 10px; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+  border-radius:6px; color:var(--muted); font-size:11px; cursor:pointer; transition:all .2s;
+}
+.tool-btn:hover { border-color:rgba(0,245,255,0.3); color:var(--cyan); }
+
+.char-count { position:absolute; bottom:10px; right:12px; font-size:10px; color:var(--muted); pointer-events:none; }
+
+/* ── テンプレートグリッド ── */
+.template-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px; }
+.template-card {
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  border-radius:10px; padding:12px; cursor:pointer; transition:all .2s;
+}
+.template-card:hover { border-color:rgba(0,245,255,0.3); background:rgba(0,245,255,0.04); }
+.template-card:active { transform:scale(.98); }
+.t-tag { font-size:10px; color:var(--cyan); margin-bottom:6px; letter-spacing:1px; }
+.t-title { font-size:12px; font-weight:700; margin-bottom:4px; }
+.t-preview { font-size:11px; color:var(--muted); line-height:1.4; }
+
+/* ── 感情スライダー ── */
+.emotion-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.emotion-item label { display:flex; justify-content:space-between; }
+.emotion-val { color:var(--cyan); font-weight:700; }
+input[type=range] {
+  width:100%; height:4px; -webkit-appearance:none; appearance:none;
+  background:rgba(255,255,255,0.1); border-radius:2px; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:var(--cyan); border:2px solid var(--bg); box-shadow:0 0 6px rgba(0,245,255,0.5);
+}
+
+/* ── VOICEVOX設定 ── */
+.voice-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
+.voice-card {
+  background:rgba(255,255,255,0.03); border:2px solid var(--border);
+  border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; transition:all .2s;
+}
+.voice-card.selected { border-color:var(--cyan); background:rgba(0,245,255,0.06); }
+.voice-card:hover:not(.selected) { border-color:rgba(255,255,255,0.2); }
+.voice-avatar { font-size:32px; margin-bottom:8px; }
+.voice-name { font-size:12px; font-weight:700; margin-bottom:2px; }
+.voice-style { font-size:10px; color:var(--muted); }
+.voice-badge { display:inline-block; font-size:9px; padding:2px 6px; border-radius:6px; margin-top:4px; }
+.badge-vvox { background:rgba(0,245,255,0.15); color:var(--cyan); }
+.badge-sbv2 { background:rgba(255,0,170,0.15); color:var(--pink); }
+.badge-rvc { background:rgba(139,0,255,0.15); color:#bb88ff; }
+
+/* ── タイムライン ── */
+.timeline { position:relative; padding-left:24px; }
+.timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:linear-gradient(180deg,var(--cyan),var(--purple)); border-radius:1px; }
+.tl-item { position:relative; margin-bottom:14px; }
+.tl-dot { position:absolute; left:-20px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid var(--cyan); background:var(--bg); }
+.tl-item.done .tl-dot { background:var(--cyan); }
+.tl-content { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+.tl-time { font-size:10px; color:var(--cyan); font-weight:700; margin-bottom:3px; }
+.tl-title { font-size:13px; font-weight:700; margin-bottom:3px; }
+.tl-desc { font-size:11px; color:var(--muted); }
+
+/* ── 出力プレビュー ── */
+.output-box {
+  background:rgba(0,0,0,0.4); border:1px solid rgba(0,245,255,0.2);
+  border-radius:10px; padding:16px; font-family:'Consolas',monospace;
+  font-size:13px; line-height:1.8; color:var(--text); white-space:pre-wrap;
+  max-height:300px; overflow-y:auto;
+}
+.output-box .tag { color:var(--cyan); font-weight:700; }
+.output-box .emotion { color:var(--pink); }
+.output-box .pause { color:var(--gold); }
+
+/* ── パラメーター表示 ── */
+.param-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:8px; }
+.param-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center; }
+.param-val { font-size:20px; font-weight:900; color:var(--cyan); }
+.param-label { font-size:10px; color:var(--muted); margin-top:2px; }
+
+/* ── コマンドボックス ── */
+.cmd-box {
+  background:#000; border:1px solid rgba(0,245,255,0.2); border-radius:8px;
+  padding:12px 14px; font-family:'Consolas',monospace; font-size:12px;
+  color:#00ff88; overflow-x:auto; white-space:nowrap;
+}
+
+/* ── タブコンテンツ ── */
+.tab-content { display:none; height:100%; }
+.tab-content.active { display:block; }
+
+/* ── ピル通知 ── */
+.pill { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+.pill-cyan { background:rgba(0,245,255,0.15); color:var(--cyan); }
+.pill-pink { background:rgba(255,0,170,0.15); color:var(--pink); }
+.pill-green { background:rgba(0,255,136,0.15); color:var(--green); }
+.pill-gold { background:rgba(255,215,0,0.15); color:var(--gold); }
+
+/* ── コピーボタン ── */
+.copy-btn { position:absolute; top:8px; right:8px; background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.3); border-radius:6px; padding:4px 8px; font-size:10px; color:var(--cyan); cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(0,245,255,0.2); }
+
+/* ── 生成ボタン ── */
+.gen-btn { width:100%; padding:12px; background:linear-gradient(135deg,var(--pink),var(--purple)); border:none; border-radius:10px; color:#fff; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:1px; transition:all .2s; margin-top:8px; }
+.gen-btn:hover { opacity:.9; transform:translateY(-1px); }
+.gen-btn-cyan { background:linear-gradient(135deg,var(--cyan),var(--purple)); }
+
+/* スクロールバー */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+
+/* モバイル対応 */
+@media(max-width:768px) {
+  .sidebar { display:none; }
+  .form-row, .form-row-3 { grid-template-columns:1fr; }
+  .emotion-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🎙️ CRUSHA VOICE STUDIO</div>
+    <div class="stage-badge">STAGE 2 — VOICE & MC</div>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-secondary" onclick="saveAll()">💾 保存</button>
+    <button class="btn btn-secondary" onclick="exportScripts()">📄 全スクリプト出力</button>
+    <button class="btn btn-primary" onclick="exportVoicevox()">🎙️ VOICEVOX用出力</button>
+  </div>
+</div>
+
+<!-- タブ -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('mc')">🎤 MCスクリプト</div>
+  <div class="tab" onclick="switchTab('voice')">🔊 音声設定</div>
+  <div class="tab" onclick="switchTab('rvc')">🎛️ RVC設定</div>
+  <div class="tab" onclick="switchTab('template')">📝 テンプレート</div>
+  <div class="tab" onclick="switchTab('export')">📤 書き出し</div>
+</div>
+
+<div class="main">
+
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <div class="sidebar-title">🎪 ライブセグメント</div>
+    <div class="segment-list" id="segmentList">
+      <!-- JS生成 -->
+    </div>
+    <div class="sidebar-title">📊 進捗</div>
+    <div class="param-grid">
+      <div class="param-item">
+        <div class="param-val" id="doneCount">0</div>
+        <div class="param-label">完成</div>
+      </div>
+      <div class="param-item">
+        <div class="param-val">6</div>
+        <div class="param-label">合計</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="content">
+
+    <!-- ── タブ1: MCスクリプト ── -->
+    <div id="tab-mc" class="tab-content active">
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-title" id="segTitle">SE G 0 1 — オープニング</div>
+            <div class="section-desc" id="segTimeRange">00:00〜01:30 / MCトーク約90秒</div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <button class="btn btn-secondary" onclick="prevSeg()">← 前</button>
+            <button class="btn btn-secondary" onclick="nextSeg()">次 →</button>
+          </div>
+        </div>
+
+        <!-- スクリプトエディタ -->
+        <div class="card">
+          <div class="card-title">📝 MCスクリプトエディタ</div>
+          <div class="editor-toolbar">
+            <button class="tool-btn" onclick="insertTag('[間:1.0]')">⏸ 間1秒</button>
+            <button class="tool-btn" onclick="insertTag('[間:0.5]')">⏸ 間0.5秒</button>
+            <button class="tool-btn" onclick="insertTag('[笑い]')">😄 笑い</button>
+            <button class="tool-btn" onclick="insertTag('[感嘆]')">✨ 感嘆</button>
+            <button class="tool-btn" onclick="insertTag('[ささやき]')">🌸 ささやき</button>
+            <button class="tool-btn" onclick="insertTag('[元気]')">⚡ 元気</button>
+            <button class="tool-btn" onclick="insertTag('[感動]')">💖 感動</button>
+            <button class="tool-btn" onclick="clearScript()">🗑 クリア</button>
+          </div>
+          <div class="script-editor-wrap">
+            <textarea class="script-editor" id="scriptEditor" rows="10" placeholder="MCトークスクリプトを入力...&#10;&#10;タグ例：[間:1.0] [笑い] [感嘆] [ささやき]" oninput="updateCharCount()"></textarea>
+            <div class="char-count" id="charCount">0文字</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="gen-btn" onclick="generateScript()">✨ AIスクリプト生成</button>
+            <button class="gen-btn gen-btn-cyan" style="width:auto; padding:12px 20px;" onclick="markDone()">✅ 完了</button>
+          </div>
+        </div>
+
+        <!-- 感情パラメーター -->
+        <div class="card">
+          <div class="card-title">🎭 感情パラメーター</div>
+          <div class="emotion-grid">
+            <div class="emotion-item">
+              <label>元気・テンション <span class="emotion-val" id="val-energy">75</span></label>
+              <input type="range" min="0" max="100" value="75" id="sl-energy" oninput="updateEmotion('energy',this.value)">
+            </div>
+            <div class="emotion-item">
+              <label>感情・深み <span class="emotion-val" id="val-emotion">60</span></label>
+              <input type="range" min="0" max="100" value="60" id="sl-emotion" oninput="updateEmotion('emotion',this.value)">
+            </div>
+            <div class="emotion-item">
+              <label>話速 <span class="emotion-val" id="val-speed">1.0</span>x</label>
+              <input type="range" min="5" max="20" value="10" id="sl-speed" oninput="updateSpeed(this.value)">
+            </div>
+            <div class="emotion-item">
+              <label>ピッチ <span class="emotion-val" id="val-pitch">0</span></label>
+              <input type="range" min="-5" max="5" value="0" id="sl-pitch" oninput="updateEmotion('pitch',this.value)">
+            </div>
+            <div class="emotion-item">
+              <label>イントネーション <span class="emotion-val" id="val-intonation">1.0</span></label>
+              <input type="range" min="0" max="20" value="10" id="sl-intonation" oninput="updateIntonation(this.value)">
+            </div>
+            <div class="emotion-item">
+              <label>音量 <span class="emotion-val" id="val-volume">1.0</span></label>
+              <input type="range" min="0" max="20" value="10" id="sl-volume" oninput="updateVolume(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <!-- プレビュー -->
+        <div class="card" style="position:relative;">
+          <div class="card-title">👁 スクリプトプレビュー（VOICEVOX形式）</div>
+          <button class="copy-btn" onclick="copyPreview()">📋 コピー</button>
+          <div class="output-box" id="previewBox">スクリプトを入力するとここにプレビューが表示されます。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── タブ2: 音声設定 ── -->
+    <div id="tab-voice" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">VOICEVOX / Style-BERT-VITS2 設定</div>
+            <div class="section-desc">CRUSHAキャラクターの声を設定する</div>
+          </div>
+        </div>
+
+        <!-- VOICEVOXキャラ選択 -->
+        <div class="card">
+          <div class="card-title">🎤 音声エンジン選択</div>
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="form-group">
+              <label>エンジン</label>
+              <select id="engineSelect" onchange="updateEngine()">
+                <option value="voicevox">VOICEVOX</option>
+                <option value="sbv2">Style-BERT-VITS2</option>
+                <option value="aivis">AivisSpeech</option>
+                <option value="coeiroink">COEIROINK</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>APIポート</label>
+              <input type="text" id="apiPort" value="50021" placeholder="50021">
+            </div>
+          </div>
+
+          <div class="card-title">🎭 キャラクター選択</div>
+          <div class="voice-cards" id="voiceCards">
+            <!-- JS生成 -->
+          </div>
+        </div>
+
+        <!-- 詳細パラメーター -->
+        <div class="card">
+          <div class="card-title">🎛 詳細パラメーター</div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>話速 (speedScale)</label>
+              <input type="number" id="speedScale" value="1.0" step="0.05" min="0.5" max="2.0">
+            </div>
+            <div class="form-group">
+              <label>音高 (pitchScale)</label>
+              <input type="number" id="pitchScale" value="0.0" step="0.05" min="-0.15" max="0.15">
+            </div>
+            <div class="form-group">
+              <label>抑揚 (intonationScale)</label>
+              <input type="number" id="intonationScale" value="1.0" step="0.1" min="0.0" max="2.0">
+            </div>
+            <div class="form-group">
+              <label>音量 (volumeScale)</label>
+              <input type="number" id="volumeScale" value="1.0" step="0.1" min="0.0" max="2.0">
+            </div>
+            <div class="form-group">
+              <label>開始無音 (prePhonemeLength)</label>
+              <input type="number" id="prePhoneme" value="0.1" step="0.05" min="0.0" max="1.5">
+            </div>
+            <div class="form-group">
+              <label>終了無音 (postPhonemeLength)</label>
+              <input type="number" id="postPhoneme" value="0.1" step="0.05" min="0.0" max="1.5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>出力サンプリングレート</label>
+            <select id="sampleRate">
+              <option value="24000">24000 Hz (VOICEVOX標準)</option>
+              <option value="44100">44100 Hz (高品質)</option>
+              <option value="48000">48000 Hz (放送品質)</option>
+            </select>
+          </div>
+          <button class="gen-btn gen-btn-cyan" onclick="applyVoiceSettings()">✅ 設定を全セグメントに適用</button>
+        </div>
+
+        <!-- APIコマンド -->
+        <div class="card">
+          <div class="card-title">🖥 VOICEVOX API コマンド例</div>
+          <div style="margin-bottom:8px;">
+            <label>テキスト合成（curl）</label>
+            <div class="cmd-box" id="curlCmd">curl -s -X POST "http://localhost:50021/audio_query?speaker=2&text=こんにちは" | curl -s -X POST -H "Content-Type: application/json" -d @- "http://localhost:50021/synthesis?speaker=2" > output.wav</div>
+          </div>
+          <div>
+            <label>バッチ処理スクリプト（Python）</label>
+            <div class="cmd-box" style="white-space:pre;">import requests, json
+URL = "http://localhost:50021"
+speaker_id = 2  # キャラクターID
+
+def tts(text, filename):
+    query = requests.post(f"{URL}/audio_query",
+        params={"speaker": speaker_id, "text": text}).json()
+    wav = requests.post(f"{URL}/synthesis",
+        params={"speaker": speaker_id},
+        data=json.dumps(query)).content
+    open(filename, "wb").write(wav)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── タブ3: RVC設定 ── -->
+    <div id="tab-rvc" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">RVC 音声変換設定</div>
+            <div class="section-desc">VOICEVOX音声をCRUSHAボイスに変換</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔁 変換フロー</div>
+          <div class="timeline">
+            <div class="tl-item done">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-time">STEP 1</div>
+                <div class="tl-title">テキスト → VOICEVOX合成</div>
+                <div class="tl-desc">スクリプトをWAVファイルに変換</div>
+              </div>
+            </div>
+            <div class="tl-item done">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-time">STEP 2</div>
+                <div class="tl-title">WAV → RVC変換</div>
+                <div class="tl-desc">CRUSHAモデルで声質変換</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-time">STEP 3</div>
+                <div class="tl-title">出力 → 動画タイムラインに配置</div>
+                <div class="tl-desc">Stage 4/5 で使用</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎛 RVC パラメーター</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>モデルパス (.pth)</label>
+              <input type="text" id="rvcModel" value="models/crusha_v1.pth" placeholder="models/crusha_v1.pth">
+            </div>
+            <div class="form-group">
+              <label>インデックスパス (.index)</label>
+              <input type="text" id="rvcIndex" value="models/crusha_v1.index" placeholder="models/crusha_v1.index">
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>ピッチシフト (semitones)</label>
+              <input type="number" id="rvcPitch" value="0" min="-24" max="24">
+            </div>
+            <div class="form-group">
+              <label>インデックス比率</label>
+              <input type="number" id="rvcIndexRate" value="0.75" step="0.05" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>フィルター半径</label>
+              <input type="number" id="rvcFilter" value="3" min="0" max="7">
+            </div>
+            <div class="form-group">
+              <label>音量エンベロープ</label>
+              <input type="number" id="rvcEnvelope" value="0.25" step="0.05" min="0" max="1">
+            </div>
+            <div class="form-group">
+              <label>ピッチ抽出 (f0)</label>
+              <select id="rvcF0">
+                <option value="rmvpe">rmvpe（推奨）</option>
+                <option value="harvest">harvest</option>
+                <option value="crepe">crepe</option>
+                <option value="pm">pm（高速）</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>保護率</label>
+              <input type="number" id="rvcProtect" value="0.33" step="0.01" min="0" max="0.5">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🖥 RVC バッチ変換コマンド</div>
+          <div class="cmd-box" id="rvcCmd">python infer-web.py --f0up_key 0 --input_path ./mc_wav/ --index_rate 0.75 --filter_radius 3 --rms_mix_rate 0.25 --protect 0.33 --hop_length 128 --f0method rmvpe --opt_path ./mc_rvc_out/ --model_name crusha_v1.pth --index_path crusha_v1.index --device cuda:0 --is_half True</div>
+          <button class="gen-btn gen-btn-cyan" onclick="generateRvcCmd()" style="margin-top:10px;">🔄 コマンド更新</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── タブ4: テンプレート ── -->
+    <div id="tab-template" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">MCトーク テンプレート集</div>
+            <div class="section-desc">クリックでエディタに挿入</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎪 オープニング系</div>
+          <div class="template-grid" id="tmpl-opening"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎵 曲間MC系</div>
+          <div class="template-grid" id="tmpl-between"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">💖 感情系・盛り上げ</div>
+          <div class="template-grid" id="tmpl-emotion"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🌙 エンディング系</div>
+          <div class="template-grid" id="tmpl-ending"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── タブ5: 書き出し ── -->
+    <div id="tab-export" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">スクリプト 書き出し</div>
+            <div class="section-desc">全セグメントをまとめて出力</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 全セグメント スクリプト一覧</div>
+          <div id="allScriptsOutput" class="output-box" style="max-height:500px;">保存データを読み込んでください...</div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="gen-btn" onclick="generateAllExport()">📄 全スクリプト生成</button>
+            <button class="gen-btn gen-btn-cyan" onclick="copyAllScripts()">📋 全コピー</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🗂 ファイル別 出力</div>
+          <div id="fileExportList"></div>
+          <button class="gen-btn" onclick="generateFileExport()" style="margin-top:8px;">📁 ファイルリスト生成</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💾 JSON エクスポート</div>
+          <button class="gen-btn gen-btn-cyan" onclick="exportJSON()">💾 全データをJSONで保存</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ──────────────────────────────────
+// データ定義
+// ──────────────────────────────────
+
+const SEGMENTS = [
+  { id:'seg01', name:'オープニング', time:'00:00〜01:30', duration:90,  type:'opening',  song:'', icon:'🌟' },
+  { id:'seg02', name:'1曲目後MC',   time:'03:30〜04:30', duration:60,  type:'between',  song:'Track 1後', icon:'🎵' },
+  { id:'seg03', name:'2曲目後MC',   time:'07:00〜08:00', duration:60,  type:'between',  song:'Track 2後', icon:'🎶' },
+  { id:'seg04', name:'中盤MC',      time:'12:00〜13:30', duration:90,  type:'mid',      song:'Track 3後', icon:'💫' },
+  { id:'seg05', name:'クライマックス前', time:'18:00〜19:00', duration:60, type:'climax', song:'Track 4前', icon:'🔥' },
+  { id:'seg06', name:'エンディング', time:'24:00〜26:00', duration:120, type:'ending',   song:'', icon:'🌙' },
+];
+
+const VOICE_PRESETS = [
+  { id:0, name:'ずんだもん', style:'ノーマル', avatar:'🟢', engine:'voicevox', speakerId:3 },
+  { id:1, name:'四国めたん', style:'ノーマル', avatar:'🟡', engine:'voicevox', speakerId:2 },
+  { id:2, name:'春日部つむぎ', style:'ノーマル', avatar:'🔵', engine:'voicevox', speakerId:8 },
+  { id:3, name:'雨晴はう',   style:'ノーマル', avatar:'🟣', engine:'voicevox', speakerId:10 },
+  { id:4, name:'CRUSHA専用', style:'RVC変換後', avatar:'🩵', engine:'rvc',      speakerId:0 },
+  { id:5, name:'カスタム',   style:'手動設定',  avatar:'⚙️', engine:'custom',   speakerId:0 },
+];
+
+const TEMPLATES = {
+  opening: [
+    { title:'元気オープニング', text:'みんな〜！[間:0.5]来てくれてありがとう！！[間:0.8]\n[元気]今日は最高のライブにするよ！準備はいい？！[間:1.0]\nさあ、一緒に盛り上がっていこう！！' },
+    { title:'しっとりオープニング', text:'[ささやき]こんにちは。[間:1.0]\n今日、ここに来てくれて……[間:0.8][感動]本当に嬉しい。\n[間:0.5]今夜は私と一緒に、[間:0.5]特別な時間を過ごしましょう。' },
+    { title:'AIrisスタイル', text:'[間:1.5][感嘆]みなさん！！[間:0.8]\n[元気]CRUSHA Virtual Live、開幕です！！\n[間:0.5]今日のために用意してきた曲たち、[間:0.3]全部届けるから——[間:0.8]最後まで一緒にいてね！' },
+  ],
+  between: [
+    { title:'曲後感謝', text:'[笑い]ありがとう〜！！[間:0.5]\n[感動]みんなの声援、すごく力になったよ。[間:0.8]\n次の曲もめちゃくちゃ気合入ってるから……[間:0.5]覚悟してね？[笑い]' },
+    { title:'曲紹介テンプレ', text:'[間:0.5]次の曲はね、[間:0.5]この曲を作ってるとき——[間:0.8]\n[感動]すごくみんなのことを考えてたんだ。[間:1.0]\n[元気]一緒に歌おうね！！' },
+    { title:'ゲーマー風', text:'[元気]うおおお！！盛り上がってるね！！[間:0.5]\n[笑い]さすがCRUSHAのファン、最高すぎる！[間:0.8]\nじゃあ次……さらに激熱な曲いくよ！！' },
+  ],
+  emotion: [
+    { title:'感謝・感動', text:'[感動]ねえ……みんな。[間:1.5]\n[ささやき]こんなにたくさん集まってくれて……[間:1.0]\n[感動]幸せすぎて、言葉が出てこないや。[間:0.8]\nありがとう。本当に、ありがとう。' },
+    { title:'盛り上げ煽り', text:'[元気]もっといけるよね？！[間:0.5]\n[感嘆]声出して——！！[間:0.3][元気]一緒に叫ぼう！！\nせーの……！！' },
+    { title:'ファンへのメッセージ', text:'[ささやき]いつも応援してくれて……[間:1.0]\n[感動]あなたがいるから、私は歌えてる。[間:1.5]\n[間:0.5]これからも、[間:0.3]ずっと一緒にいてね。' },
+  ],
+  ending: [
+    { title:'しっとりエンディング', text:'[感動]今日は……本当に楽しかった。[間:1.0]\n[ささやき]みんなの顔、ぜんぶ見えてたよ。[間:1.5]\n[間:0.5]また会いに来てね。[間:0.8]待ってるから。[間:1.0]\n[感動]ありがとう……大好き。' },
+    { title:'元気エンディング', text:'[元気]CRUSHA Virtual Live、ここで終了です！！[間:0.5]\n[笑い]最高だったね！！みんな最高！！[間:0.8]\n[元気]また絶対にやるから——[間:0.5]次回も来てね！！\n[感嘆]バイバーイ！！！' },
+    { title:'AIrisスタイルED', text:'[ささやき]……ありがとう。[間:2.0]\n[感動]今夜のこと、絶対忘れない。[間:1.5]\n[元気]また会おうね。[間:0.5]必ず——。[間:1.0]\n[感嘆]CRUSHA Virtual Live、Act Ⅰ……[間:0.5]これにて終演！' },
+  ],
+};
+
+// ── 状態 ──
+let currentSeg = 0;
+let scripts = {};
+let segDone = {};
+let selectedVoice = 4; // CRUSHA専用
+
+// ──────────────────────────────────
+// 初期化
+// ──────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  renderSegmentList();
+  renderVoiceCards();
+  renderTemplates();
+  selectSegment(0);
+  updateRvcCmd();
+});
+
+function renderSegmentList() {
+  const el = document.getElementById('segmentList');
+  el.innerHTML = SEGMENTS.map((s, i) => `
+    <div class="seg-item ${i===currentSeg?'active':''}" onclick="selectSegment(${i})" id="segItem_${i}">
+      <div class="seg-num">${i+1}</div>
+      <div class="seg-info">
+        <div class="seg-name">${s.icon} ${s.name}</div>
+        <div class="seg-time">${s.time}</div>
+      </div>
+      <div class="seg-status ${segDone[s.id]?'done':''}"></div>
+    </div>
+  `).join('');
+  document.getElementById('doneCount').textContent = Object.values(segDone).filter(Boolean).length;
+}
+
+function renderVoiceCards() {
+  const el = document.getElementById('voiceCards');
+  el.innerHTML = VOICE_PRESETS.map((v, i) => `
+    <div class="voice-card ${i===selectedVoice?'selected':''}" onclick="selectVoice(${i})" id="voiceCard_${i}">
+      <div class="voice-avatar">${v.avatar}</div>
+      <div class="voice-name">${v.name}</div>
+      <div class="voice-style">${v.style}</div>
+      <span class="voice-badge ${v.engine==='rvc'?'badge-rvc':v.engine==='voicevox'?'badge-vvox':'badge-sbv2'}">${v.engine.toUpperCase()}</span>
+    </div>
+  `).join('');
+}
+
+function renderTemplates() {
+  Object.keys(TEMPLATES).forEach(cat => {
+    const el = document.getElementById(`tmpl-${cat}`);
+    if (!el) return;
+    el.innerHTML = TEMPLATES[cat].map(t => `
+      <div class="template-card" onclick="applyTemplate('${escapeQuotes(t.text)}')">
+        <div class="t-tag">${{opening:'🌟 OP',between:'🎵 曲間',emotion:'💖 感情',ending:'🌙 ED'}[cat]||'📝'}</div>
+        <div class="t-title">${t.title}</div>
+        <div class="t-preview">${t.text.substring(0,50).replace(/\n/g,' ')}...</div>
+      </div>
+    `).join('');
+  });
+}
+
+function escapeQuotes(s) { return s.replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+
+// ──────────────────────────────────
+// セグメント操作
+// ──────────────────────────────────
+function selectSegment(i) {
+  // 現在のスクリプトを保存
+  if (currentSeg >= 0) {
+    scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  }
+  currentSeg = i;
+  const seg = SEGMENTS[i];
+  document.getElementById('segTitle').textContent = `SEG ${String(i+1).padStart(2,'0')} — ${seg.name}`;
+  document.getElementById('segTimeRange').textContent = `${seg.time} / MCトーク約${seg.duration}秒`;
+  document.getElementById('scriptEditor').value = scripts[seg.id] || '';
+  updateCharCount();
+  updatePreview();
+  renderSegmentList();
+  switchTab('mc');
+}
+
+function prevSeg() { if(currentSeg > 0) selectSegment(currentSeg - 1); }
+function nextSeg() { if(currentSeg < SEGMENTS.length-1) selectSegment(currentSeg + 1); }
+
+function markDone() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  segDone[SEGMENTS[currentSeg].id] = true;
+  renderSegmentList();
+  saveData();
+  if(currentSeg < SEGMENTS.length-1) selectSegment(currentSeg+1);
+}
+
+// ──────────────────────────────────
+// スクリプト操作
+// ──────────────────────────────────
+function insertTag(tag) {
+  const ed = document.getElementById('scriptEditor');
+  const pos = ed.selectionStart;
+  ed.value = ed.value.slice(0,pos) + tag + ed.value.slice(pos);
+  ed.selectionStart = ed.selectionEnd = pos + tag.length;
+  ed.focus();
+  updateCharCount();
+  updatePreview();
+}
+
+function clearScript() {
+  if(confirm('スクリプトをクリアしますか？')) {
+    document.getElementById('scriptEditor').value = '';
+    updateCharCount();
+    updatePreview();
+  }
+}
+
+function updateCharCount() {
+  const len = document.getElementById('scriptEditor').value.length;
+  document.getElementById('charCount').textContent = `${len}文字`;
+  updatePreview();
+}
+
+function updatePreview() {
+  const text = document.getElementById('scriptEditor').value;
+  const box = document.getElementById('previewBox');
+  if (!text.trim()) { box.innerHTML = 'スクリプトを入力するとここにプレビューが表示されます。'; return; }
+  // タグをカラーリング
+  let html = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\[([^\]]+)\]/g, '<span class="tag">[$1]</span>')
+    .replace(/(感動|感嘆|笑い|ささやき|元気)/g, '<span class="emotion">$1</span>')
+    .replace(/\[間:[^\]]+\]/g, m => `<span class="pause">${m}</span>`)
+    .replace(/\n/g,'<br>');
+  box.innerHTML = html;
+}
+
+function copyPreview() {
+  const text = document.getElementById('scriptEditor').value;
+  navigator.clipboard.writeText(text).then(() => showToast('コピーしました'));
+}
+
+// ──────────────────────────────────
+// AIスクリプト生成
+// ──────────────────────────────────
+function generateScript() {
+  const seg = SEGMENTS[currentSeg];
+  const energy = document.getElementById('sl-energy').value;
+  const templates = TEMPLATES[seg.type] || TEMPLATES.between;
+  const chosen = templates[Math.floor(Math.random()*templates.length)];
+  document.getElementById('scriptEditor').value = chosen.text;
+  updateCharCount();
+  updatePreview();
+  showToast(`「${seg.name}」のスクリプトを生成しました`);
+}
+
+function applyTemplate(text) {
+  const decoded = text.replace(/\\n/g,'\n').replace(/\\'/g,"'");
+  document.getElementById('scriptEditor').value = decoded;
+  updateCharCount();
+  updatePreview();
+  switchTab('mc');
+  showToast('テンプレートを適用しました');
+}
+
+// ──────────────────────────────────
+// 感情パラメーター
+// ──────────────────────────────────
+function updateEmotion(type, val) { document.getElementById(`val-${type}`).textContent = val; }
+function updateSpeed(val) { document.getElementById('val-speed').textContent = (val/10).toFixed(1); }
+function updateIntonation(val) { document.getElementById('val-intonation').textContent = (val/10).toFixed(1); }
+function updateVolume(val) { document.getElementById('val-volume').textContent = (val/10).toFixed(1); }
+
+// ──────────────────────────────────
+// 音声選択
+// ──────────────────────────────────
+function selectVoice(i) {
+  selectedVoice = i;
+  document.querySelectorAll('.voice-card').forEach((c,idx) => {
+    c.classList.toggle('selected', idx===i);
+  });
+  showToast(`${VOICE_PRESETS[i].name} を選択しました`);
+}
+
+function updateEngine() {
+  const engine = document.getElementById('engineSelect').value;
+  const ports = { voicevox:'50021', sbv2:'5000', aivis:'10101', coeiroink:'50031' };
+  document.getElementById('apiPort').value = ports[engine] || '50021';
+}
+
+function applyVoiceSettings() {
+  showToast('音声設定を全セグメントに適用しました');
+}
+
+// ──────────────────────────────────
+// RVCコマンド生成
+// ──────────────────────────────────
+function updateRvcCmd() {
+  const model = document.getElementById('rvcModel')?.value || 'crusha_v1.pth';
+  const index = document.getElementById('rvcIndex')?.value || 'crusha_v1.index';
+  const pitch = document.getElementById('rvcPitch')?.value || '0';
+  const idxRate = document.getElementById('rvcIndexRate')?.value || '0.75';
+  const filter = document.getElementById('rvcFilter')?.value || '3';
+  const envelope = document.getElementById('rvcEnvelope')?.value || '0.25';
+  const f0 = document.getElementById('rvcF0')?.value || 'rmvpe';
+  const protect = document.getElementById('rvcProtect')?.value || '0.33';
+  const cmd = `python infer-web.py --f0up_key ${pitch} --input_path ./mc_wav/ --index_rate ${idxRate} --filter_radius ${filter} --rms_mix_rate ${envelope} --protect ${protect} --hop_length 128 --f0method ${f0} --opt_path ./mc_rvc_out/ --model_name ${model.split('/').pop()} --index_path ${index.split('/').pop()} --device cuda:0 --is_half True`;
+  const el = document.getElementById('rvcCmd');
+  if(el) el.textContent = cmd;
+}
+
+function generateRvcCmd() { updateRvcCmd(); showToast('コマンドを更新しました'); }
+
+// ──────────────────────────────────
+// 書き出し
+// ──────────────────────────────────
+function generateAllExport() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  let output = '=== CRUSHA VOICE STUDIO — 全MCスクリプト ===\n\n';
+  SEGMENTS.forEach((seg, i) => {
+    const text = scripts[seg.id] || '（未作成）';
+    const status = segDone[seg.id] ? '✅ 完了' : '🔲 未完成';
+    output += `【SEG${String(i+1).padStart(2,'0')}】${seg.name} ${seg.time} ${status}\n`;
+    output += '─'.repeat(40) + '\n';
+    output += text + '\n\n';
+  });
+  document.getElementById('allScriptsOutput').textContent = output;
+}
+
+function copyAllScripts() {
+  const text = document.getElementById('allScriptsOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('全スクリプトをコピーしました'));
+}
+
+function generateFileExport() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  const el = document.getElementById('fileExportList');
+  el.innerHTML = SEGMENTS.map((seg, i) => {
+    const text = scripts[seg.id] || '';
+    const lines = text.trim() ? text.split('\n').length : 0;
+    return `
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+        <span style="font-size:12px; color:var(--cyan); font-weight:700; width:60px;">SEG${String(i+1).padStart(2,'0')}</span>
+        <span style="font-size:13px; flex:1;">${seg.name}</span>
+        <span style="font-size:11px; color:var(--muted);">${lines}行 / ${text.length}文字</span>
+        <button class="btn btn-secondary" style="font-size:11px; padding:5px 10px;" onclick="downloadScript(${i})">💾 DL</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function downloadScript(i) {
+  const seg = SEGMENTS[i];
+  const text = scripts[seg.id] || '';
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mc_seg${String(i+1).padStart(2,'0')}_${seg.name}.txt`;
+  a.click();
+}
+
+function exportScripts() { switchTab('export'); generateAllExport(); }
+
+function exportVoicevox() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  const voice = VOICE_PRESETS[selectedVoice];
+  const speed = parseFloat(document.getElementById('speedScale')?.value||1.0);
+  const pitch = parseFloat(document.getElementById('pitchScale')?.value||0.0);
+  const intonation = parseFloat(document.getElementById('intonationScale')?.value||1.0);
+  const volume = parseFloat(document.getElementById('volumeScale')?.value||1.0);
+
+  const data = {
+    version: '1.0',
+    engine: voice.engine,
+    speaker_id: voice.speakerId,
+    params: { speedScale: speed, pitchScale: pitch, intonationScale: intonation, volumeScale: volume },
+    segments: SEGMENTS.map(s => ({ id: s.id, name: s.name, script: scripts[s.id]||'' }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'crusha_voice_project.json';
+  a.click();
+  showToast('VOICEVOX用プロジェクトを保存しました');
+}
+
+function exportJSON() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  const data = { scripts, segDone, selectedVoice, timestamp: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'crusha_voice_studio_backup.json';
+  a.click();
+  showToast('JSONを保存しました');
+}
+
+// ──────────────────────────────────
+// タブ切替
+// ──────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['mc','voice','rvc','template','export'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-${name}`)?.classList.add('active');
+}
+
+// ──────────────────────────────────
+// 保存/読込
+// ──────────────────────────────────
+function saveData() {
+  scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
+  const data = { scripts, segDone, selectedVoice };
+  localStorage.setItem('crusha-voice-studio', JSON.stringify(data));
+}
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem('crusha-voice-studio');
+    if (saved) {
+      const data = JSON.parse(saved);
+      scripts = data.scripts || {};
+      segDone = data.segDone || {};
+      selectedVoice = data.selectedVoice ?? 4;
+    }
+  } catch(e) {}
+}
+
+function saveAll() { saveData(); showToast('保存しました'); }
+
+// ──────────────────────────────────
+// トースト通知
+// ──────────────────────────────────
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    Object.assign(t.style, {
+      position:'fixed', bottom:'24px', right:'24px', zIndex:'9999',
+      background:'rgba(0,245,255,0.15)', backdropFilter:'blur(10px)',
+      border:'1px solid rgba(0,245,255,0.4)', borderRadius:'10px',
+      padding:'10px 18px', fontSize:'13px', color:'#00f5ff',
+      fontWeight:'700', transition:'opacity .3s', opacity:'0',
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.opacity = '0', 2500);
+}
+</script>
+</body>
+</html>

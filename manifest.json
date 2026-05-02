@@ -1,0 +1,71 @@
+{
+  "name": "CRUSHA STUDIO",
+  "short_name": "CRUSHA",
+  "description": "CRUSHA Virtual Live Concert Production Suite",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0a0a1a",
+  "background_color": "#0a0a1a",
+  "lang": "ja",
+  "categories": ["music", "entertainment", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Video Studio",
+      "short_name": "Video",
+      "description": "6ステージ制作パイプライン",
+      "url": "./CRUSHA-VIDEO-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Music Studio",
+      "short_name": "Music",
+      "description": "Suno AI楽曲生成ツール",
+      "url": "./CRUSHA-MUSIC-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Voice Studio",
+      "short_name": "Voice",
+      "description": "VOICEVOX MCスクリプト生成",
+      "url": "./CRUSHA-VOICE-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Video Gen Studio",
+      "short_name": "VideoGen",
+      "description": "Wan2.2/AnimateDiff ワークフロービルダー",
+      "url": "./CRUSHA-VIDEO-GEN-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Edit Studio",
+      "short_name": "Edit",
+      "description": "FFmpeg タイムライン編集・カラーグレーディング",
+      "url": "./CRUSHA-EDIT-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Export Studio",
+      "short_name": "Export",
+      "description": "YouTube配信・SNS投稿・最終書き出し",
+      "url": "./CRUSHA-EXPORT-STUDIO-v1.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUSHA VIDEO GEN STUDIO v1 — Wan2.2 / AnimateDiff</title>
+<style>
+:root {
+  --bg: #080810;
+  --surface: #0f0f1e;
+  --card: #151528;
+  --border: #2a2a4a;
+  --cyan: #00d4ff;
+  --pink: #ff2d78;
+  --gold: #ffd700;
+  --green: #00ff88;
+  --purple: #8b5cf6;
+  --orange: #ff6b2d;
+  --text: #e8e8ff;
+  --muted: #6b6b8a;
+  --radius: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(135deg, #080810 0%, #0f0f2e 50%, #080810 100%);
+  border-bottom: 2px solid var(--cyan);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,212,255,0.2);
+}
+.header-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 20px rgba(0,212,255,0.4);
+}
+.header-info h1 { font-size: 18px; color: var(--cyan); font-weight: 800; letter-spacing: 2px; }
+.header-info p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.header-badges { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.badge-wan { background: rgba(0,212,255,0.15); border: 1px solid var(--cyan); color: var(--cyan); }
+.badge-anim { background: rgba(139,92,246,0.15); border: 1px solid var(--purple); color: var(--purple); }
+.badge-cf { background: rgba(255,215,0,0.15); border: 1px solid var(--gold); color: var(--gold); }
+
+/* ── LAYOUT ── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 78px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 78px);
+  position: sticky; top: 78px;
+}
+.sidebar-section { margin-bottom: 20px; }
+.sidebar-label {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 0 8px 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+}
+.shot-item {
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+  position: relative;
+}
+.shot-item:hover { background: rgba(0,212,255,0.05); border-color: var(--cyan); }
+.shot-item.active { background: rgba(0,212,255,0.1); border-color: var(--cyan); }
+.shot-item .shot-num {
+  font-size: 9px; color: var(--muted); display: block;
+}
+.shot-item .shot-name {
+  font-size: 12px; font-weight: 600; color: var(--text); margin: 2px 0;
+}
+.shot-item .shot-seg {
+  font-size: 10px; color: var(--muted);
+}
+.shot-status {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border);
+}
+.shot-status.done { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.shot-status.wip { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.shot-status.ready { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+
+.add-shot-btn {
+  width: 100%; padding: 9px; border-radius: 8px;
+  background: rgba(0,212,255,0.08); border: 1px dashed var(--cyan);
+  color: var(--cyan); cursor: pointer; font-size: 12px; font-weight: 600;
+  transition: all 0.2s; margin-top: 6px;
+}
+.add-shot-btn:hover { background: rgba(0,212,255,0.15); }
+
+/* ── MAIN CONTENT ── */
+.main-content { padding: 20px; overflow-y: auto; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 20px;
+  border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.tab {
+  padding: 10px 18px; cursor: pointer; font-size: 12px; font-weight: 600;
+  color: var(--muted); border-radius: 8px 8px 0 0;
+  border: 1px solid transparent; border-bottom: none;
+  transition: all 0.2s; white-space: nowrap;
+}
+.tab.active {
+  color: var(--cyan); background: rgba(0,212,255,0.1);
+  border-color: var(--border); border-bottom-color: var(--card);
+}
+.tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.03); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 13px; font-weight: 700; color: var(--cyan);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.card-title .icon { font-size: 16px; }
+
+/* ── FORM ELEMENTS ── */
+.form-row {
+  display: grid; gap: 12px; margin-bottom: 12px;
+}
+.form-row.cols2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+label {
+  display: block; font-size: 11px; color: var(--muted);
+  margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+}
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+}
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+select option { background: #1a1a2e; }
+
+/* ── RANGE SLIDERS ── */
+.slider-group { margin-bottom: 12px; }
+.slider-row {
+  display: flex; align-items: center; gap: 10px; margin-top: 5px;
+}
+.slider-row input[type="range"] {
+  flex: 1; appearance: none; height: 4px;
+  background: var(--border); border-radius: 2px;
+  border: none; padding: 0;
+  outline: none;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--cyan);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0,212,255,0.6);
+}
+.slider-val {
+  min-width: 48px; text-align: right;
+  font-size: 12px; font-weight: 700; color: var(--cyan);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 10px 18px; border-radius: 8px; cursor: pointer;
+  font-size: 12px; font-weight: 700; border: none;
+  transition: all 0.2s; letter-spacing: 0.5px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: #000; box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(0,212,255,0.4); }
+.btn-secondary {
+  background: rgba(139,92,246,0.15); border: 1px solid var(--purple); color: var(--purple);
+}
+.btn-secondary:hover { background: rgba(139,92,246,0.25); }
+.btn-success {
+  background: rgba(0,255,136,0.15); border: 1px solid var(--green); color: var(--green);
+}
+.btn-success:hover { background: rgba(0,255,136,0.25); }
+.btn-danger {
+  background: rgba(255,45,120,0.15); border: 1px solid var(--pink); color: var(--pink);
+}
+.btn-warning {
+  background: rgba(255,215,0,0.15); border: 1px solid var(--gold); color: var(--gold);
+}
+.btn-sm { padding: 6px 12px; font-size: 11px; }
+.btn-xs { padding: 4px 8px; font-size: 10px; border-radius: 5px; }
+.btn-full { width: 100%; justify-content: center; }
+
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── PROMPT AREA ── */
+.prompt-container { position: relative; }
+.prompt-tags {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.ptag {
+  padding: 3px 10px; border-radius: 14px; cursor: pointer;
+  font-size: 10px; font-weight: 700; border: 1px solid;
+  transition: all 0.15s;
+}
+.ptag-char { color: var(--cyan); border-color: rgba(0,212,255,0.4); background: rgba(0,212,255,0.08); }
+.ptag-char:hover { background: rgba(0,212,255,0.2); }
+.ptag-env { color: var(--purple); border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.08); }
+.ptag-env:hover { background: rgba(139,92,246,0.2); }
+.ptag-cam { color: var(--gold); border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.08); }
+.ptag-cam:hover { background: rgba(255,215,0,0.2); }
+.ptag-motion { color: var(--green); border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); }
+.ptag-motion:hover { background: rgba(0,255,136,0.2); }
+.ptag-mood { color: var(--pink); border-color: rgba(255,45,120,0.4); background: rgba(255,45,120,0.08); }
+.ptag-mood:hover { background: rgba(255,45,120,0.2); }
+
+.prompt-preview {
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 8px; padding: 12px;
+  font-size: 11px; line-height: 1.7;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  color: var(--text); max-height: 120px; overflow-y: auto;
+  margin-top: 8px; white-space: pre-wrap; word-break: break-all;
+}
+.prompt-preview .t-char { color: var(--cyan); font-weight: 600; }
+.prompt-preview .t-env { color: var(--purple); }
+.prompt-preview .t-cam { color: var(--gold); }
+.prompt-preview .t-motion { color: var(--green); }
+.prompt-preview .t-quality { color: var(--muted); }
+.prompt-preview .t-neg { color: var(--pink); }
+
+/* ── WORKFLOW JSON ── */
+.json-output {
+  background: #0a0a15;
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 11px; color: #a8b8d8;
+  max-height: 340px; overflow: auto;
+  white-space: pre; line-height: 1.6;
+}
+.json-key { color: var(--purple); }
+.json-str { color: var(--green); }
+.json-num { color: var(--gold); }
+.json-bool { color: var(--orange); }
+
+/* ── SHOT LIST TABLE ── */
+.shot-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.shot-table th {
+  text-align: left; padding: 8px 10px;
+  background: rgba(0,212,255,0.06); color: var(--muted);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.shot-table td {
+  padding: 10px; border-bottom: 1px solid rgba(42,42,74,0.5);
+  vertical-align: middle;
+}
+.shot-table tr:hover td { background: rgba(0,212,255,0.02); }
+.shot-table input[type="text"] { padding: 5px 8px; font-size: 12px; }
+.shot-table select { padding: 5px 8px; font-size: 11px; }
+
+/* ── TEMPLATE GRID ── */
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.tpl-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tpl-card:hover { border-color: var(--cyan); background: rgba(0,212,255,0.04); }
+.tpl-card h4 { font-size: 12px; font-weight: 700; color: var(--cyan); margin-bottom: 4px; }
+.tpl-card .tpl-cat {
+  font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.tpl-card p { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+/* ── PROGRESS BAR ── */
+.progress-bar {
+  height: 6px; background: var(--border); border-radius: 3px; margin: 8px 0;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  transition: width 0.4s;
+}
+
+/* ── STATUS GRID ── */
+.status-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px; margin-bottom: 16px;
+}
+.stat-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; text-align: center;
+}
+.stat-box .stat-val {
+  font-size: 24px; font-weight: 800; color: var(--cyan); display: block;
+}
+.stat-box .stat-label {
+  font-size: 10px; color: var(--muted); margin-top: 2px;
+}
+
+/* ── INFO BLOCK ── */
+.info-block {
+  background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 8px; padding: 14px; margin-bottom: 14px;
+  font-size: 12px; line-height: 1.7; color: var(--muted);
+}
+.info-block strong { color: var(--cyan); }
+.info-block code {
+  background: rgba(0,0,0,0.4); padding: 2px 6px;
+  border-radius: 4px; font-family: monospace; color: var(--green); font-size: 11px;
+}
+
+/* ── SETTINGS GRID ── */
+.settings-section { margin-bottom: 24px; }
+.settings-section h3 {
+  font-size: 13px; font-weight: 700; color: var(--purple);
+  margin-bottom: 12px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── CHIP ── */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+  background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--cyan);
+}
+.chip.purple { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: var(--purple); }
+.chip.green { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: var(--green); }
+.chip.gold { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); color: var(--gold); }
+.chip.pink { background: rgba(255,45,120,0.1); border-color: rgba(255,45,120,0.3); color: var(--pink); }
+
+/* ── SEPARATOR ── */
+.sep { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--card); border: 1px solid var(--green);
+  border-radius: 10px; padding: 12px 20px;
+  color: var(--green); font-size: 13px; font-weight: 600;
+  z-index: 9999; transform: translateY(80px); opacity: 0;
+  transition: all 0.3s; pointer-events: none;
+  box-shadow: 0 8px 30px rgba(0,255,136,0.2);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.cyan { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 8px 30px rgba(0,212,255,0.2); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; max-height: none; }
+  .form-row.cols2, .form-row.cols3, .form-row.cols4 { grid-template-columns: 1fr; }
+  .tabs { overflow-x: auto; }
+  .status-grid { grid-template-columns: repeat(2, 1fr); }
+  .tpl-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🎬</div>
+  <div class="header-info">
+    <h1>VIDEO GEN STUDIO</h1>
+    <p>Stage 4 — Wan2.2 / AnimateDiff / ComfyUI ワークフロービルダー</p>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-wan">WAN 2.2</span>
+    <span class="badge badge-anim">ANIMATEDIFF</span>
+    <span class="badge badge-cf">COMFYUI</span>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR: Shot List -->
+  <div class="sidebar" id="shotSidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">📋 ショットリスト</div>
+      <div id="shotListSidebar">
+        <!-- JS で生成 -->
+      </div>
+      <button class="add-shot-btn" onclick="addShot()">＋ ショット追加</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">📊 進行状況</div>
+      <div style="padding: 4px 8px;">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:4px;">全体進捗</div>
+        <div class="progress-bar"><div class="progress-fill" id="totalProgress" style="width:0%"></div></div>
+        <div style="font-size:11px; color:var(--cyan); text-align:right;" id="progressText">0 / 0 ショット</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">⚡ クイックアクション</div>
+      <div style="display:flex; flex-direction:column; gap:6px; padding: 0 4px;">
+        <button class="btn btn-primary btn-sm" onclick="genAllPrompts()">🔄 全プロンプト生成</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportBatchJson()">📤 バッチJSON出力</button>
+        <button class="btn btn-warning btn-sm" onclick="saveAll()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- STATUS -->
+    <div class="status-grid" id="statusGrid">
+      <div class="stat-box">
+        <span class="stat-val" id="statTotal">0</span>
+        <div class="stat-label">総ショット数</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="color:var(--gold)" id="statWip">0</span>
+        <div class="stat-label">作業中</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="color:var(--green)" id="statDone">0</span>
+        <div class="stat-label">完了</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="color:var(--pink)" id="statTodo">0</span>
+        <div class="stat-label">未着手</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="color:var(--purple)" id="statFrames">0</span>
+        <div class="stat-label">総フレーム数</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="color:var(--orange)" id="statSeconds">0s</span>
+        <div class="stat-label">総秒数</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('prompt')">✏️ プロンプト編集</div>
+      <div class="tab" onclick="switchTab('settings')">⚙️ 生成設定</div>
+      <div class="tab" onclick="switchTab('workflow')">🔗 ワークフロー</div>
+      <div class="tab" onclick="switchTab('templates')">📚 テンプレート</div>
+      <div class="tab" onclick="switchTab('batch')">🚀 バッチ出力</div>
+    </div>
+
+    <!-- TAB: プロンプト編集 -->
+    <div class="tab-panel active" id="tab-prompt">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span>ショット基本情報</div>
+        <div class="form-row cols3">
+          <div>
+            <label>ショット名</label>
+            <input type="text" id="shotName" placeholder="Opening_001" oninput="updateCurrentShot('name', this.value)">
+          </div>
+          <div>
+            <label>楽曲 / セグメント</label>
+            <select id="shotSegment" onchange="updateCurrentShot('segment', this.value)">
+              <option value="">— 選択 —</option>
+              <option value="opening">🌟 オープニング</option>
+              <option value="song1">🎵 1曲目</option>
+              <option value="mc1">💬 MC1</option>
+              <option value="song2">🎶 2曲目</option>
+              <option value="mc2">💬 MC2</option>
+              <option value="song3">🎸 3曲目</option>
+              <option value="mc3">💬 MC3</option>
+              <option value="song4">🎹 4曲目</option>
+              <option value="climax">🔥 クライマックス</option>
+              <option value="ending">🌙 エンディング</option>
+            </select>
+          </div>
+          <div>
+            <label>ショットタイプ</label>
+            <select id="shotType" onchange="updateCurrentShot('type', this.value)">
+              <option value="stage_wide">ステージ全景</option>
+              <option value="portrait_front">正面ポートレート</option>
+              <option value="portrait_low">ローアングル</option>
+              <option value="portrait_side">横顔</option>
+              <option value="dance_full">ダンス全身</option>
+              <option value="close_face">フェイスアップ</option>
+              <option value="close_hand">ハンドアップ</option>
+              <option value="dynamic_action">ダイナミックアクション</option>
+              <option value="crowd_reaction">客席リアクション</option>
+              <option value="transition">トランジション</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols4">
+          <div>
+            <label>フレーム数</label>
+            <select id="shotFrames" onchange="updateCurrentShot('frames', parseInt(this.value)); updateStats()">
+              <option value="24">24f (1s@24fps)</option>
+              <option value="48" selected>48f (2s@24fps)</option>
+              <option value="72">72f (3s@24fps)</option>
+              <option value="96">96f (4s@24fps)</option>
+              <option value="120">120f (5s@24fps)</option>
+              <option value="144">144f (6s@24fps)</option>
+              <option value="192">192f (8s@24fps)</option>
+            </select>
+          </div>
+          <div>
+            <label>解像度</label>
+            <select id="shotRes" onchange="updateCurrentShot('resolution', this.value)">
+              <option value="768x512">768×512 (横16:9)</option>
+              <option value="512x768">512×768 (縦9:16)</option>
+              <option value="832x480">832×480 (横)</option>
+              <option value="480x832">480×832 (縦)</option>
+              <option value="1024x576">1024×576 (横)</option>
+              <option value="576x1024">576×1024 (縦)</option>
+            </select>
+          </div>
+          <div>
+            <label>生成モデル</label>
+            <select id="shotModel" onchange="updateCurrentShot('model', this.value)">
+              <option value="wan2.2">Wan2.2-I2V</option>
+              <option value="wan2.2_t2v">Wan2.2-T2V</option>
+              <option value="animatediff_xl">AnimateDiff-XL</option>
+              <option value="animatediff_v3">AnimateDiff-V3</option>
+              <option value="hunyuan">HunyuanVideo</option>
+              <option value="ltxv">LTX-Video</option>
+            </select>
+          </div>
+          <div>
+            <label>ステータス</label>
+            <select id="shotStatus" onchange="updateCurrentShot('status', this.value); renderShotList()">
+              <option value="todo">⬜ 未着手</option>
+              <option value="wip">🟡 作業中</option>
+              <option value="ready">🔵 生成待ち</option>
+              <option value="done">✅ 完了</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSITIVE PROMPT -->
+      <div class="card">
+        <div class="card-title"><span class="icon">✨</span>ポジティブプロンプト</div>
+
+        <div style="margin-bottom:8px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700;">👤 キャラクター</span>
+          <div class="prompt-tags" style="margin-top:4px;">
+            <span class="ptag ptag-char" onclick="insertTag('+', 'crusha_v1, turquoise hair, ferret ears')">CRUSHA</span>
+            <span class="ptag ptag-char" onclick="insertTag('+', '1girl, solo, idol singer')">アイドル</span>
+            <span class="ptag ptag-char" onclick="insertTag('+', 'on stage, concert, singing')">ステージ</span>
+            <span class="ptag ptag-char" onclick="insertTag('+', 'microphone in hand')">マイク持ち</span>
+            <span class="ptag ptag-char" onclick="insertTag('+', 'concert costume, idol outfit')">衣装</span>
+            <span class="ptag ptag-char" onclick="insertTag('+', 'expressive face, emotional singing')">表情</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700;">🏟️ 環境</span>
+          <div class="prompt-tags" style="margin-top:4px;">
+            <span class="ptag ptag-env" onclick="insertTag('+', 'concert hall, spotlight, crowd in background')">ホール</span>
+            <span class="ptag ptag-env" onclick="insertTag('+', 'colorful stage lights, laser beams')">ステージライト</span>
+            <span class="ptag ptag-env" onclick="insertTag('+', 'confetti falling, particles')">紙吹雪</span>
+            <span class="ptag ptag-env" onclick="insertTag('+', 'dark stage, neon lights, cyberpunk')">サイバーパンク</span>
+            <span class="ptag ptag-env" onclick="insertTag('+', 'outdoor festival, night sky, fireworks')">野外フェス</span>
+            <span class="ptag ptag-env" onclick="insertTag('+', 'smoke effect, fog machine, atmosphere')">スモーク</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700;">📷 カメラ</span>
+          <div class="prompt-tags" style="margin-top:4px;">
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'close-up shot')">クローズアップ</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'wide shot, full body')">ワイドショット</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'dynamic angle, dutch angle')">ダッチアングル</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'low angle, looking up at performer')">ローアングル</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'bird eye view, overhead shot')">俯瞰</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'bokeh background, shallow depth of field')">ボケ</span>
+            <span class="ptag ptag-cam" onclick="insertTag('+', 'lens flare, cinematic')">シネマ</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700;">💃 モーション</span>
+          <div class="prompt-tags" style="margin-top:4px;">
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'dancing, body movement, rhythmic')">ダンス</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'hair flowing, dynamic hair')">髪なびき</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'arm raised, pointing to crowd')">腕を上げる</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'jumping, energetic performance')">ジャンプ</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'spinning, twirling')">スピン</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'slow motion, floating, ethereal')">スローモーション</span>
+            <span class="ptag ptag-motion" onclick="insertTag('+', 'camera pan, tracking shot')">パン</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700;">🎭 雰囲気</span>
+          <div class="prompt-tags" style="margin-top:4px;">
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'vibrant, colorful, exciting, high energy')">ハイエナジー</span>
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'emotional, touching, heartfelt')">感動的</span>
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'dark, dramatic, intense')">ドラマチック</span>
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'dreamy, magical, fantasy')">ファンタジー</span>
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'cute, kawaii, idol')">可愛い</span>
+            <span class="ptag ptag-mood" onclick="insertTag('+', 'sexy, elegant, mature')">セクシー</span>
+          </div>
+        </div>
+
+        <div>
+          <label>プロンプトテキスト（直接編集可）</label>
+          <textarea id="promptPositive" rows="4"
+            placeholder="crusha_v1, 1girl, turquoise hair, ferret ears, on stage, concert, ..."
+            oninput="updateCurrentShot('promptPositive', this.value); updatePreview()"></textarea>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>品質タグ自動追加</label>
+          <div class="form-row cols3" style="margin-top:6px;">
+            <div>
+              <select id="qualityPreset" onchange="applyQualityPreset()">
+                <option value="">— 品質プリセット選択 —</option>
+                <option value="wan_standard">Wan2.2 標準</option>
+                <option value="wan_cinematic">Wan2.2 シネマ</option>
+                <option value="animediff_anime">AnimateDiff アニメ</option>
+                <option value="animediff_realistic">AnimateDiff リアル</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn btn-secondary btn-full" onclick="clearPrompt('+')">🗑️ クリア</button>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-full" onclick="copyPrompt('+')">📋 コピー</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEGATIVE PROMPT -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🚫</span>ネガティブプロンプト</div>
+        <div class="prompt-tags">
+          <span class="ptag ptag-char" onclick="insertTag('-', 'human ears, cat ears, dog ears, fox ears, turquoise ears')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">耳ミス防止</span>
+          <span class="ptag ptag-char" onclick="insertTag('-', 'blurry, low quality, bad anatomy')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">低品質</span>
+          <span class="ptag ptag-char" onclick="insertTag('-', 'static, no movement, frozen')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">静止</span>
+          <span class="ptag ptag-char" onclick="insertTag('-', 'watermark, text, logo')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">透かし</span>
+          <span class="ptag ptag-char" onclick="insertTag('-', 'extra fingers, wrong hands, deformed')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">手崩れ</span>
+          <span class="ptag ptag-char" onclick="insertTag('-', 'temporal inconsistency, flickering, jitter')" style="color:var(--pink); border-color:rgba(255,45,120,0.4); background:rgba(255,45,120,0.08);">フリッカー</span>
+        </div>
+        <textarea id="promptNegative" rows="3"
+          placeholder="(human ears:1.5), (cat ears:1.5), blurry, low quality, bad anatomy, ..."
+          oninput="updateCurrentShot('promptNegative', this.value)"
+          style="margin-top:8px;"></textarea>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="card">
+        <div class="card-title"><span class="icon">👁️</span>プロンプトプレビュー</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">
+          <span class="chip">👤 キャラ</span>
+          <span class="chip purple">🏟️ 環境</span>
+          <span class="chip gold">📷 カメラ</span>
+          <span class="chip green">💃 モーション</span>
+          <span class="chip">⭐ 品質</span>
+          <span class="chip pink">🚫 ネガ</span>
+        </div>
+        <div class="prompt-preview" id="promptPreviewBox">— ショットを選択するかプロンプトを入力してください —</div>
+        <div class="btn-group" style="margin-top:10px;">
+          <button class="btn btn-primary" onclick="copyFullPrompt()">📋 全文コピー</button>
+          <button class="btn btn-secondary" onclick="generateWorkflow()">🔗 ワークフロー生成</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: 生成設定 -->
+    <div class="tab-panel" id="tab-settings">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🤖</span>モデル設定</div>
+        <div class="settings-section">
+          <h3>🎬 Wan2.2 設定</h3>
+          <div class="form-row cols2">
+            <div>
+              <label>Wan2.2 モデルパス</label>
+              <input type="text" id="wan22Path" placeholder="models/wan2.2/wan2.2-i2v-14b-480p-bf16.safetensors"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>VAE パス</label>
+              <input type="text" id="wan22VaePath" placeholder="models/vae/wan2.2_vae.safetensors"
+                oninput="saveSettings()">
+            </div>
+          </div>
+          <div class="form-row cols2">
+            <div>
+              <label>CLIP Text Encoder</label>
+              <input type="text" id="wan22ClipPath" placeholder="models/clip/umt5-xxl-enc-bf16.safetensors"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>Image Encoder (I2V)</label>
+              <input type="text" id="wan22ImgEncPath" placeholder="models/clip/clip-vit-h-14-laion2B.safetensors"
+                oninput="saveSettings()">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🎞️ AnimateDiff 設定</h3>
+          <div class="form-row cols2">
+            <div>
+              <label>AnimateDiff モーションモジュール</label>
+              <input type="text" id="animaDiffPath" placeholder="models/animatediff/mm_sdxl_v10_beta.ckpt"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>ベースSDXLモデル</label>
+              <input type="text" id="sdxlModelPath" placeholder="models/checkpoints/animagine-xl-4.0.safetensors"
+                oninput="saveSettings()">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>⚡ ComfyUI 接続設定</h3>
+          <div class="form-row cols3">
+            <div>
+              <label>ComfyUI ホスト</label>
+              <input type="text" id="comfyHost" value="127.0.0.1" oninput="saveSettings()">
+            </div>
+            <div>
+              <label>ポート</label>
+              <input type="number" id="comfyPort" value="8188" oninput="saveSettings()">
+            </div>
+            <div>
+              <label>出力ディレクトリ</label>
+              <input type="text" id="outputDir" placeholder="output/crusha-live" oninput="saveSettings()">
+            </div>
+          </div>
+          <div class="info-block">
+            <strong>ComfyUI API 接続テスト:</strong><br>
+            <code>http://127.0.0.1:8188/system_stats</code> にアクセスして接続確認できます。
+            ワークフロー送信は <code>/prompt</code> エンドポイントに JSON POST します。
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎛️</span>デフォルト生成パラメータ</div>
+
+        <div class="form-row cols3">
+          <div>
+            <label>デフォルトステップ数</label>
+            <input type="number" id="defSteps" value="25" min="10" max="60" oninput="saveSettings()">
+          </div>
+          <div>
+            <label>CFG Scale</label>
+            <input type="number" id="defCfg" value="7.0" min="1" max="20" step="0.5" oninput="saveSettings()">
+          </div>
+          <div>
+            <label>デフォルトシード</label>
+            <input type="number" id="defSeed" value="-1" oninput="saveSettings()">
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label>Motion Scale（モーション強度）</label>
+          <div class="slider-row">
+            <input type="range" id="motionScale" min="0.5" max="2.0" step="0.05" value="1.0"
+              oninput="document.getElementById('motionScaleVal').textContent=parseFloat(this.value).toFixed(2); saveSettings()">
+            <span class="slider-val" id="motionScaleVal">1.00</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label>Guidance Scale（WAN2.2）</label>
+          <div class="slider-row">
+            <input type="range" id="guidanceScale" min="1.0" max="10.0" step="0.5" value="6.0"
+              oninput="document.getElementById('guidanceScaleVal').textContent=parseFloat(this.value).toFixed(1); saveSettings()">
+            <span class="slider-val" id="guidanceScaleVal">6.0</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label>Video CFG（時間軸一貫性）</label>
+          <div class="slider-row">
+            <input type="range" id="videoCfg" min="1.0" max="10.0" step="0.5" value="7.0"
+              oninput="document.getElementById('videoCfgVal').textContent=parseFloat(this.value).toFixed(1); saveSettings()">
+            <span class="slider-val" id="videoCfgVal">7.0</span>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label>Denoise Strength (I2V)</label>
+          <div class="slider-row">
+            <input type="range" id="denoiseStrength" min="0.5" max="1.0" step="0.05" value="0.9"
+              oninput="document.getElementById('denoiseStrengthVal').textContent=parseFloat(this.value).toFixed(2); saveSettings()">
+            <span class="slider-val" id="denoiseStrengthVal">0.90</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🖼️</span>参照画像設定（I2V用）</div>
+        <div class="info-block">
+          <strong>Image-to-Video (I2V) 使用時:</strong>
+          各ショットの開始フレームとなる参照画像パスを指定します。
+          CRUSHA SUPREME で生成した画像を直接指定できます。<br>
+          推奨: <strong>CRUSHA-NSFW-SUPREME</strong> で生成 → 保存 → ここでパス指定
+        </div>
+        <div id="i2vPathList">
+          <div class="form-row cols2">
+            <div>
+              <label>グローバル参照画像ディレクトリ</label>
+              <input type="text" id="i2vBaseDir" placeholder="C:/ComfyUI/input/crusha-live/"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>デフォルト参照画像</label>
+              <input type="text" id="i2vDefaultImg" placeholder="crusha_stage_default.png"
+                oninput="saveSettings()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: ワークフロー -->
+    <div class="tab-panel" id="tab-workflow">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🔗</span>ComfyUI ワークフロー生成</div>
+
+        <div class="form-row cols2">
+          <div>
+            <label>ワークフロータイプ</label>
+            <select id="workflowType" onchange="generateWorkflow()">
+              <option value="wan22_t2v">Wan2.2 Text-to-Video</option>
+              <option value="wan22_i2v" selected>Wan2.2 Image-to-Video</option>
+              <option value="animatediff_xl">AnimateDiff-XL</option>
+              <option value="animatediff_v3">AnimateDiff-V3 (SD1.5)</option>
+              <option value="hunyuan">HunyuanVideo</option>
+            </select>
+          </div>
+          <div>
+            <label>出力形式</label>
+            <select id="outputFormat">
+              <option value="mp4_h264">MP4 (H.264)</option>
+              <option value="mp4_h265">MP4 (H.265)</option>
+              <option value="webp_anim">WebP アニメーション</option>
+              <option value="gif">GIF</option>
+              <option value="frames_png">PNGフレーム連番</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-group" style="margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="generateWorkflow()">🔄 ワークフロー生成</button>
+          <button class="btn btn-secondary" onclick="copyWorkflow()">📋 JSONコピー</button>
+          <button class="btn btn-success" onclick="downloadWorkflow()">💾 JSON保存</button>
+          <button class="btn btn-warning" onclick="sendToComfyUI()">🚀 ComfyUIに送信</button>
+        </div>
+
+        <div class="json-output" id="workflowJson">// ← 「ワークフロー生成」ボタンをクリックしてください</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📡</span>ComfyUI API 直接送信</div>
+        <div class="info-block">
+          <strong>送信方法:</strong>
+          上の JSON を ComfyUI の <code>POST http://127.0.0.1:8188/prompt</code> に送信します。
+          ブラウザ内から CORS 制限のある場合は、JSON をコピーして ComfyUI Manager または
+          Python スクリプトで送信してください。
+        </div>
+        <div class="form-row cols3">
+          <div>
+            <button class="btn btn-primary btn-full" onclick="sendToComfyUI()">🚀 API送信</button>
+          </div>
+          <div>
+            <button class="btn btn-secondary btn-full" onclick="checkComfyStatus()">📊 ステータス確認</button>
+          </div>
+          <div>
+            <button class="btn btn-warning btn-full" onclick="genPythonScript()">🐍 Pythonスクリプト生成</button>
+          </div>
+        </div>
+        <div id="comfyStatusMsg" style="margin-top:10px; font-size:12px; color:var(--muted);"></div>
+
+        <div id="pythonScriptArea" style="display:none; margin-top:12px;">
+          <label>Python 送信スクリプト</label>
+          <div class="json-output" id="pythonScript" style="max-height:200px;"></div>
+          <button class="btn btn-success btn-sm" style="margin-top:8px;" onclick="copyPythonScript()">📋 コピー</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: テンプレート -->
+    <div class="tab-panel" id="tab-templates">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📚</span>ショットテンプレートライブラリ</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:14px;">
+          クリックで現在のショットに適用。プロンプトと基本設定が自動入力されます。
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div class="sidebar-label" style="padding:0 0 6px;">🌟 オープニング</div>
+          <div class="tpl-grid">
+            <div class="tpl-card" onclick="applyTemplate('opening_grand')">
+              <h4>🌟 グランドオープニング</h4>
+              <div class="tpl-cat">OPENING / WAN2.2-I2V</div>
+              <p>ステージ全景からCRUSHAへズームイン。紙吹雪とレーザーライトが炸裂するオープニング映像。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('opening_silhouette')">
+              <h4>🌑 シルエット登場</h4>
+              <div class="tpl-cat">OPENING / ANIMATEDIFF-XL</div>
+              <p>スモークの中から浮かび上がるシルエット。スポットライトが当たりキャラクターが明らかに。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('opening_cinematic')">
+              <h4>🎬 シネマティック登場</h4>
+              <div class="tpl-cat">OPENING / WAN2.2-T2V</div>
+              <p>空撮からステージへのドラマチックなカメラワーク。映画的な雰囲気でライブが始まる。</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div class="sidebar-label" style="padding:0 0 6px;">🎵 楽曲パフォーマンス</div>
+          <div class="tpl-grid">
+            <div class="tpl-card" onclick="applyTemplate('perf_dance_full')">
+              <h4>💃 ダンス全身ショット</h4>
+              <div class="tpl-cat">PERFORMANCE / WAN2.2-I2V</div>
+              <p>全身ダンスシーン。激しいリズムに合わせた動きで観客を煽る。髪なびきも重要。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('perf_face_closeup')">
+              <h4>😊 フェイスアップ</h4>
+              <div class="tpl-cat">PERFORMANCE / ANIMATEDIFF-XL</div>
+              <p>歌いながら感情表現豊かな表情クローズアップ。感動的な楽曲パートに合わせる。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('perf_dynamic')">
+              <h4>⚡ ダイナミックアクション</h4>
+              <div class="tpl-cat">PERFORMANCE / WAN2.2-I2V</div>
+              <p>ジャンプ・スピン・腕を上げるなどのダイナミックな動き。サビのクライマックスに最適。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('perf_crowd')">
+              <h4>👥 客席コール&レスポンス</h4>
+              <div class="tpl-cat">PERFORMANCE / WAN2.2-T2V</div>
+              <p>ステージから客席を見渡すショット。満員の観客が一体となる瞬間を表現。</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div class="sidebar-label" style="padding:0 0 6px;">🔥 クライマックス</div>
+          <div class="tpl-grid">
+            <div class="tpl-card" onclick="applyTemplate('climax_fire')">
+              <h4>🔥 炎エフェクト</h4>
+              <div class="tpl-cat">CLIMAX / WAN2.2-I2V</div>
+              <p>火柱やパイロエフェクトと共に最高潮を迎えるショット。エネルギーが爆発する瞬間。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('climax_neon')">
+              <h4>💜 ネオン&サイバーパンク</h4>
+              <div class="tpl-cat">CLIMAX / ANIMATEDIFF-XL</div>
+              <p>サイバーパンク調のネオンライトに囲まれた幻想的なクライマックス。紫とシアンが輝く。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('climax_firework')">
+              <h4>🎆 花火フィナーレ</h4>
+              <div class="tpl-cat">CLIMAX / WAN2.2-T2V</div>
+              <p>空高く打ち上がる花火とともに最高の盛り上がりへ。フルショットで全てを収める。</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sidebar-label" style="padding:0 0 6px;">🌙 エンディング</div>
+          <div class="tpl-grid">
+            <div class="tpl-card" onclick="applyTemplate('ending_wave')">
+              <h4>👋 手を振ってお別れ</h4>
+              <div class="tpl-cat">ENDING / ANIMATEDIFF-XL</div>
+              <p>笑顔でステージから手を振るCRUSHA。感動的なエンディングシーン。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('ending_dark')">
+              <h4>🌑 フェードアウト</h4>
+              <div class="tpl-cat">ENDING / WAN2.2-I2V</div>
+              <p>スポットライトが消えて暗転へ。余韻を残すシネマチックなエンド。</p>
+            </div>
+            <div class="tpl-card" onclick="applyTemplate('ending_dream')">
+              <h4>✨ ドリームエンド</h4>
+              <div class="tpl-cat">ENDING / ANIMATEDIFF-XL</div>
+              <p>キラキラパーティクルの中に消えていく夢幻的なエンディング。余韻と感動を最大化。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB: バッチ出力 -->
+    <div class="tab-panel" id="tab-batch">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🚀</span>バッチ生成スケジュール</div>
+
+        <div class="info-block">
+          <strong>バッチ生成の流れ:</strong><br>
+          1. 全ショットのプロンプトを確認・設定<br>
+          2. 「バッチJSON生成」でComfyUI送信用JSONを一括作成<br>
+          3. ComfyUI API または Pythonスクリプトで順次送信<br>
+          4. 生成完了後、CRUSHA EDIT STUDIOで編集・結合
+        </div>
+
+        <div class="form-row cols3">
+          <div>
+            <label>並列生成数</label>
+            <select id="batchParallel">
+              <option value="1" selected>1（順次・安全）</option>
+              <option value="2">2（並列・注意）</option>
+              <option value="3">3（並列・VRAM多め）</option>
+            </select>
+          </div>
+          <div>
+            <label>生成対象フィルター</label>
+            <select id="batchFilter">
+              <option value="all">全ショット</option>
+              <option value="todo">未着手のみ</option>
+              <option value="wip">作業中のみ</option>
+              <option value="ready">生成待ちのみ</option>
+            </select>
+          </div>
+          <div>
+            <label>完了後アクション</label>
+            <select id="batchPostAction">
+              <option value="nothing">何もしない</option>
+              <option value="notify">通知のみ</option>
+              <option value="auto_edit">自動エディット起動</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="genBatchJson()">📦 バッチJSON生成</button>
+          <button class="btn btn-secondary" onclick="genBatchPython()">🐍 Pythonバッチ生成</button>
+          <button class="btn btn-success" onclick="exportShotList()">📊 ショットリスト出力</button>
+          <button class="btn btn-warning" onclick="exportAllPrompts()">📝 全プロンプト出力</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span>ショット一覧</div>
+        <div style="overflow-x: auto;">
+          <table class="shot-table" id="batchShotTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ショット名</th>
+                <th>セグメント</th>
+                <th>モデル</th>
+                <th>フレーム</th>
+                <th>解像度</th>
+                <th>ステータス</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="batchShotBody">
+              <!-- JS生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="batchOutputCard" style="display:none;">
+        <div class="card-title"><span class="icon">📦</span>バッチ出力結果</div>
+        <div class="btn-group" style="margin-bottom:12px;">
+          <button class="btn btn-primary" onclick="copyBatchOutput()">📋 全コピー</button>
+          <button class="btn btn-success" onclick="downloadBatchOutput()">💾 JSONダウンロード</button>
+        </div>
+        <div class="json-output" id="batchOutputJson" style="max-height:400px;"></div>
+      </div>
+
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /main-layout -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let shots = [];
+let currentShotIndex = 0;
+const STORAGE_KEY = 'crusha_video_gen_v1';
+
+// デフォルトショットリスト（ライブ構成）
+const DEFAULT_SHOTS = [
+  { id:'shot_001', name:'Opening_Wide', segment:'opening', type:'stage_wide', frames:72, resolution:'768x512', model:'wan2.2_t2v', status:'todo',
+    promptPositive:'cinematic wide shot of a large concert hall, colorful stage lights, laser beams, empty stage waiting for performer, dramatic atmosphere, smoke effect, crowd in darkness',
+    promptNegative:'blurry, low quality, watermark, text, static' },
+  { id:'shot_002', name:'Opening_Appearance', segment:'opening', type:'portrait_front', frames:96, resolution:'512x768', model:'wan2.2_i2v', status:'todo',
+    promptPositive:'crusha_v1, 1girl, turquoise hair, ferret ears on top of head, idol singer, making grand entrance on concert stage, spotlight shining down, confetti falling, emotional expression, concert costume',
+    promptNegative:'(human ears:1.5),(cat ears:1.5),(dog ears:1.5), blurry, bad anatomy, static, frozen' },
+  { id:'shot_003', name:'Song1_Dance', segment:'song1', type:'dance_full', frames:96, resolution:'512x768', model:'wan2.2_i2v', status:'todo',
+    promptPositive:'crusha_v1, 1girl, turquoise hair, ferret ears, full body dancing, energetic performance, concert stage, colorful lights, hair flowing, dynamic movement, idol singer',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, static, bad anatomy, extra limbs' },
+  { id:'shot_004', name:'Song1_FaceUp', segment:'song1', type:'close_face', frames:48, resolution:'512x768', model:'animatediff_xl', status:'todo',
+    promptPositive:'crusha_v1, 1girl, close-up face, singing with emotion, turquoise eyes, expressive, microphone, stage lighting, concert',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, ugly, bad anatomy' },
+  { id:'shot_005', name:'Song2_Dynamic', segment:'song2', type:'dynamic_action', frames:72, resolution:'768x512', model:'wan2.2_i2v', status:'todo',
+    promptPositive:'crusha_v1, 1girl, jumping on stage, arm raised, energetic, concert crowd in background, colorful laser lights, idol performance, full body shot',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, static, bad anatomy' },
+  { id:'shot_006', name:'Climax_Fire', segment:'climax', type:'dynamic_action', frames:96, resolution:'768x512', model:'wan2.2_i2v', status:'todo',
+    promptPositive:'crusha_v1, 1girl, climax performance, fire effects in background, pyrotechnics, intense expression, maximum energy, concert hall, spotlight, dramatic',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, bad anatomy, calm, static' },
+  { id:'shot_007', name:'Ending_Wave', segment:'ending', type:'portrait_front', frames:72, resolution:'512x768', model:'animatediff_xl', status:'todo',
+    promptPositive:'crusha_v1, 1girl, smiling and waving goodbye, concert stage, soft warm lighting, emotional farewell, bowing, audience applause in background',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, sad expression, bad anatomy' },
+  { id:'shot_008', name:'Ending_Fadeout', segment:'ending', type:'stage_wide', frames:72, resolution:'768x512', model:'wan2.2_t2v', status:'todo',
+    promptPositive:'concert stage slowly fading to black, last spotlight dimming, empty stage, emotional atmosphere, end of show, cinematic fade out',
+    promptNegative:'blurry, low quality, bright, energetic, crowded' },
+];
+
+// ─────────────────────────────────────────────
+// TEMPLATES
+// ─────────────────────────────────────────────
+const TEMPLATES = {
+  opening_grand: {
+    name:'Opening_Grand', segment:'opening', type:'stage_wide', frames:96, resolution:'768x512', model:'wan2.2_t2v',
+    promptPositive:'wide establishing shot of massive concert arena, thousands of fans with lightsticks, colorful confetti, laser beams, professional concert lighting rig, haze machine, dramatic entrance atmosphere, cinematic, 8k quality',
+    promptNegative:'blurry, low quality, empty venue, day, boring'
+  },
+  opening_silhouette: {
+    name:'Opening_Silhouette', segment:'opening', type:'portrait_front', frames:72, resolution:'512x768', model:'animatediff_xl',
+    promptPositive:'crusha_v1, silhouette emerging from stage smoke, backlit by intense spotlight, dramatic reveal, concert atmosphere, ferret ears visible in silhouette, idol singer, slow reveal',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, clear face too early, bad anatomy'
+  },
+  opening_cinematic: {
+    name:'Opening_Cinematic', segment:'opening', type:'stage_wide', frames:120, resolution:'768x512', model:'wan2.2_t2v',
+    promptPositive:'cinematic drone shot sweeping over massive outdoor concert, city lights in distance, fireworks launching, concert stage lit up spectacularly, camera descending toward stage, epic atmosphere',
+    promptNegative:'blurry, shaky, boring, static, low quality'
+  },
+  perf_dance_full: {
+    name:'Perf_Dance_Full', segment:'song1', type:'dance_full', frames:96, resolution:'512x768', model:'wan2.2_i2v',
+    promptPositive:'crusha_v1, 1girl, full body dance performance, turquoise hair flowing, ferret ears, energetic choreography, concert stage, colorful spotlights, crowd visible in background, microphone in hand, idol concert, dynamic motion blur',
+    promptNegative:'(human ears:1.5),(cat ears:1.5),(dog ears:1.5), blurry, bad anatomy, static, frozen, extra limbs'
+  },
+  perf_face_closeup: {
+    name:'Perf_FaceCloseup', segment:'song2', type:'close_face', frames:48, resolution:'512x768', model:'animatediff_xl',
+    promptPositive:'crusha_v1, 1girl, extreme close-up face, singing emotionally, turquoise eyes shining, tears of joy, beautiful expression, stage lighting creating dramatic shadows, microphone, idol concert',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, ugly, bad anatomy, full body'
+  },
+  perf_dynamic: {
+    name:'Perf_Dynamic', segment:'song3', type:'dynamic_action', frames:72, resolution:'512x768', model:'wan2.2_i2v',
+    promptPositive:'crusha_v1, 1girl, jumping high on stage, arms spread wide, euphoric expression, concert confetti explosion, colorful laser grid background, full body shot, ferret ears, idol outfit, maximum energy',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, static, grounded, bad anatomy'
+  },
+  perf_crowd: {
+    name:'Perf_Crowd', segment:'song2', type:'crowd_reaction', frames:72, resolution:'768x512', model:'wan2.2_t2v',
+    promptPositive:'shot from performer perspective looking out at massive crowd, thousands of fans with colored lightsticks creating waves, chanting and singing along, sea of lights, concert hall, emotional connection moment',
+    promptNegative:'blurry, empty venue, boring, low energy, static'
+  },
+  climax_fire: {
+    name:'Climax_Fire', segment:'climax', type:'dynamic_action', frames:96, resolution:'768x512', model:'wan2.2_i2v',
+    promptPositive:'crusha_v1, 1girl, powerful stance at climax, massive pyrotechnic fire columns on both sides, intense orange and yellow flames, maximum energy performance, crowd going wild, epic concert moment, ferret ears, dramatic lighting',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, calm, static, peaceful, bad anatomy'
+  },
+  climax_neon: {
+    name:'Climax_Neon', segment:'climax', type:'dynamic_action', frames:96, resolution:'512x768', model:'animatediff_xl',
+    promptPositive:'crusha_v1, 1girl, cyberpunk concert stage, surrounded by neon lights cyan and purple, rain of light particles, intense performance, ferret ears glowing in neon, dramatic upshot, sci-fi concert aesthetic',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, bad anatomy, warm colors only, static'
+  },
+  climax_firework: {
+    name:'Climax_Firework', segment:'climax', type:'stage_wide', frames:120, resolution:'768x512', model:'wan2.2_t2v',
+    promptPositive:'wide shot of outdoor concert at peak moment, massive fireworks explosion overhead, singer silhouette against fireworks sky, crowd arms raised, confetti explosion from stage, cinematic epic finale',
+    promptNegative:'blurry, indoor, calm, low energy, boring, static'
+  },
+  ending_wave: {
+    name:'Ending_Wave', segment:'ending', type:'portrait_front', frames:72, resolution:'512x768', model:'animatediff_xl',
+    promptPositive:'crusha_v1, 1girl, warm smile, waving hand to audience, ferret ears, concert stage with soft warm golden lighting, grateful expression, bowing, idol farewell, emotional ending, backstage lights',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, sad expression, bad anatomy, energetic'
+  },
+  ending_dark: {
+    name:'Ending_Dark', segment:'ending', type:'stage_wide', frames:96, resolution:'768x512', model:'wan2.2_i2v',
+    promptPositive:'concert stage final bow, single spotlight on performer, rest of stage in darkness, slow fade to black, emotional ending atmosphere, cinematic, dramatic, crowd in silence',
+    promptNegative:'blurry, bright, energetic, chaotic, busy background'
+  },
+  ending_dream: {
+    name:'Ending_Dream', segment:'ending', type:'portrait_front', frames:96, resolution:'512x768', model:'animatediff_xl',
+    promptPositive:'crusha_v1, 1girl, dreamy magical ending, surrounded by floating sparkling particles, soft pastel light, ethereal atmosphere, ferret ears, blowing a kiss, fading into sparkles, fantasy concert finale',
+    promptNegative:'(human ears:1.5),(cat ears:1.5), blurry, harsh lighting, realistic only, bad anatomy'
+  }
+};
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  loadData();
+  if (shots.length === 0) {
+    shots = JSON.parse(JSON.stringify(DEFAULT_SHOTS));
+  }
+  renderShotList();
+  selectShot(0);
+  updateStats();
+  loadSettings();
+  renderBatchTable();
+}
+
+// ─────────────────────────────────────────────
+// SHOT MANAGEMENT
+// ─────────────────────────────────────────────
+function renderShotList() {
+  const container = document.getElementById('shotListSidebar');
+  container.innerHTML = '';
+  shots.forEach((shot, i) => {
+    const statusClass = { todo:'', wip:'wip', ready:'ready', done:'done' }[shot.status] || '';
+    const div = document.createElement('div');
+    div.className = 'shot-item' + (i === currentShotIndex ? ' active' : '');
+    div.onclick = () => selectShot(i);
+    div.innerHTML = `
+      <span class="shot-num">#${String(i+1).padStart(3,'0')}</span>
+      <div class="shot-name">${shot.name || 'Untitled'}</div>
+      <div class="shot-seg">${getSegmentLabel(shot.segment)} · ${shot.model || '-'}</div>
+      <div class="shot-status ${statusClass}"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function selectShot(index) {
+  if (index < 0 || index >= shots.length) return;
+  currentShotIndex = index;
+  renderShotList();
+  const shot = shots[index];
+  // フォームに反映
+  setVal('shotName', shot.name || '');
+  setVal('shotSegment', shot.segment || '');
+  setVal('shotType', shot.type || 'stage_wide');
+  setVal('shotFrames', shot.frames || 48);
+  setVal('shotRes', shot.resolution || '768x512');
+  setVal('shotModel', shot.model || 'wan2.2_i2v');
+  setVal('shotStatus', shot.status || 'todo');
+  setVal('promptPositive', shot.promptPositive || '');
+  setVal('promptNegative', shot.promptNegative || '');
+  updatePreview();
+}
+
+function updateCurrentShot(field, value) {
+  if (!shots[currentShotIndex]) return;
+  shots[currentShotIndex][field] = value;
+  if (field === 'name') renderShotList();
+  saveData();
+}
+
+function addShot() {
+  const newShot = {
+    id: 'shot_' + Date.now(),
+    name: 'NewShot_' + String(shots.length + 1).padStart(3,'0'),
+    segment: '', type: 'stage_wide', frames: 48,
+    resolution: '768x512', model: 'wan2.2_i2v', status: 'todo',
+    promptPositive: '', promptNegative: '(human ears:1.5),(cat ears:1.5), blurry, low quality'
+  };
+  shots.push(newShot);
+  renderShotList();
+  selectShot(shots.length - 1);
+  updateStats();
+  renderBatchTable();
+  saveData();
+  toast('ショットを追加しました', 'cyan');
+}
+
+function getSegmentLabel(seg) {
+  const map = {
+    opening:'オープニング', song1:'1曲目', mc1:'MC1', song2:'2曲目',
+    mc2:'MC2', song3:'3曲目', mc3:'MC3', song4:'4曲目',
+    climax:'クライマックス', ending:'エンディング'
+  };
+  return map[seg] || seg || '未設定';
+}
+
+// ─────────────────────────────────────────────
+// PROMPT TOOLS
+// ─────────────────────────────────────────────
+function insertTag(type, text) {
+  const field = type === '+' ? 'promptPositive' : 'promptNegative';
+  const el = document.getElementById(field);
+  const current = el.value.trim();
+  el.value = current ? current + ', ' + text : text;
+  updateCurrentShot(field, el.value);
+  updatePreview();
+}
+
+function clearPrompt(type) {
+  const field = type === '+' ? 'promptPositive' : 'promptNegative';
+  document.getElementById(field).value = '';
+  updateCurrentShot(field, '');
+  updatePreview();
+}
+
+function copyPrompt(type) {
+  const field = type === '+' ? 'promptPositive' : 'promptNegative';
+  const text = document.getElementById(field).value;
+  navigator.clipboard.writeText(text).then(() => toast('コピーしました！'));
+}
+
+function copyFullPrompt() {
+  const pos = document.getElementById('promptPositive').value;
+  const neg = document.getElementById('promptNegative').value;
+  const full = `POSITIVE:\n${pos}\n\nNEGATIVE:\n${neg}`;
+  navigator.clipboard.writeText(full).then(() => toast('全プロンプトをコピーしました！'));
+}
+
+function updatePreview() {
+  const pos = document.getElementById('promptPositive').value;
+  const neg = document.getElementById('promptNegative').value;
+  const box = document.getElementById('promptPreviewBox');
+  if (!pos && !neg) {
+    box.textContent = '— ショットを選択するかプロンプトを入力してください —';
+    return;
+  }
+  // 簡易カラーリング（色分け省略しシンプル表示）
+  box.textContent = (pos ? '▶ POSITIVE:\n' + pos : '') + (neg ? '\n\n▷ NEGATIVE:\n' + neg : '');
+}
+
+function applyQualityPreset() {
+  const preset = document.getElementById('qualityPreset').value;
+  if (!preset) return;
+  const presets = {
+    wan_standard: 'masterpiece, best quality, high quality, 4k, sharp',
+    wan_cinematic: 'cinematic, film grain, professional cinematography, ARRI, anamorphic, 8k',
+    animediff_anime: 'masterpiece, best quality, anime, vibrant colors, clean lines, detailed',
+    animediff_realistic: 'photorealistic, hyperrealistic, film photography, RAW photo, detailed skin'
+  };
+  const tags = presets[preset];
+  if (tags) {
+    const el = document.getElementById('promptPositive');
+    const current = el.value.trim();
+    el.value = current ? current + ', ' + tags : tags;
+    updateCurrentShot('promptPositive', el.value);
+    updatePreview();
+    toast('品質プリセット適用: ' + preset);
+  }
+}
+
+function applyTemplate(key) {
+  const tpl = TEMPLATES[key];
+  if (!tpl || !shots[currentShotIndex]) { toast('テンプレートが見つかりません'); return; }
+  const shot = shots[currentShotIndex];
+  Object.assign(shot, tpl);
+  shot.id = shot.id || 'shot_' + Date.now();
+  selectShot(currentShotIndex);
+  renderShotList();
+  saveData();
+  toast('テンプレート適用: ' + tpl.name);
+  switchTab('prompt');
+}
+
+function genAllPrompts() {
+  // 全ショットにデフォルトネガを付与
+  shots.forEach(s => {
+    if (!s.promptNegative) {
+      s.promptNegative = '(human ears:1.5),(cat ears:1.5),(dog ears:1.5), blurry, low quality, bad anatomy';
+    }
+  });
+  saveData();
+  renderShotList();
+  toast('全ショットのネガティブプロンプトを補完しました');
+}
+
+// ─────────────────────────────────────────────
+// WORKFLOW GENERATION
+// ─────────────────────────────────────────────
+function generateWorkflow() {
+  const shot = shots[currentShotIndex];
+  const wfType = document.getElementById('workflowType').value;
+  const posPrompt = document.getElementById('promptPositive').value || (shot && shot.promptPositive) || '';
+  const negPrompt = document.getElementById('promptNegative').value || (shot && shot.promptNegative) || '';
+  const frames = shot ? shot.frames : 48;
+  const resolution = shot ? (shot.resolution || '768x512') : '768x512';
+  const [width, height] = resolution.split('x').map(Number);
+  const steps = parseInt(document.getElementById('defSteps')?.value || 25);
+  const cfg = parseFloat(document.getElementById('defCfg')?.value || 7.0);
+  const motionScale = parseFloat(document.getElementById('motionScale')?.value || 1.0);
+  const seed = parseInt(document.getElementById('defSeed')?.value || -1);
+  const actualSeed = seed === -1 ? Math.floor(Math.random() * 2**32) : seed;
+
+  let workflow;
+
+  if (wfType === 'wan22_i2v') {
+    workflow = genWan22I2VWorkflow(posPrompt, negPrompt, frames, width, height, steps, cfg, actualSeed);
+  } else if (wfType === 'wan22_t2v') {
+    workflow = genWan22T2VWorkflow(posPrompt, negPrompt, frames, width, height, steps, cfg, actualSeed);
+  } else if (wfType === 'animatediff_xl') {
+    workflow = genAnimateDiffXLWorkflow(posPrompt, negPrompt, frames, width, height, steps, cfg, motionScale, actualSeed);
+  } else if (wfType === 'animatediff_v3') {
+    workflow = genAnimateDiffV3Workflow(posPrompt, negPrompt, frames, width, height, steps, cfg, motionScale, actualSeed);
+  } else {
+    workflow = { note: `ワークフロータイプ "${wfType}" は近日対応予定です。` };
+  }
+
+  document.getElementById('workflowJson').textContent = JSON.stringify(workflow, null, 2);
+  switchTab('workflow');
+  toast('ワークフロー生成完了！');
+}
+
+function genWan22I2VWorkflow(pos, neg, frames, w, h, steps, cfg, seed) {
+  const wan22Path = document.getElementById('wan22Path')?.value || 'wan2.2/wan2.2-i2v-14b-480p-bf16.safetensors';
+  const vaePath = document.getElementById('wan22VaePath')?.value || 'wan2.2/wan_2.1_vae.safetensors';
+  const clipPath = document.getElementById('wan22ClipPath')?.value || 'wan2.2/umt5-xxl-enc-bf16.safetensors';
+  const imgEncPath = document.getElementById('wan22ImgEncPath')?.value || 'wan2.2/clip_vision_h.safetensors';
+  const i2vImg = document.getElementById('i2vDefaultImg')?.value || 'crusha_reference.png';
+
+  return {
+    "1": { class_type: "WanVideoModelLoader", inputs: { model: wan22Path, precision: "bf16", attention_mode: "sageattn_varlen" }, _meta: { title: "Wan2.2 I2V Model Loader" } },
+    "2": { class_type: "CLIPLoader", inputs: { clip_name: clipPath, type: "wan" }, _meta: { title: "T5 Text Encoder" } },
+    "3": { class_type: "CLIPVisionLoader", inputs: { clip_name: imgEncPath }, _meta: { title: "Image Encoder" } },
+    "4": { class_type: "AutoEncoderKLWan", inputs: { vae_name: vaePath }, _meta: { title: "Wan VAE" } },
+    "5": { class_type: "CLIPTextEncode", inputs: { clip: ["2", 0], text: pos }, _meta: { title: "Positive Prompt" } },
+    "6": { class_type: "CLIPTextEncode", inputs: { clip: ["2", 0], text: neg }, _meta: { title: "Negative Prompt" } },
+    "7": { class_type: "LoadImage", inputs: { image: i2vImg }, _meta: { title: "Reference Image" } },
+    "8": { class_type: "CLIPVisionEncode", inputs: { clip_vision: ["3", 0], image: ["7", 0], crop: "center" }, _meta: { title: "CLIP Vision Encode" } },
+    "9": {
+      class_type: "WanVideoSampler",
+      inputs: {
+        model: ["1", 0], positive: ["5", 0], negative: ["6", 0],
+        image_embeds: ["8", 0], vae: ["4", 0],
+        num_frames: frames, width: w, height: h,
+        steps: steps, cfg: cfg, seed: seed,
+        sampler_name: "unipc", scheduler: "simple_linear",
+        guidance_scale: parseFloat(document.getElementById('guidanceScale')?.value || 6.0),
+        denoise: parseFloat(document.getElementById('denoiseStrength')?.value || 0.9)
+      },
+      _meta: { title: "Wan2.2 I2V Sampler" }
+    },
+    "10": { class_type: "WanVideoDecoder", inputs: { vae: ["4", 0], samples: ["9", 0], enable_vae_tiling: false, tile_sample_min_height: 272, tile_sample_min_width: 272, tile_overlap_factor_height: 0.2, tile_overlap_factor_width: 0.2 }, _meta: { title: "Video Decode" } },
+    "11": { class_type: "VHS_VideoCombine", inputs: { images: ["10", 0], frame_rate: 24, loop_count: 0, filename_prefix: `crusha_${shot_name_safe()}`, format: "video/h264-mp4", pingpong: false, save_output: true }, _meta: { title: "Save Video" } }
+  };
+}
+
+function genWan22T2VWorkflow(pos, neg, frames, w, h, steps, cfg, seed) {
+  const wan22Path = document.getElementById('wan22Path')?.value || 'wan2.2/wan2.2-t2v-14b-480p-bf16.safetensors';
+  const vaePath = document.getElementById('wan22VaePath')?.value || 'wan2.2/wan_2.1_vae.safetensors';
+  const clipPath = document.getElementById('wan22ClipPath')?.value || 'wan2.2/umt5-xxl-enc-bf16.safetensors';
+
+  return {
+    "1": { class_type: "WanVideoModelLoader", inputs: { model: wan22Path, precision: "bf16", attention_mode: "sageattn_varlen" }, _meta: { title: "Wan2.2 T2V Model Loader" } },
+    "2": { class_type: "CLIPLoader", inputs: { clip_name: clipPath, type: "wan" }, _meta: { title: "T5 Text Encoder" } },
+    "3": { class_type: "AutoEncoderKLWan", inputs: { vae_name: vaePath }, _meta: { title: "Wan VAE" } },
+    "4": { class_type: "CLIPTextEncode", inputs: { clip: ["2", 0], text: pos }, _meta: { title: "Positive Prompt" } },
+    "5": { class_type: "CLIPTextEncode", inputs: { clip: ["2", 0], text: neg }, _meta: { title: "Negative Prompt" } },
+    "6": {
+      class_type: "WanVideoSampler",
+      inputs: {
+        model: ["1", 0], positive: ["4", 0], negative: ["5", 0], vae: ["3", 0],
+        num_frames: frames, width: w, height: h,
+        steps: steps, cfg: cfg, seed: seed,
+        sampler_name: "unipc", scheduler: "simple_linear",
+        guidance_scale: parseFloat(document.getElementById('guidanceScale')?.value || 6.0)
+      },
+      _meta: { title: "Wan2.2 T2V Sampler" }
+    },
+    "7": { class_type: "WanVideoDecoder", inputs: { vae: ["3", 0], samples: ["6", 0], enable_vae_tiling: false, tile_sample_min_height: 272, tile_sample_min_width: 272, tile_overlap_factor_height: 0.2, tile_overlap_factor_width: 0.2 }, _meta: { title: "Video Decode" } },
+    "8": { class_type: "VHS_VideoCombine", inputs: { images: ["7", 0], frame_rate: 24, loop_count: 0, filename_prefix: `crusha_${shot_name_safe()}`, format: "video/h264-mp4", pingpong: false, save_output: true }, _meta: { title: "Save Video" } }
+  };
+}
+
+function genAnimateDiffXLWorkflow(pos, neg, frames, w, h, steps, cfg, motionScale, seed) {
+  const sdxlPath = document.getElementById('sdxlModelPath')?.value || 'animagine-xl-4.0.safetensors';
+  const animPath = document.getElementById('animaDiffPath')?.value || 'animatediff/mm_sdxl_v10_beta.ckpt';
+
+  return {
+    "1": { class_type: "CheckpointLoaderSimple", inputs: { ckpt_name: sdxlPath }, _meta: { title: "SDXL Checkpoint" } },
+    "2": { class_type: "ADE_LoadAnimateDiffModel", inputs: { model_name: animPath, ad_settings: null }, _meta: { title: "AnimateDiff Motion Module" } },
+    "3": { class_type: "ADE_AnimateDiffLoaderWithContext", inputs: { model: ["1", 0], motion_model: ["2", 0], motion_scale: motionScale, apply_v2_models_properly: true }, _meta: { title: "AnimateDiff Loader" } },
+    "4": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["1", 1], text_g: pos, text_l: pos, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Positive Prompt" } },
+    "5": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["1", 1], text_g: neg, text_l: neg, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Negative Prompt" } },
+    "6": { class_type: "EmptyLatentImage", inputs: { width: w, height: h, batch_size: frames }, _meta: { title: "Latent (frames)" } },
+    "7": { class_type: "KSampler", inputs: { model: ["3", 0], positive: ["4", 0], negative: ["5", 0], latent_image: ["6", 0], seed: seed, steps: steps, cfg: cfg, sampler_name: "dpm_2_ancestral", scheduler: "karras", denoise: 1.0 }, _meta: { title: "KSampler" } },
+    "8": { class_type: "VAEDecode", inputs: { samples: ["7", 0], vae: ["1", 2] }, _meta: { title: "VAE Decode" } },
+    "9": { class_type: "VHS_VideoCombine", inputs: { images: ["8", 0], frame_rate: 24, loop_count: 0, filename_prefix: `crusha_${shot_name_safe()}`, format: "video/h264-mp4", pingpong: false, save_output: true }, _meta: { title: "Save Video" } }
+  };
+}
+
+function genAnimateDiffV3Workflow(pos, neg, frames, w, h, steps, cfg, motionScale, seed) {
+  return {
+    ...genAnimateDiffXLWorkflow(pos, neg, frames, w, h, steps, cfg, motionScale, seed),
+    _model_note: "SD1.5 variant: replace checkpoint with SD1.5 model, motion module with v3_sd15_mm.ckpt"
+  };
+}
+
+function shot_name_safe() {
+  const shot = shots[currentShotIndex];
+  return (shot ? shot.name : 'shot').replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+function copyWorkflow() {
+  const text = document.getElementById('workflowJson').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('ワークフローJSONをコピーしました！'));
+}
+
+function downloadWorkflow() {
+  const text = document.getElementById('workflowJson').textContent;
+  const shot = shots[currentShotIndex];
+  const name = shot ? shot.name : 'workflow';
+  downloadFile(text, `${name}_workflow.json`, 'application/json');
+}
+
+async function sendToComfyUI() {
+  const host = document.getElementById('comfyHost')?.value || '127.0.0.1';
+  const port = document.getElementById('comfyPort')?.value || '8188';
+  const url = `http://${host}:${port}/prompt`;
+  const wfText = document.getElementById('workflowJson').textContent;
+  const statusEl = document.getElementById('comfyStatusMsg');
+
+  try {
+    const wf = JSON.parse(wfText);
+    statusEl.textContent = '送信中...';
+    statusEl.style.color = 'var(--gold)';
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: wf })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      statusEl.textContent = `✅ 送信成功！ Prompt ID: ${data.prompt_id || 'N/A'}`;
+      statusEl.style.color = 'var(--green)';
+      toast('ComfyUIに送信しました！');
+    } else {
+      statusEl.textContent = `❌ 送信失敗: HTTP ${res.status}`;
+      statusEl.style.color = 'var(--pink)';
+    }
+  } catch (e) {
+    statusEl.textContent = `❌ 接続エラー: ${e.message}（ComfyUI起動中か確認してください）`;
+    statusEl.style.color = 'var(--pink)';
+  }
+}
+
+async function checkComfyStatus() {
+  const host = document.getElementById('comfyHost')?.value || '127.0.0.1';
+  const port = document.getElementById('comfyPort')?.value || '8188';
+  const statusEl = document.getElementById('comfyStatusMsg');
+  try {
+    const res = await fetch(`http://${host}:${port}/system_stats`);
+    if (res.ok) {
+      const data = await res.json();
+      const gpuMem = data.devices?.[0]?.vram_free || 'N/A';
+      statusEl.textContent = `✅ ComfyUI 接続OK | VRAM空き: ${typeof gpuMem === 'number' ? (gpuMem/1024/1024/1024).toFixed(1)+'GB' : gpuMem}`;
+      statusEl.style.color = 'var(--green)';
+    }
+  } catch {
+    statusEl.textContent = '❌ ComfyUI 未起動 or 接続不可';
+    statusEl.style.color = 'var(--pink)';
+  }
+}
+
+function genPythonScript() {
+  const host = document.getElementById('comfyHost')?.value || '127.0.0.1';
+  const port = document.getElementById('comfyPort')?.value || '8188';
+  const wfText = document.getElementById('workflowJson').textContent;
+  const script = `#!/usr/bin/env python3
+# CRUSHA VIDEO GEN — ComfyUI 送信スクリプト
+import json, urllib.request, uuid
+
+SERVER = "http://${host}:${port}"
+WORKFLOW = ${wfText}
+
+def queue_prompt(workflow):
+    data = json.dumps({"prompt": workflow, "client_id": str(uuid.uuid4())}).encode("utf-8")
+    req = urllib.request.Request(SERVER + "/prompt", data=data)
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req) as res:
+        return json.loads(res.read())
+
+if __name__ == "__main__":
+    result = queue_prompt(WORKFLOW)
+    print("Queued:", result.get("prompt_id", "unknown"))
+    print("Done! Check ComfyUI for output.")
+`;
+  document.getElementById('pythonScript').textContent = script;
+  document.getElementById('pythonScriptArea').style.display = 'block';
+  toast('Pythonスクリプト生成完了！');
+}
+
+function copyPythonScript() {
+  const text = document.getElementById('pythonScript').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Pythonスクリプトをコピーしました！'));
+}
+
+// ─────────────────────────────────────────────
+// BATCH OUTPUT
+// ─────────────────────────────────────────────
+function renderBatchTable() {
+  const tbody = document.getElementById('batchShotBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  shots.forEach((shot, i) => {
+    const statusBadge = {
+      todo: '<span style="color:var(--muted)">⬜ 未着手</span>',
+      wip: '<span style="color:var(--gold)">🟡 作業中</span>',
+      ready: '<span style="color:var(--cyan)">🔵 生成待ち</span>',
+      done: '<span style="color:var(--green)">✅ 完了</span>'
+    }[shot.status] || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:600">${shot.name || '-'}</td>
+      <td style="color:var(--muted)">${getSegmentLabel(shot.segment)}</td>
+      <td><span class="chip">${shot.model || '-'}</span></td>
+      <td style="color:var(--cyan)">${shot.frames}f</td>
+      <td style="color:var(--muted)">${shot.resolution}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-xs btn-secondary" onclick="selectShot(${i}); switchTab('prompt')">編集</button>
+        <button class="btn btn-xs btn-warning" onclick="deleteShot(${i})">削除</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function deleteShot(index) {
+  if (!confirm(`ショット "${shots[index].name}" を削除しますか？`)) return;
+  shots.splice(index, 1);
+  if (currentShotIndex >= shots.length) currentShotIndex = shots.length - 1;
+  renderShotList();
+  if (shots.length > 0) selectShot(currentShotIndex);
+  updateStats();
+  renderBatchTable();
+  saveData();
+  toast('ショットを削除しました');
+}
+
+function genBatchJson() {
+  const filter = document.getElementById('batchFilter').value;
+  const targetShots = shots.filter(s => filter === 'all' || s.status === filter);
+
+  if (targetShots.length === 0) {
+    toast('対象ショットがありません'); return;
+  }
+
+  const batchData = {
+    metadata: {
+      project: 'CRUSHA LIVE CONCERT',
+      generated: new Date().toISOString(),
+      total_shots: targetShots.length,
+      total_frames: targetShots.reduce((a, s) => a + (s.frames || 0), 0)
+    },
+    shots: targetShots.map(s => ({
+      id: s.id, name: s.name, segment: s.segment,
+      model: s.model, frames: s.frames, resolution: s.resolution,
+      prompt_positive: s.promptPositive,
+      prompt_negative: s.promptNegative,
+      status: s.status
+    }))
+  };
+
+  document.getElementById('batchOutputJson').textContent = JSON.stringify(batchData, null, 2);
+  document.getElementById('batchOutputCard').style.display = 'block';
+  toast(`バッチJSON生成: ${targetShots.length}ショット`);
+}
+
+function genBatchPython() {
+  const filter = document.getElementById('batchFilter').value;
+  const targetShots = shots.filter(s => filter === 'all' || s.status === filter);
+  const host = document.getElementById('comfyHost')?.value || '127.0.0.1';
+  const port = document.getElementById('comfyPort')?.value || '8188';
+
+  const script = `#!/usr/bin/env python3
+# CRUSHA LIVE — バッチ動画生成スクリプト
+# 生成対象: ${targetShots.length}ショット
+import json, urllib.request, uuid, time
+
+SERVER = "http://${host}:${port}"
+
+SHOTS = ${JSON.stringify(targetShots.map(s => ({name: s.name, model: s.model, frames: s.frames, resolution: s.resolution, prompt: s.promptPositive, negative: s.promptNegative})), null, 2)}
+
+def queue_prompt(workflow):
+    data = json.dumps({"prompt": workflow, "client_id": str(uuid.uuid4())}).encode("utf-8")
+    req = urllib.request.Request(SERVER + "/prompt", data=data)
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.loads(r.read())
+
+def build_wan22_workflow(shot):
+    """Wan2.2 T2V ワークフロー生成（簡易版）"""
+    w, h = map(int, shot.get("resolution", "768x512").split("x"))
+    return {
+        "note": f"Build full workflow for shot: {shot['name']}",
+        "prompt_positive": shot["prompt"],
+        "prompt_negative": shot["negative"],
+        "frames": shot["frames"],
+        "width": w, "height": h
+    }
+
+if __name__ == "__main__":
+    print(f"バッチ生成開始: {len(SHOTS)}ショット")
+    for i, shot in enumerate(SHOTS):
+        print(f"[{i+1}/{len(SHOTS)}] {shot['name']} ({shot['model']}, {shot['frames']}f)")
+        wf = build_wan22_workflow(shot)
+        try:
+            result = queue_prompt(wf)
+            print(f"  → Queued: {result.get('prompt_id', '?')}")
+        except Exception as e:
+            print(f"  → ERROR: {e}")
+        time.sleep(1)
+    print("全ショットをキューに送信しました！")
+`;
+
+  document.getElementById('batchOutputJson').textContent = script;
+  document.getElementById('batchOutputCard').style.display = 'block';
+  toast('Pythonバッチスクリプト生成完了！');
+}
+
+function exportShotList() {
+  const csv = [
+    ['#', 'ショット名', 'セグメント', 'モデル', 'フレーム', '解像度', 'ステータス'].join(','),
+    ...shots.map((s, i) => [i+1, s.name, s.segment, s.model, s.frames, s.resolution, s.status].join(','))
+  ].join('\n');
+  downloadFile(csv, 'crusha_shotlist.csv', 'text/csv');
+  toast('ショットリストをCSV出力しました');
+}
+
+function exportAllPrompts() {
+  const text = shots.map((s, i) => `=== Shot ${i+1}: ${s.name} ===\nSegment: ${s.segment}\nModel: ${s.model} | Frames: ${s.frames} | Res: ${s.resolution}\n\nPOSITIVE:\n${s.promptPositive}\n\nNEGATIVE:\n${s.promptNegative}\n`).join('\n---\n\n');
+  downloadFile(text, 'crusha_all_prompts.txt', 'text/plain');
+  toast('全プロンプトをTXT出力しました');
+}
+
+function exportBatchJson() { genBatchJson(); switchTab('batch'); }
+
+function copyBatchOutput() {
+  navigator.clipboard.writeText(document.getElementById('batchOutputJson').textContent)
+    .then(() => toast('コピーしました！'));
+}
+
+function downloadBatchOutput() {
+  const text = document.getElementById('batchOutputJson').textContent;
+  downloadFile(text, 'crusha_batch.json', 'application/json');
+}
+
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+function updateStats() {
+  const total = shots.length;
+  const done = shots.filter(s => s.status === 'done').length;
+  const wip = shots.filter(s => s.status === 'wip').length;
+  const ready = shots.filter(s => s.status === 'ready').length;
+  const todo = shots.filter(s => s.status === 'todo').length;
+  const totalFrames = shots.reduce((a, s) => a + (parseInt(s.frames) || 0), 0);
+  const totalSec = (totalFrames / 24).toFixed(0);
+
+  setTextContent('statTotal', total);
+  setTextContent('statWip', wip + ready);
+  setTextContent('statDone', done);
+  setTextContent('statTodo', todo);
+  setTextContent('statFrames', totalFrames);
+  setTextContent('statSeconds', totalSec + 's');
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const bar = document.getElementById('totalProgress');
+  if (bar) bar.style.width = pct + '%';
+  const ptext = document.getElementById('progressText');
+  if (ptext) ptext.textContent = `${done} / ${total} ショット`;
+
+  renderBatchTable();
+}
+
+// ─────────────────────────────────────────────
+// TAB SWITCH
+// ─────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const panels = ['prompt','settings','workflow','templates','batch'];
+    t.classList.toggle('active', panels[i] === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'tab-' + id);
+  });
+  if (id === 'batch') { renderBatchTable(); }
+}
+
+// ─────────────────────────────────────────────
+// PERSIST
+// ─────────────────────────────────────────────
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY + '_shots', JSON.stringify(shots));
+  } catch(e) {}
+}
+
+function loadData() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY + '_shots');
+    if (d) shots = JSON.parse(d);
+  } catch(e) {}
+}
+
+function saveSettings() {
+  const fields = ['wan22Path','wan22VaePath','wan22ClipPath','wan22ImgEncPath',
+    'animaDiffPath','sdxlModelPath','comfyHost','comfyPort','outputDir',
+    'defSteps','defCfg','defSeed','motionScale','guidanceScale','videoCfg',
+    'denoiseStrength','i2vBaseDir','i2vDefaultImg'];
+  const s = {};
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) s[f] = el.value;
+  });
+  try { localStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify(s)); } catch(e) {}
+}
+
+function loadSettings() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY + '_settings');
+    if (!d) return;
+    const s = JSON.parse(d);
+    Object.entries(s).forEach(([k, v]) => {
+      const el = document.getElementById(k);
+      if (el) el.value = v;
+    });
+    // スライダーの表示値更新
+    ['motionScale','guidanceScale','videoCfg','denoiseStrength'].forEach(id => {
+      const el = document.getElementById(id);
+      const valEl = document.getElementById(id + 'Val');
+      if (el && valEl) valEl.textContent = parseFloat(el.value).toFixed(id === 'motionScale' || id === 'denoiseStrength' ? 2 : 1);
+    });
+  } catch(e) {}
+}
+
+function saveAll() {
+  saveData();
+  saveSettings();
+  toast('💾 保存しました！');
+}
+
+// ─────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function setTextContent(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────────────
+// AUTO SAVE
+// ─────────────────────────────────────────────
+setInterval(() => { saveData(); }, 60000);
+window.addEventListener('beforeunload', saveAll);
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

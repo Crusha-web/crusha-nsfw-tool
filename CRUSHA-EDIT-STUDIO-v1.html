@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUSHA EDIT STUDIO v1 — 編集・タイムライン</title>
+<style>
+:root {
+  --bg: #080810;
+  --surface: #0f0f1e;
+  --card: #151528;
+  --border: #2a2a4a;
+  --cyan: #00d4ff;
+  --pink: #ff2d78;
+  --gold: #ffd700;
+  --green: #00ff88;
+  --purple: #8b5cf6;
+  --orange: #ff6b2d;
+  --text: #e8e8ff;
+  --muted: #6b6b8a;
+  --radius: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; }
+
+.header {
+  background:linear-gradient(135deg,#080810,#0f1020,#080810);
+  border-bottom:2px solid var(--orange);
+  padding:14px 20px; display:flex; align-items:center; gap:16px;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 4px 30px rgba(255,107,45,0.2);
+}
+.header-icon { width:46px;height:46px; background:linear-gradient(135deg,var(--orange),var(--gold)); border-radius:12px; display:flex;align-items:center;justify-content:center; font-size:22px; box-shadow:0 0 20px rgba(255,107,45,0.4); }
+.header-info h1 { font-size:18px; color:var(--orange); font-weight:800; letter-spacing:2px; }
+.header-info p { font-size:11px; color:var(--muted); margin-top:2px; }
+.header-badges { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+.badge { padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.badge-ffmpeg { background:rgba(255,107,45,0.15); border:1px solid var(--orange); color:var(--orange); }
+.badge-davinci { background:rgba(255,215,0,0.15); border:1px solid var(--gold); color:var(--gold); }
+.badge-tl { background:rgba(0,212,255,0.15); border:1px solid var(--cyan); color:var(--cyan); }
+
+.main-layout { display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 78px); }
+
+/* SIDEBAR */
+.sidebar { background:var(--surface); border-right:1px solid var(--border); padding:16px 12px; overflow-y:auto; max-height:calc(100vh - 78px); position:sticky; top:78px; }
+.sidebar-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:0 8px 6px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+.clip-item { padding:10px; border-radius:8px; cursor:pointer; border:1px solid transparent; transition:all 0.2s; margin-bottom:4px; position:relative; }
+.clip-item:hover { background:rgba(255,107,45,0.06); border-color:var(--orange); }
+.clip-item.active { background:rgba(255,107,45,0.1); border-color:var(--orange); }
+.clip-order { font-size:9px; color:var(--muted); }
+.clip-name { font-size:12px; font-weight:600; color:var(--text); margin:2px 0; }
+.clip-duration { font-size:10px; color:var(--muted); }
+.clip-type-dot { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; }
+
+/* MAIN */
+.main-content { padding:20px; overflow-y:auto; }
+
+/* TABS */
+.tabs { display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+.tab { padding:10px 18px; cursor:pointer; font-size:12px; font-weight:600; color:var(--muted); border-radius:8px 8px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.2s; white-space:nowrap; }
+.tab.active { color:var(--orange); background:rgba(255,107,45,0.1); border-color:var(--border); border-bottom-color:var(--card); }
+.tab:hover:not(.active) { color:var(--text); background:rgba(255,255,255,0.03); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* CARDS */
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:16px; }
+.card-title { font-size:13px; font-weight:700; color:var(--orange); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+/* FORM */
+.form-row { display:grid; gap:12px; margin-bottom:12px; }
+.form-row.cols2 { grid-template-columns:1fr 1fr; }
+.form-row.cols3 { grid-template-columns:1fr 1fr 1fr; }
+.form-row.cols4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+label { display:block; font-size:11px; color:var(--muted); margin-bottom:5px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+input[type="text"],input[type="number"],select,textarea { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:9px 12px; font-size:13px; font-family:inherit; transition:border-color 0.2s; outline:none; }
+input:focus,select:focus,textarea:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(255,107,45,0.1); }
+textarea { resize:vertical; min-height:80px; line-height:1.5; }
+select option { background:#1a1a2e; }
+
+/* TIMELINE */
+.timeline-container { background:#0a0a15; border:1px solid var(--border); border-radius:10px; overflow-x:auto; padding:16px; margin-bottom:16px; min-height:200px; }
+.tl-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.tl-tracks { display:flex; flex-direction:column; gap:8px; }
+.tl-track { display:flex; gap:8px; align-items:center; }
+.tl-track-label { width:80px; font-size:10px; color:var(--muted); text-align:right; flex-shrink:0; font-weight:600; text-transform:uppercase; }
+.tl-track-area { flex:1; position:relative; height:44px; background:rgba(255,255,255,0.03); border-radius:6px; border:1px solid var(--border); overflow:hidden; min-width:600px; }
+.tl-clip {
+  position:absolute; top:4px; height:36px; border-radius:5px;
+  display:flex; align-items:center; padding:0 8px;
+  font-size:10px; font-weight:700; cursor:grab;
+  white-space:nowrap; overflow:hidden;
+  transition:opacity 0.15s;
+}
+.tl-clip:hover { opacity:0.85; }
+.tl-clip-video { background:linear-gradient(135deg,rgba(0,212,255,0.6),rgba(139,92,246,0.6)); border:1px solid var(--cyan); color:#fff; }
+.tl-clip-audio { background:linear-gradient(135deg,rgba(255,45,120,0.6),rgba(255,107,45,0.6)); border:1px solid var(--pink); color:#fff; }
+.tl-clip-mc { background:linear-gradient(135deg,rgba(255,215,0,0.5),rgba(255,107,45,0.5)); border:1px solid var(--gold); color:#fff; }
+.tl-clip-se { background:linear-gradient(135deg,rgba(0,255,136,0.4),rgba(0,212,255,0.4)); border:1px solid var(--green); color:#fff; }
+
+.tl-ruler { height:20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); position:relative; margin-bottom:8px; min-width:600px; }
+.tl-ruler-tick { position:absolute; bottom:0; font-size:9px; color:var(--muted); padding-bottom:2px; }
+
+/* FFMPEG */
+.ffmpeg-output { background:#0a0a15; border:1px solid var(--border); border-radius:8px; padding:14px; font-family:'Cascadia Code','Consolas',monospace; font-size:11px; color:#a8c8f8; max-height:300px; overflow:auto; white-space:pre-wrap; line-height:1.7; }
+.cmd-comment { color:var(--muted); }
+.cmd-flag { color:var(--cyan); }
+.cmd-value { color:var(--green); }
+.cmd-path { color:var(--gold); }
+
+/* BUTTONS */
+.btn { padding:10px 18px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700; border:none; transition:all 0.2s; letter-spacing:0.5px; display:inline-flex; align-items:center; gap:6px; }
+.btn-primary { background:linear-gradient(135deg,var(--orange),var(--gold)); color:#000; box-shadow:0 4px 20px rgba(255,107,45,0.3); }
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 25px rgba(255,107,45,0.4); }
+.btn-secondary { background:rgba(139,92,246,0.15); border:1px solid var(--purple); color:var(--purple); }
+.btn-success { background:rgba(0,255,136,0.15); border:1px solid var(--green); color:var(--green); }
+.btn-danger { background:rgba(255,45,120,0.15); border:1px solid var(--pink); color:var(--pink); }
+.btn-cyan { background:rgba(0,212,255,0.15); border:1px solid var(--cyan); color:var(--cyan); }
+.btn-sm { padding:6px 12px; font-size:11px; }
+.btn-xs { padding:4px 8px; font-size:10px; border-radius:5px; }
+.btn-full { width:100%; justify-content:center; }
+.btn-group { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* RANGE */
+.slider-group { margin-bottom:12px; }
+.slider-row { display:flex; align-items:center; gap:10px; margin-top:5px; }
+.slider-row input[type="range"] { flex:1; appearance:none; height:4px; background:var(--border); border-radius:2px; border:none; padding:0; outline:none; }
+.slider-row input[type="range"]::-webkit-slider-thumb { appearance:none; width:16px;height:16px; border-radius:50%; background:var(--orange); cursor:pointer; box-shadow:0 0 8px rgba(255,107,45,0.6); }
+.slider-val { min-width:48px; text-align:right; font-size:12px; font-weight:700; color:var(--orange); }
+
+/* TRANSITION PICKER */
+.transition-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; }
+.trans-btn { padding:10px 6px; text-align:center; border-radius:8px; cursor:pointer; background:var(--surface); border:1px solid var(--border); font-size:11px; color:var(--muted); transition:all 0.2s; }
+.trans-btn:hover,.trans-btn.active { background:rgba(255,107,45,0.1); border-color:var(--orange); color:var(--orange); }
+.trans-btn .trans-icon { font-size:20px; display:block; margin-bottom:4px; }
+
+/* INFO */
+.info-block { background:rgba(255,107,45,0.06); border:1px solid rgba(255,107,45,0.2); border-radius:8px; padding:14px; margin-bottom:14px; font-size:12px; line-height:1.7; color:var(--muted); }
+.info-block strong { color:var(--orange); }
+.info-block code { background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; font-family:monospace; color:var(--green); font-size:11px; }
+
+/* STATUS GRID */
+.status-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-bottom:16px; }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+.stat-box .stat-val { font-size:24px; font-weight:800; color:var(--orange); display:block; }
+.stat-box .stat-label { font-size:10px; color:var(--muted); margin-top:2px; }
+
+/* EDL TABLE */
+.edl-table { width:100%; border-collapse:collapse; font-size:11px; }
+.edl-table th { text-align:left; padding:8px 10px; background:rgba(255,107,45,0.06); color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+.edl-table td { padding:9px 10px; border-bottom:1px solid rgba(42,42,74,0.5); vertical-align:middle; }
+.edl-table tr:hover td { background:rgba(255,107,45,0.02); }
+.edl-table input[type="text"] { padding:4px 8px; font-size:11px; }
+.edl-table select { padding:4px 8px; font-size:10px; }
+
+.chip { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; }
+.chip-orange { background:rgba(255,107,45,0.1); border:1px solid rgba(255,107,45,0.3); color:var(--orange); }
+.chip-cyan { background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); color:var(--cyan); }
+.chip-green { background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); color:var(--green); }
+.chip-gold { background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); color:var(--gold); }
+
+.toast { position:fixed; bottom:24px; right:24px; background:var(--card); border:1px solid var(--green); border-radius:10px; padding:12px 20px; color:var(--green); font-size:13px; font-weight:600; z-index:9999; transform:translateY(80px); opacity:0; transition:all 0.3s; pointer-events:none; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.orange { border-color:var(--orange); color:var(--orange); }
+
+@media(max-width:768px){
+  .main-layout{grid-template-columns:1fr;}
+  .sidebar{position:static;max-height:none;}
+  .form-row.cols2,.form-row.cols3,.form-row.cols4{grid-template-columns:1fr;}
+  .tabs{overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">✂️</div>
+  <div class="header-info">
+    <h1>EDIT STUDIO</h1>
+    <p>Stage 5 — タイムライン構成 / FFmpeg / DaVinci Resolve 編集ツール</p>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-ffmpeg">FFMPEG</span>
+    <span class="badge badge-davinci">DAVINCI</span>
+    <span class="badge badge-tl">TIMELINE</span>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- SIDEBAR: クリップリスト -->
+  <div class="sidebar">
+    <div style="margin-bottom:20px;">
+      <div class="sidebar-label">🎬 クリップリスト</div>
+      <div id="clipSidebar"></div>
+      <button style="width:100%;padding:9px;border-radius:8px;background:rgba(255,107,45,0.08);border:1px dashed var(--orange);color:var(--orange);cursor:pointer;font-size:12px;font-weight:600;margin-top:6px;" onclick="addClip()">＋ クリップ追加</button>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div class="sidebar-label">⏱️ タイムライン情報</div>
+      <div style="padding:4px 8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--muted);">総尺</span>
+          <span style="font-size:11px;color:var(--orange);font-weight:700;" id="tlTotalDuration">00:00:00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--muted);">クリップ数</span>
+          <span style="font-size:11px;color:var(--cyan);font-weight:700;" id="tlClipCount">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:11px;color:var(--muted);">フレームレート</span>
+          <span style="font-size:11px;color:var(--green);font-weight:700;">24fps</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-label">⚡ クイックアクション</div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:0 4px;">
+        <button class="btn btn-primary btn-sm" onclick="buildTimeline()">🔄 タイムライン再構築</button>
+        <button class="btn btn-secondary btn-sm" onclick="genFFmpegAll()">💻 FFmpegコマンド生成</button>
+        <button class="btn btn-success btn-sm" onclick="saveAll()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- STATS -->
+    <div class="status-grid">
+      <div class="stat-box"><span class="stat-val" id="statClips">0</span><div class="stat-label">クリップ数</div></div>
+      <div class="stat-box"><span class="stat-val" style="color:var(--cyan)" id="statVideo">0</span><div class="stat-label">映像クリップ</div></div>
+      <div class="stat-box"><span class="stat-val" style="color:var(--pink)" id="statAudio">0</span><div class="stat-label">音声トラック</div></div>
+      <div class="stat-box"><span class="stat-val" style="color:var(--gold)" id="statDuration">0s</span><div class="stat-label">総尺</div></div>
+      <div class="stat-box"><span class="stat-val" style="color:var(--green)" id="statSize">~0MB</span><div class="stat-label">推定サイズ</div></div>
+      <div class="stat-box"><span class="stat-val" style="color:var(--purple)" id="statFps">24fps</span><div class="stat-label">フレームレート</div></div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('timeline')">📐 タイムライン</div>
+      <div class="tab" onclick="switchTab('clips')">🎞️ クリップ編集</div>
+      <div class="tab" onclick="switchTab('ffmpeg')">💻 FFmpegコマンド</div>
+      <div class="tab" onclick="switchTab('audio')">🎵 音声ミックス</div>
+      <div class="tab" onclick="switchTab('export_edl')">📤 EDL/XML出力</div>
+    </div>
+
+    <!-- TAB: タイムライン -->
+    <div class="tab-panel active" id="tab-timeline">
+      <div class="card">
+        <div class="card-title"><span>🎬</span>ライブタイムライン構成</div>
+        <div class="info-block">
+          <strong>使い方:</strong> 左サイドバーでクリップ追加 → ドラッグで順番変更 → FFmpegコマンド生成で結合コマンド出力。
+          各クリップの開始時刻は自動計算されます。
+        </div>
+
+        <div class="timeline-container">
+          <div class="tl-ruler" id="tlRuler"></div>
+          <div class="tl-tracks" id="tlTracks">
+            <div class="tl-track">
+              <div class="tl-track-label">VIDEO</div>
+              <div class="tl-track-area" id="videoTrack"></div>
+            </div>
+            <div class="tl-track">
+              <div class="tl-track-label">BGM</div>
+              <div class="tl-track-area" id="bgmTrack"></div>
+            </div>
+            <div class="tl-track">
+              <div class="tl-track-label">VOICE</div>
+              <div class="tl-track-area" id="voiceTrack"></div>
+            </div>
+            <div class="tl-track">
+              <div class="tl-track-label">SE</div>
+              <div class="tl-track-area" id="seTrack"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="buildTimeline()">🔄 タイムライン更新</button>
+          <button class="btn btn-cyan" onclick="autoArrangeClips()">✨ 自動配置</button>
+          <button class="btn btn-secondary" onclick="addTransition()">↔️ トランジション追加</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📋</span>クリップ順序管理</div>
+        <div style="overflow-x:auto;">
+          <table class="edl-table" id="clipOrderTable">
+            <thead><tr>
+              <th style="width:40px">順</th>
+              <th>ファイル名</th>
+              <th>種類</th>
+              <th>開始時刻</th>
+              <th>尺</th>
+              <th>トランジション</th>
+              <th>操作</th>
+            </tr></thead>
+            <tbody id="clipOrderBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: クリップ編集 -->
+    <div class="tab-panel" id="tab-clips">
+      <div class="card">
+        <div class="card-title"><span>🎞️</span>クリップ詳細設定</div>
+        <div class="form-row cols3">
+          <div>
+            <label>クリップ名</label>
+            <input type="text" id="clipName" placeholder="Opening_001.mp4" oninput="updateCurrentClip('name',this.value)">
+          </div>
+          <div>
+            <label>セグメント</label>
+            <select id="clipSegment" onchange="updateCurrentClip('segment',this.value)">
+              <option value="opening">🌟 オープニング</option>
+              <option value="song1">🎵 1曲目</option>
+              <option value="mc1">💬 MC1</option>
+              <option value="song2">🎶 2曲目</option>
+              <option value="mc2">💬 MC2</option>
+              <option value="song3">🎸 3曲目</option>
+              <option value="mc3">💬 MC3</option>
+              <option value="climax">🔥 クライマックス</option>
+              <option value="ending">🌙 エンディング</option>
+            </select>
+          </div>
+          <div>
+            <label>クリップタイプ</label>
+            <select id="clipType" onchange="updateCurrentClip('type',this.value)">
+              <option value="video">🎬 映像</option>
+              <option value="bgm">🎵 BGM</option>
+              <option value="voice">🎙️ ボイス</option>
+              <option value="se">🔔 SE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols4">
+          <div>
+            <label>ファイルパス</label>
+            <input type="text" id="clipPath" placeholder="output/opening_001.mp4" oninput="updateCurrentClip('path',this.value)">
+          </div>
+          <div>
+            <label>開始時刻 (秒)</label>
+            <input type="number" id="clipStart" value="0" step="0.1" oninput="updateCurrentClip('start',parseFloat(this.value))">
+          </div>
+          <div>
+            <label>尺 (秒)</label>
+            <input type="number" id="clipDuration" value="3" step="0.1" min="0.1" oninput="updateCurrentClip('duration',parseFloat(this.value));updateStats()">
+          </div>
+          <div>
+            <label>イン点 (秒)</label>
+            <input type="number" id="clipIn" value="0" step="0.1" oninput="updateCurrentClip('inPoint',parseFloat(this.value))">
+          </div>
+        </div>
+        <div class="form-row cols3">
+          <div>
+            <label>トランジション種類</label>
+            <select id="clipTransition" onchange="updateCurrentClip('transition',this.value)">
+              <option value="cut">カット</option>
+              <option value="fade_in">フェードイン</option>
+              <option value="fade_out">フェードアウト</option>
+              <option value="crossfade">クロスフェード</option>
+              <option value="dissolve">ディゾルブ</option>
+              <option value="wipe_left">ワイプ左</option>
+              <option value="wipe_right">ワイプ右</option>
+              <option value="zoom_in">ズームイン</option>
+              <option value="flash">フラッシュ</option>
+            </select>
+          </div>
+          <div>
+            <label>トランジション尺 (秒)</label>
+            <input type="number" id="clipTransDur" value="0.5" step="0.1" min="0.1" oninput="updateCurrentClip('transitionDuration',parseFloat(this.value))">
+          </div>
+          <div>
+            <label>音声ボリューム (%)</label>
+            <input type="number" id="clipVolume" value="100" min="0" max="200" oninput="updateCurrentClip('volume',parseInt(this.value))">
+          </div>
+        </div>
+        <div>
+          <label>メモ</label>
+          <textarea id="clipNote" rows="2" placeholder="このクリップに関するメモ..." oninput="updateCurrentClip('note',this.value)"></textarea>
+        </div>
+      </div>
+
+      <!-- カラーグレーディング -->
+      <div class="card">
+        <div class="card-title"><span>🎨</span>カラーグレーディング (FFmpeg filter)</div>
+        <div class="form-row cols3">
+          <div>
+            <label>ブライトネス</label>
+            <div class="slider-row">
+              <input type="range" id="cgBrightness" min="-0.5" max="0.5" step="0.01" value="0" oninput="document.getElementById('cgBrightnessVal').textContent=parseFloat(this.value).toFixed(2)">
+              <span class="slider-val" id="cgBrightnessVal">0.00</span>
+            </div>
+          </div>
+          <div>
+            <label>コントラスト</label>
+            <div class="slider-row">
+              <input type="range" id="cgContrast" min="0.5" max="2.0" step="0.05" value="1.0" oninput="document.getElementById('cgContrastVal').textContent=parseFloat(this.value).toFixed(2)">
+              <span class="slider-val" id="cgContrastVal">1.00</span>
+            </div>
+          </div>
+          <div>
+            <label>サチュレーション</label>
+            <div class="slider-row">
+              <input type="range" id="cgSaturation" min="0" max="3.0" step="0.05" value="1.0" oninput="document.getElementById('cgSaturationVal').textContent=parseFloat(this.value).toFixed(2)">
+              <span class="slider-val" id="cgSaturationVal">1.00</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row cols2">
+          <div>
+            <label>カラールックプリセット</label>
+            <select id="cgPreset" onchange="applyColorPreset()">
+              <option value="">— プリセット選択 —</option>
+              <option value="vivid">VIVID（鮮やか）</option>
+              <option value="cinematic">CINEMATIC（映画風）</option>
+              <option value="anime">ANIME（アニメ調）</option>
+              <option value="neon">NEON（ネオン）</option>
+              <option value="warm">WARM（暖色）</option>
+              <option value="cool">COOL（寒色）</option>
+            </select>
+          </div>
+          <div>
+            <label>LUTファイル（任意）</label>
+            <input type="text" id="cgLut" placeholder="luts/crusha_live.cube">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: FFmpegコマンド -->
+    <div class="tab-panel" id="tab-ffmpeg">
+      <div class="card">
+        <div class="card-title"><span>💻</span>FFmpegコマンド生成</div>
+        <div class="form-row cols3">
+          <div>
+            <label>出力ファイル名</label>
+            <input type="text" id="ffOutputName" value="CRUSHA_LIVE_v1.mp4">
+          </div>
+          <div>
+            <label>出力コーデック</label>
+            <select id="ffCodec">
+              <option value="h264">H.264 (libx264)</option>
+              <option value="h265">H.265 (libx265)</option>
+              <option value="vp9">VP9</option>
+              <option value="av1">AV1 (libaom)</option>
+            </select>
+          </div>
+          <div>
+            <label>ビットレート</label>
+            <select id="ffBitrate">
+              <option value="8M">8Mbps (HD標準)</option>
+              <option value="15M" selected>15Mbps (FHD高品質)</option>
+              <option value="25M">25Mbps (FHD最高品質)</option>
+              <option value="50M">50Mbps (マスター)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols4">
+          <div>
+            <label>解像度</label>
+            <select id="ffResolution">
+              <option value="1920x1080">1920×1080 (FHD)</option>
+              <option value="1280x720">1280×720 (HD)</option>
+              <option value="3840x2160">3840×2160 (4K)</option>
+              <option value="1080x1920">1080×1920 (縦型)</option>
+            </select>
+          </div>
+          <div>
+            <label>フレームレート</label>
+            <select id="ffFps">
+              <option value="24">24fps</option>
+              <option value="30" selected>30fps</option>
+              <option value="60">60fps</option>
+            </select>
+          </div>
+          <div>
+            <label>音声コーデック</label>
+            <select id="ffAudioCodec">
+              <option value="aac">AAC</option>
+              <option value="mp3">MP3</option>
+              <option value="flac">FLAC（ロスレス）</option>
+            </select>
+          </div>
+          <div>
+            <label>音声ビットレート</label>
+            <select id="ffAudioBitrate">
+              <option value="192k">192kbps</option>
+              <option value="320k" selected>320kbps</option>
+              <option value="512k">512kbps</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-group" style="margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="genFFmpegAll()">⚡ 全コマンド生成</button>
+          <button class="btn btn-secondary" onclick="genFFmpegConcat()">🔗 結合コマンド</button>
+          <button class="btn btn-cyan" onclick="genFFmpegMix()">🎵 音声ミックスコマンド</button>
+          <button class="btn btn-success" onclick="copyFFmpeg()">📋 コピー</button>
+        </div>
+        <div class="ffmpeg-output" id="ffmpegOutput">// ← 「全コマンド生成」ボタンをクリックしてください</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📋</span>よく使うFFmpegコマンド集</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:var(--surface);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px;">🎬 動画結合 (concatファイル方式)</div>
+            <div class="ffmpeg-output" style="max-height:80px;">ffmpeg -f concat -safe 0 -i filelist.txt -c copy output.mp4</div>
+            <button class="btn btn-xs btn-cyan" style="margin-top:6px;" onclick="copyCmd('ffmpeg -f concat -safe 0 -i filelist.txt -c copy output.mp4')">コピー</button>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px;">🎵 BGMミックス (音量調整付き)</div>
+            <div class="ffmpeg-output" style="max-height:80px;">ffmpeg -i video.mp4 -i bgm.mp3 -filter_complex "[1:a]volume=0.7[bgm];[0:a][bgm]amix=inputs=2:duration=first" -c:v copy output.mp4</div>
+            <button class="btn btn-xs btn-cyan" style="margin-top:6px;" onclick="copyCmd('ffmpeg -i video.mp4 -i bgm.mp3 -filter_complex \"[1:a]volume=0.7[bgm];[0:a][bgm]amix=inputs=2:duration=first\" -c:v copy output.mp4')">コピー</button>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px;">🌊 クロスフェードトランジション</div>
+            <div class="ffmpeg-output" style="max-height:80px;">ffmpeg -i clip1.mp4 -i clip2.mp4 -filter_complex "[0:v][1:v]xfade=transition=dissolve:duration=0.5:offset=2.5[v]" -map "[v]" output.mp4</div>
+            <button class="btn btn-xs btn-cyan" style="margin-top:6px;" onclick="copyCmd('ffmpeg -i clip1.mp4 -i clip2.mp4 -filter_complex \"[0:v][1:v]xfade=transition=dissolve:duration=0.5:offset=2.5[v]\" -map \"[v]\" output.mp4')">コピー</button>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px;">📐 解像度変換 + カラーグレーディング</div>
+            <div class="ffmpeg-output" style="max-height:80px;">ffmpeg -i input.mp4 -vf "scale=1920:1080,eq=brightness=0.05:contrast=1.2:saturation=1.3" -c:v libx264 -crf 18 output.mp4</div>
+            <button class="btn btn-xs btn-cyan" style="margin-top:6px;" onclick="copyCmd('ffmpeg -i input.mp4 -vf \"scale=1920:1080,eq=brightness=0.05:contrast=1.2:saturation=1.3\" -c:v libx264 -crf 18 output.mp4')">コピー</button>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px;">📜 字幕焼き込み (ASS形式)</div>
+            <div class="ffmpeg-output" style="max-height:80px;">ffmpeg -i video.mp4 -vf "ass=subtitles.ass" -c:v libx264 -crf 18 output_with_subs.mp4</div>
+            <button class="btn btn-xs btn-cyan" style="margin-top:6px;" onclick="copyCmd('ffmpeg -i video.mp4 -vf \"ass=subtitles.ass\" -c:v libx264 -crf 18 output_with_subs.mp4')">コピー</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: 音声ミックス -->
+    <div class="tab-panel" id="tab-audio">
+      <div class="card">
+        <div class="card-title"><span>🎵</span>音声トラックミックス設定</div>
+
+        <div id="audioTrackList">
+          <!-- JS生成 -->
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="addAudioTrack()" style="margin-top:8px;">＋ 音声トラック追加</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>🎚️</span>マスタートラック設定</div>
+        <div class="form-row cols2">
+          <div class="slider-group">
+            <label>マスターボリューム</label>
+            <div class="slider-row">
+              <input type="range" id="masterVol" min="0" max="2" step="0.05" value="1.0" oninput="document.getElementById('masterVolVal').textContent=(parseFloat(this.value)*100).toFixed(0)+'%'">
+              <span class="slider-val" id="masterVolVal">100%</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label>マスターゲイン (dB)</label>
+            <div class="slider-row">
+              <input type="range" id="masterGain" min="-20" max="10" step="0.5" value="0" oninput="document.getElementById('masterGainVal').textContent=parseFloat(this.value).toFixed(1)+'dB'">
+              <span class="slider-val" id="masterGainVal">0.0dB</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row cols3">
+          <div>
+            <label>BGMフェードイン (秒)</label>
+            <input type="number" id="bgmFadeIn" value="2.0" step="0.5" min="0">
+          </div>
+          <div>
+            <label>BGMフェードアウト (秒)</label>
+            <input type="number" id="bgmFadeOut" value="3.0" step="0.5" min="0">
+          </div>
+          <div>
+            <label>コンプレッサー</label>
+            <select id="compressor">
+              <option value="none">なし</option>
+              <option value="light">ライト (-3dB)</option>
+              <option value="medium" selected>ミディアム (-6dB)</option>
+              <option value="heavy">ヘビー (-10dB)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="genAudioMixCmd()" style="margin-top:8px;">🎚️ ミックスコマンド生成</button>
+        <div class="ffmpeg-output" id="audioMixOutput" style="margin-top:12px;">// ミックスコマンドがここに表示されます</div>
+      </div>
+    </div>
+
+    <!-- TAB: EDL/XML出力 -->
+    <div class="tab-panel" id="tab-export_edl">
+      <div class="card">
+        <div class="card-title"><span>📤</span>DaVinci Resolve / Premiere 用 EDL・XML出力</div>
+        <div class="info-block">
+          <strong>EDL (Edit Decision List)</strong> — DaVinci Resolve, Premiere Pro, Final Cut Proに対応した汎用編集リスト形式。<br>
+          <strong>XML (Final Cut Pro XML)</strong> — FCPXおよびDaVinci Resolveのタイムラインインポートに使用。
+        </div>
+        <div class="form-row cols3">
+          <div>
+            <label>プロジェクト名</label>
+            <input type="text" id="edlProjectName" value="CRUSHA_LIVE_2026">
+          </div>
+          <div>
+            <label>フレームレート</label>
+            <select id="edlFps">
+              <option value="24">24fps</option>
+              <option value="30" selected>30fps (29.97)</option>
+              <option value="60">60fps</option>
+            </select>
+          </div>
+          <div>
+            <label>出力形式</label>
+            <select id="edlFormat">
+              <option value="edl">EDL (CMX 3600)</option>
+              <option value="fcpxml">Final Cut Pro XML</option>
+              <option value="otio">OpenTimelineIO JSON</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-group" style="margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="genEDL()">📋 EDL生成</button>
+          <button class="btn btn-secondary" onclick="genFCPXML()">🎬 FCP XML生成</button>
+          <button class="btn btn-success" onclick="downloadEDL()">💾 ダウンロード</button>
+          <button class="btn btn-cyan" onclick="copyEDL()">📋 コピー</button>
+        </div>
+        <div class="ffmpeg-output" id="edlOutput" style="max-height:400px;">// ← 「EDL生成」または「FCP XML生成」をクリックしてください</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>🎬</span>DaVinci Resolve 作業手順</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);">
+            <strong style="color:var(--orange);">① プロジェクト作成</strong><br>
+            DaVinci Resolve起動 → New Project → プロジェクト名: <code>CRUSHA_LIVE_2026</code><br>
+            Settings → Master Settings → 解像度: 1920×1080 / フレームレート: 24fps
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);">
+            <strong style="color:var(--orange);">② メディアのインポート</strong><br>
+            Media Pool → Import Media → 生成した全mp4ファイルをドラッグ&ドロップ<br>
+            BGM音声ファイル(wav/mp3)も同様にインポート
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);">
+            <strong style="color:var(--orange);">③ EDLインポート</strong><br>
+            File → Import → Timeline → 出力したEDLファイルを選択<br>
+            タイムラインに自動配置される（パスが一致しない場合は手動で再リンク）
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);">
+            <strong style="color:var(--orange);">④ カラーグレーディング</strong><br>
+            Color ページ → Nodes → Serial Node追加 → 各クリップにLUT適用<br>
+            CRUSHA推奨: 彩度+20、コントラスト+0.15、ハイライトシアン寄り
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);">
+            <strong style="color:var(--orange);">⑤ 書き出し</strong><br>
+            Deliver ページ → Render Settings → YouTube/Vimeo or Custom → CRUSHA EXPORT STUDIOで設定値確認 → Render
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /main-layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const STORAGE_KEY = 'crusha_edit_v1';
+let clips = [];
+let currentClipIndex = 0;
+let audioTracks = [];
+
+const DEFAULT_CLIPS = [
+  { id:'c01', name:'Opening_Wide.mp4', segment:'opening', type:'video', path:'output/opening_wide.mp4', start:0, duration:3, inPoint:0, transition:'fade_in', transitionDuration:1.0, volume:100, note:'オープニング全景' },
+  { id:'c02', name:'Opening_Appearance.mp4', segment:'opening', type:'video', path:'output/opening_appearance.mp4', start:3, duration:4, inPoint:0, transition:'crossfade', transitionDuration:0.5, volume:100, note:'CRUSHA登場シーン' },
+  { id:'c03', name:'Song1_Dance.mp4', segment:'song1', type:'video', path:'output/song1_dance.mp4', start:7, duration:4, inPoint:0, transition:'cut', transitionDuration:0, volume:100, note:'1曲目ダンスシーン' },
+  { id:'c04', name:'Song1_FaceUp.mp4', segment:'song1', type:'video', path:'output/song1_faceup.mp4', start:11, duration:2, inPoint:0, transition:'dissolve', transitionDuration:0.5, volume:100, note:'フェイスアップカット' },
+  { id:'c05', name:'Song2_Dynamic.mp4', segment:'song2', type:'video', path:'output/song2_dynamic.mp4', start:13, duration:3, inPoint:0, transition:'cut', transitionDuration:0, volume:100, note:'2曲目ダイナミック' },
+  { id:'c06', name:'Climax_Fire.mp4', segment:'climax', type:'video', path:'output/climax_fire.mp4', start:16, duration:4, inPoint:0, transition:'flash', transitionDuration:0.3, volume:100, note:'クライマックス炎' },
+  { id:'c07', name:'Ending_Wave.mp4', segment:'ending', type:'video', path:'output/ending_wave.mp4', start:20, duration:3, inPoint:0, transition:'dissolve', transitionDuration:0.8, volume:100, note:'エンディング手振り' },
+  { id:'c08', name:'Ending_Fadeout.mp4', segment:'ending', type:'video', path:'output/ending_fadeout.mp4', start:23, duration:3, inPoint:0, transition:'fade_out', transitionDuration:1.5, volume:100, note:'フェードアウト' },
+];
+const DEFAULT_AUDIO = [
+  { id:'a01', name:'song1_bgm.mp3', type:'bgm', path:'music/song1.mp3', start:7, duration:120, volume:80, fadeIn:2, fadeOut:3 },
+  { id:'a02', name:'opening_voice_mc.wav', type:'voice', path:'voice/opening_mc.wav', start:0, duration:10, volume:100, fadeIn:0, fadeOut:0.5 },
+];
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  loadData();
+  if (clips.length === 0) clips = JSON.parse(JSON.stringify(DEFAULT_CLIPS));
+  if (audioTracks.length === 0) audioTracks = JSON.parse(JSON.stringify(DEFAULT_AUDIO));
+  renderClipSidebar();
+  selectClip(0);
+  updateStats();
+  buildTimeline();
+  renderAudioTracks();
+}
+
+// ─────────────────────────────────────────────
+// CLIPS
+// ─────────────────────────────────────────────
+function renderClipSidebar() {
+  const c = document.getElementById('clipSidebar');
+  c.innerHTML = '';
+  const typeColors = { video:'var(--cyan)', bgm:'var(--pink)', voice:'var(--gold)', se:'var(--green)' };
+  clips.filter(cl => cl.type === 'video').forEach((clip, i) => {
+    const realIdx = clips.indexOf(clip);
+    const div = document.createElement('div');
+    div.className = 'clip-item' + (realIdx === currentClipIndex ? ' active' : '');
+    div.onclick = () => selectClip(realIdx);
+    div.innerHTML = `
+      <span class="clip-order">#${String(i+1).padStart(3,'0')} · ${clip.segment||''}</span>
+      <div class="clip-name">${clip.name||'Untitled'}</div>
+      <div class="clip-duration">${clip.duration}s · ${clip.transition||'cut'}</div>
+      <div class="clip-type-dot" style="background:${typeColors[clip.type]||'#666'}"></div>
+    `;
+    c.appendChild(div);
+  });
+}
+
+function selectClip(i) {
+  if (i < 0 || i >= clips.length) return;
+  currentClipIndex = i;
+  renderClipSidebar();
+  const cl = clips[i];
+  setVal('clipName', cl.name||'');
+  setVal('clipSegment', cl.segment||'opening');
+  setVal('clipType', cl.type||'video');
+  setVal('clipPath', cl.path||'');
+  setVal('clipStart', cl.start||0);
+  setVal('clipDuration', cl.duration||3);
+  setVal('clipIn', cl.inPoint||0);
+  setVal('clipTransition', cl.transition||'cut');
+  setVal('clipTransDur', cl.transitionDuration||0.5);
+  setVal('clipVolume', cl.volume||100);
+  setVal('clipNote', cl.note||'');
+}
+
+function updateCurrentClip(field, val) {
+  if (!clips[currentClipIndex]) return;
+  clips[currentClipIndex][field] = val;
+  if (field === 'name') renderClipSidebar();
+  saveData();
+}
+
+function addClip() {
+  const newClip = { id:'c_'+Date.now(), name:'NewClip_'+String(clips.length+1).padStart(3,'0')+'.mp4', segment:'song1', type:'video', path:'', start:getTotalDuration(), duration:3, inPoint:0, transition:'cut', transitionDuration:0.5, volume:100, note:'' };
+  clips.push(newClip);
+  renderClipSidebar();
+  selectClip(clips.length-1);
+  updateStats();
+  saveData();
+  toast('クリップを追加しました');
+}
+
+function autoArrangeClips() {
+  let t = 0;
+  clips.filter(c => c.type === 'video').forEach(cl => { cl.start = t; t += cl.duration; });
+  renderClipSidebar();
+  buildTimeline();
+  updateStats();
+  saveData();
+  toast('自動配置完了！');
+}
+
+function addTransition() {
+  toast('次のクリップ選択後、クリップ編集タブからトランジションを設定してください', 'orange');
+  switchTab('clips');
+}
+
+// ─────────────────────────────────────────────
+// TIMELINE
+// ─────────────────────────────────────────────
+function buildTimeline() {
+  const totalSec = Math.max(getTotalDuration(), 30);
+  const PX_PER_SEC = 20;
+  const totalW = totalSec * PX_PER_SEC;
+
+  // Ruler
+  const ruler = document.getElementById('tlRuler');
+  ruler.style.width = totalW + 'px';
+  ruler.innerHTML = '';
+  for (let s = 0; s <= totalSec; s += 5) {
+    const tick = document.createElement('div');
+    tick.className = 'tl-ruler-tick';
+    tick.style.left = (s * PX_PER_SEC) + 'px';
+    tick.textContent = formatTime(s);
+    ruler.appendChild(tick);
+  }
+
+  const tracks = { video: document.getElementById('videoTrack'), bgm: document.getElementById('bgmTrack'), voice: document.getElementById('voiceTrack'), se: document.getElementById('seTrack') };
+  Object.values(tracks).forEach(t => { t.style.width = totalW + 'px'; t.innerHTML = ''; });
+
+  // 映像クリップ
+  clips.filter(c => c.type === 'video').forEach(cl => {
+    const clip = document.createElement('div');
+    clip.className = 'tl-clip tl-clip-video';
+    clip.style.left = (cl.start * PX_PER_SEC) + 'px';
+    clip.style.width = Math.max((cl.duration * PX_PER_SEC) - 2, 10) + 'px';
+    clip.title = cl.name + ' [' + cl.transition + ']';
+    clip.textContent = cl.name.replace('.mp4','').substring(0,12);
+    tracks.video.appendChild(clip);
+  });
+
+  // 音声トラック
+  audioTracks.forEach(at => {
+    const tEl = at.type === 'bgm' ? tracks.bgm : at.type === 'voice' ? tracks.voice : tracks.se;
+    if (!tEl) return;
+    const clip = document.createElement('div');
+    clip.className = 'tl-clip ' + (at.type === 'bgm' ? 'tl-clip-audio' : at.type === 'voice' ? 'tl-clip-mc' : 'tl-clip-se');
+    clip.style.left = (at.start * PX_PER_SEC) + 'px';
+    clip.style.width = Math.max((at.duration * PX_PER_SEC) - 2, 10) + 'px';
+    clip.title = at.name;
+    clip.textContent = at.name.substring(0, 10);
+    tEl.appendChild(clip);
+  });
+
+  renderClipOrderTable();
+  updateTlInfo();
+}
+
+function renderClipOrderTable() {
+  const tbody = document.getElementById('clipOrderBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  clips.filter(c => c.type === 'video').forEach((cl, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:600;color:var(--text)">${cl.name}</td>
+      <td><span class="chip chip-orange">${cl.segment}</span></td>
+      <td style="color:var(--cyan);font-family:monospace">${formatTime(cl.start)}</td>
+      <td style="color:var(--gold)">${cl.duration}s</td>
+      <td><span class="chip chip-cyan">${cl.transition}</span></td>
+      <td>
+        <button class="btn btn-xs btn-secondary" onclick="selectClip(${clips.indexOf(cl)});switchTab('clips')">編集</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteClip(${clips.indexOf(cl)})">削除</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function deleteClip(i) {
+  if (!confirm('削除: ' + clips[i].name)) return;
+  clips.splice(i, 1);
+  if (currentClipIndex >= clips.length) currentClipIndex = clips.length - 1;
+  renderClipSidebar();
+  if (clips.length > 0) selectClip(currentClipIndex);
+  updateStats(); buildTimeline(); saveData();
+  toast('削除しました');
+}
+
+function updateTlInfo() {
+  const total = getTotalDuration();
+  const h = Math.floor(total/3600), m = Math.floor((total%3600)/60), s = total%60;
+  setTextContent('tlTotalDuration', `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(Math.floor(s)).padStart(2,'0')}`);
+  setTextContent('tlClipCount', clips.length);
+}
+
+function getTotalDuration() {
+  const videoClips = clips.filter(c => c.type === 'video');
+  if (videoClips.length === 0) return 0;
+  return videoClips.reduce((mx, c) => Math.max(mx, c.start + c.duration), 0);
+}
+
+// ─────────────────────────────────────────────
+// FFMPEG
+// ─────────────────────────────────────────────
+function genFFmpegAll() {
+  const videoClips = clips.filter(c => c.type === 'video');
+  const out = document.getElementById('ffOutputName').value || 'CRUSHA_LIVE_v1.mp4';
+  const codec = document.getElementById('ffCodec').value;
+  const codecMap = { h264: 'libx264', h265: 'libx265', vp9: 'libvpx-vp9', av1: 'libaom-av1' };
+  const br = document.getElementById('ffBitrate').value;
+  const res = document.getElementById('ffResolution').value;
+  const fps = document.getElementById('ffFps').value;
+  const acodec = document.getElementById('ffAudioCodec').value;
+  const abr = document.getElementById('ffAudioBitrate').value;
+
+  let lines = [];
+  lines.push('# ═══════════════════════════════════════════════');
+  lines.push('# CRUSHA LIVE — FFmpeg 編集コマンド一式');
+  lines.push('# 生成日時: ' + new Date().toLocaleString('ja-JP'));
+  lines.push('# ═══════════════════════════════════════════════\n');
+
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# Step 1: filelist.txt 作成');
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# 以下を filelist.txt として保存してください:');
+  videoClips.forEach(cl => lines.push(`# file '${cl.path || cl.name}'`));
+  lines.push('');
+
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# Step 2: 映像結合');
+  lines.push('# ─────────────────────────────────────');
+  lines.push(`ffmpeg -f concat -safe 0 -i filelist.txt \\`);
+  lines.push(`  -vf "scale=${res},fps=${fps}" \\`);
+  lines.push(`  -c:v ${codecMap[codec] || 'libx264'} -b:v ${br} \\`);
+  lines.push(`  -c:a ${acodec} -b:a ${abr} \\`);
+  lines.push(`  -movflags +faststart \\`);
+  lines.push(`  video_concat.mp4\n`);
+
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# Step 3: BGMミックス');
+  lines.push('# ─────────────────────────────────────');
+  const bgmTracks = audioTracks.filter(a => a.type === 'bgm');
+  if (bgmTracks.length > 0) {
+    bgmTracks.forEach((at, i) => {
+      lines.push(`# BGM${i+1}: ${at.name} (vol:${at.volume}%, start:${at.start}s)`);
+    });
+    lines.push(`ffmpeg -i video_concat.mp4 \\`);
+    bgmTracks.forEach(at => lines.push(`  -i "${at.path || at.name}" \\`));
+    const volFilters = bgmTracks.map((at, i) => `[${i+1}:a]volume=${at.volume/100},adelay=${Math.round(at.start*1000)}|${Math.round(at.start*1000)}[bgm${i}]`).join(';');
+    const mixInputs = bgmTracks.map((_,i) => `[bgm${i}]`).join('') + '[0:a]';
+    lines.push(`  -filter_complex "${volFilters};${mixInputs}amix=inputs=${bgmTracks.length+1}:duration=first[aout]" \\`);
+    lines.push(`  -map 0:v -map "[aout]" \\`);
+    lines.push(`  -c:v copy -c:a ${acodec} -b:a ${abr} \\`);
+    lines.push(`  video_with_bgm.mp4\n`);
+  } else {
+    lines.push('# BGMトラックなし — Step 4に進んでください\n');
+  }
+
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# Step 4: 最終書き出し + カラーグレーディング');
+  lines.push('# ─────────────────────────────────────');
+  const br2 = parseFloat(document.getElementById('cgBrightness').value).toFixed(2);
+  const co2 = parseFloat(document.getElementById('cgContrast').value).toFixed(2);
+  const sa2 = parseFloat(document.getElementById('cgSaturation').value).toFixed(2);
+  const lutPath = document.getElementById('cgLut').value;
+  let vf = `scale=${res}`;
+  if (br2 !== '0.00' || co2 !== '1.00' || sa2 !== '1.00') {
+    vf += `,eq=brightness=${br2}:contrast=${co2}:saturation=${sa2}`;
+  }
+  if (lutPath) vf += `,lut3d=${lutPath}`;
+  lines.push(`ffmpeg -i ${bgmTracks.length > 0 ? 'video_with_bgm.mp4' : 'video_concat.mp4'} \\`);
+  lines.push(`  -vf "${vf}" \\`);
+  lines.push(`  -c:v ${codecMap[codec] || 'libx264'} -b:v ${br} \\`);
+  lines.push(`  -c:a copy \\`);
+  lines.push(`  -movflags +faststart \\`);
+  lines.push(`  ${out}\n`);
+
+  lines.push('# ─────────────────────────────────────');
+  lines.push('# 完了！ → CRUSHA EXPORT STUDIO で配信設定へ');
+  lines.push('# ─────────────────────────────────────');
+
+  document.getElementById('ffmpegOutput').textContent = lines.join('\n');
+  toast('FFmpegコマンド生成完了！');
+}
+
+function genFFmpegConcat() {
+  const videoClips = clips.filter(c => c.type === 'video');
+  const lines = [
+    '# filelist.txt の内容:',
+    ...videoClips.map(cl => `file '${cl.path || cl.name}'`),
+    '',
+    '# 結合コマンド:',
+    'ffmpeg -f concat -safe 0 -i filelist.txt -c copy output_concat.mp4'
+  ];
+  document.getElementById('ffmpegOutput').textContent = lines.join('\n');
+}
+
+function genFFmpegMix() {
+  genAudioMixCmd();
+  const out = document.getElementById('audioMixOutput').textContent;
+  document.getElementById('ffmpegOutput').textContent = out;
+}
+
+function copyFFmpeg() {
+  navigator.clipboard.writeText(document.getElementById('ffmpegOutput').textContent).then(() => toast('コピーしました！'));
+}
+
+function copyCmd(cmd) { navigator.clipboard.writeText(cmd).then(() => toast('コピー！')); }
+
+// ─────────────────────────────────────────────
+// AUDIO
+// ─────────────────────────────────────────────
+function renderAudioTracks() {
+  const container = document.getElementById('audioTrackList');
+  container.innerHTML = '';
+  audioTracks.forEach((at, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;';
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:700;color:var(--orange);">${i+1}. ${at.name}</span>
+        <div style="display:flex;gap:6px;">
+          <span class="chip chip-cyan">${at.type}</span>
+          <button class="btn btn-xs btn-danger" onclick="deleteAudioTrack(${i})">削除</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div><label>ファイルパス</label><input type="text" value="${at.path||''}" oninput="audioTracks[${i}].path=this.value;saveData()"></div>
+        <div><label>種類</label>
+          <select oninput="audioTracks[${i}].type=this.value;renderAudioTracks();buildTimeline();">
+            ${['bgm','voice','se'].map(t => `<option${at.type===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div><label>開始時刻(秒)</label><input type="number" value="${at.start||0}" step="0.5" oninput="audioTracks[${i}].start=parseFloat(this.value);buildTimeline();saveData()"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <label style="margin:0;min-width:60px;">音量</label>
+        <input type="range" min="0" max="200" value="${at.volume||100}" style="flex:1;appearance:none;height:4px;background:var(--border);border-radius:2px;border:none;outline:none;" oninput="this.nextElementSibling.textContent=this.value+'%';audioTracks[${i}].volume=parseInt(this.value);saveData()">
+        <span style="color:var(--orange);font-size:12px;font-weight:700;min-width:40px;">${at.volume||100}%</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function addAudioTrack() {
+  audioTracks.push({ id:'a_'+Date.now(), name:'new_track.mp3', type:'bgm', path:'', start:0, duration:60, volume:80, fadeIn:0, fadeOut:0 });
+  renderAudioTracks();
+  buildTimeline();
+  saveData();
+  toast('音声トラック追加');
+}
+
+function deleteAudioTrack(i) {
+  audioTracks.splice(i, 1);
+  renderAudioTracks();
+  buildTimeline();
+  saveData();
+  toast('削除しました');
+}
+
+function genAudioMixCmd() {
+  const masterVol = document.getElementById('masterVol').value;
+  const fadeIn = document.getElementById('bgmFadeIn').value;
+  const fadeOut = document.getElementById('bgmFadeOut').value;
+  const acodec = document.getElementById('ffAudioCodec')?.value || 'aac';
+  const abr = document.getElementById('ffAudioBitrate')?.value || '320k';
+
+  const inputs = ['-i video_concat.mp4', ...audioTracks.map(at => `-i "${at.path||at.name}"`)].join(' \\\n  ');
+  const filterParts = audioTracks.map((at, i) => `[${i+1}:a]volume=${at.volume/100},adelay=${Math.round((at.start||0)*1000)}|${Math.round((at.start||0)*1000)},afade=t=in:st=${at.start||0}:d=${fadeIn}[a${i}]`).join(';');
+  const mixSources = audioTracks.map((_,i) => `[a${i}]`).join('') + '[0:a]';
+  const lines = [
+    '# 音声ミックスコマンド',
+    `ffmpeg ${inputs} \\`,
+    `  -filter_complex "${filterParts};${mixSources}amix=inputs=${audioTracks.length+1}:duration=first,volume=${masterVol}[aout]" \\`,
+    `  -map 0:v -map "[aout]" \\`,
+    `  -c:v copy -c:a ${acodec} -b:a ${abr} \\`,
+    `  video_mixed.mp4`
+  ];
+  document.getElementById('audioMixOutput').textContent = lines.join('\n');
+  toast('ミックスコマンド生成！');
+}
+
+// ─────────────────────────────────────────────
+// COLOR PRESET
+// ─────────────────────────────────────────────
+function applyColorPreset() {
+  const p = document.getElementById('cgPreset').value;
+  const presets = {
+    vivid:     { brightness:0.05, contrast:1.2, saturation:1.6 },
+    cinematic: { brightness:-0.05, contrast:1.15, saturation:0.9 },
+    anime:     { brightness:0.05, contrast:1.1, saturation:1.5 },
+    neon:      { brightness:0.0, contrast:1.3, saturation:2.0 },
+    warm:      { brightness:0.05, contrast:1.1, saturation:1.2 },
+    cool:      { brightness:-0.02, contrast:1.1, saturation:1.1 },
+  };
+  if (!presets[p]) return;
+  const pr = presets[p];
+  setVal('cgBrightness', pr.brightness);
+  setVal('cgContrast', pr.contrast);
+  setVal('cgSaturation', pr.saturation);
+  document.getElementById('cgBrightnessVal').textContent = pr.brightness.toFixed(2);
+  document.getElementById('cgContrastVal').textContent = pr.contrast.toFixed(2);
+  document.getElementById('cgSaturationVal').textContent = pr.saturation.toFixed(2);
+  toast('カラープリセット適用: ' + p);
+}
+
+// ─────────────────────────────────────────────
+// EDL
+// ─────────────────────────────────────────────
+function genEDL() {
+  const fps = parseInt(document.getElementById('edlFps').value) || 30;
+  const project = document.getElementById('edlProjectName').value || 'CRUSHA_LIVE';
+  const videoClips = clips.filter(c => c.type === 'video');
+
+  let lines = [
+    `TITLE: ${project}`,
+    `FCM: NON-DROP FRAME`,
+    ''
+  ];
+
+  videoClips.forEach((cl, i) => {
+    const srcIn = toTC(cl.inPoint || 0, fps);
+    const srcOut = toTC((cl.inPoint || 0) + cl.duration, fps);
+    const recIn = toTC(cl.start, fps);
+    const recOut = toTC(cl.start + cl.duration, fps);
+    lines.push(`${String(i+1).padStart(3,'0')}  AX  ${cl.type === 'video' ? 'V' : 'A'}  ${cl.transition === 'cut' ? 'C' : 'D'} ${cl.transitionDuration ? String(Math.round(cl.transitionDuration*fps)).padStart(4,'0') : '    '}  ${srcIn} ${srcOut} ${recIn} ${recOut}`);
+    lines.push(`* FROM CLIP NAME: ${cl.name}`);
+    lines.push('');
+  });
+
+  document.getElementById('edlOutput').textContent = lines.join('\n');
+  toast('EDL生成完了！');
+}
+
+function genFCPXML() {
+  const fps = document.getElementById('edlFps').value || '30';
+  const project = document.getElementById('edlProjectName').value || 'CRUSHA_LIVE';
+  const videoClips = clips.filter(c => c.type === 'video');
+  const totalDur = getTotalDuration();
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+<fcpxml version="1.10">
+  <resources>
+    <format id="r1" name="FFVideoFormat1080p${fps}" frameDuration="1/${fps}s" width="1920" height="1080"/>
+${videoClips.map((cl,i) => `    <asset id="a${i+1}" name="${cl.name.replace('.mp4','')}" start="0s" duration="${cl.duration}s" hasVideo="1" hasAudio="1" audioSources="1" audioChannels="2" audioRate="48000">
+      <media-rep kind="original-media" src="file://${cl.path || cl.name}"/>
+    </asset>`).join('\n')}
+  </resources>
+  <library>
+    <event name="${project}">
+      <project name="${project}">
+        <sequence format="r1" duration="${totalDur}s" tcStart="0s" tcFormat="NDF">
+          <spine>
+${videoClips.map((cl,i) => `            <clip name="${cl.name.replace('.mp4','')}" ref="a${i+1}" offset="${cl.start}s" duration="${cl.duration}s" start="${cl.inPoint||0}s"/>`).join('\n')}
+          </spine>
+        </sequence>
+      </project>
+    </event>
+  </library>
+</fcpxml>`;
+
+  document.getElementById('edlOutput').textContent = xml;
+  toast('FCP XML生成完了！');
+}
+
+function downloadEDL() {
+  const fmt = document.getElementById('edlFormat').value;
+  const ext = fmt === 'fcpxml' ? 'fcpxml' : fmt === 'otio' ? 'json' : 'edl';
+  const content = document.getElementById('edlOutput').textContent;
+  const name = (document.getElementById('edlProjectName').value || 'CRUSHA_LIVE') + '.' + ext;
+  downloadFile(content, name, 'text/plain');
+}
+
+function copyEDL() {
+  navigator.clipboard.writeText(document.getElementById('edlOutput').textContent).then(() => toast('コピー！'));
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function toTC(sec, fps) {
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60), f = Math.floor((sec%1)*fps);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(f).padStart(2,'0')}`;
+}
+function formatTime(sec) {
+  const m = Math.floor(sec/60), s = Math.floor(sec%60);
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function updateStats() {
+  const total = clips.length;
+  const video = clips.filter(c => c.type === 'video').length;
+  const audio = audioTracks.length;
+  const dur = getTotalDuration();
+  const estMB = Math.round(dur * 15 / 8); // ~15Mbps
+  setTextContent('statClips', total);
+  setTextContent('statVideo', video);
+  setTextContent('statAudio', audio);
+  setTextContent('statDuration', dur.toFixed(0)+'s');
+  setTextContent('statSize', '~'+estMB+'MB');
+}
+function switchTab(id) {
+  const names = ['timeline','clips','ffmpeg','audio','export_edl'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === id));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+id));
+  if (id === 'timeline') buildTimeline();
+}
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY+'_clips', JSON.stringify(clips)); localStorage.setItem(STORAGE_KEY+'_audio', JSON.stringify(audioTracks)); } catch(e){}
+}
+function loadData() {
+  try { const d = localStorage.getItem(STORAGE_KEY+'_clips'); if (d) clips = JSON.parse(d); const a = localStorage.getItem(STORAGE_KEY+'_audio'); if (a) audioTracks = JSON.parse(a); } catch(e){}
+}
+function saveAll() { saveData(); toast('💾 保存しました！', 'orange'); }
+function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
+function setTextContent(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function downloadFile(c, n, t) { const b = new Blob([c],{type:t}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click(); URL.revokeObjectURL(a.href); }
+function toast(msg, type='') { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show'+(type?' '+type:''); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000); }
+
+setInterval(saveData, 60000);
+window.addEventListener('beforeunload', saveData);
+init();
+</script>
+</body>
+</html>

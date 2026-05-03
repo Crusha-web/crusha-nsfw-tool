@@ -186,6 +186,14 @@ select option { background:#1a1a2e; }
   </div>
 </div>
 
+<!-- PROJECT BANNER -->
+<div id="proj-banner" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <span style="color:#00ff88;font-weight:700;">✂️ プロジェクト連動</span>
+  <span id="proj-banner-info" style="color:var(--muted);font-size:13px;">— プロジェクト未読み込み —</span>
+  <button class="btn" onclick="loadFromProject()" style="margin-left:auto;">📂 プロジェクトから読み込み</button>
+  <button class="btn" onclick="saveTimelineToProject()">💾 タイムラインをプロジェクトに保存</button>
+</div>
+
 <div class="main-layout">
 
   <!-- SIDEBAR: クリップリスト -->
@@ -1187,6 +1195,116 @@ function setVal(id, v) { const el = document.getElementById(id); if (el) el.valu
 function setTextContent(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 function downloadFile(c, n, t) { const b = new Blob([c],{type:t}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click(); URL.revokeObjectURL(a.href); }
 function toast(msg, type='') { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show'+(type?' '+type:''); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000); }
+
+// ─────────────────────────────────────────────
+// PROJECT INTEGRATION
+// ─────────────────────────────────────────────
+function getProject() {
+  try { return JSON.parse(localStorage.getItem('crusha_project') || '{}'); } catch(e) { return {}; }
+}
+function setProject(proj) {
+  try { localStorage.setItem('crusha_project', JSON.stringify(proj)); } catch(e) {}
+}
+
+function loadFromProject() {
+  try {
+    const proj = getProject();
+    const songs = proj.songs || [];
+    const mcScripts = proj.mcScripts || [];
+    if (!songs.length && !mcScripts.length) {
+      toast('プロジェクトにデータがありません。Music Studio / Voice Studio で保存してください。');
+      return;
+    }
+    // バナー更新
+    const infoEl = document.getElementById('proj-banner-info');
+    if (infoEl) {
+      infoEl.textContent = `${proj.projectName || '無題'} / ${proj.artistName || ''} — 曲数: ${songs.length}`;
+    }
+    // songs[] → BGM オーディオトラック追加
+    let addedBGM = 0;
+    let timeOffset = 0;
+    songs.forEach((song, idx) => {
+      const trackName = song.title || song.name || '曲' + (idx + 1);
+      const exists = audioTracks.some(t => t.name === trackName && t.type === 'bgm');
+      // duration "3:45" → 秒数変換
+      let durSec = 180;
+      if (song.duration) {
+        const parts = song.duration.split(':').map(Number);
+        if (parts.length === 2) durSec = parts[0] * 60 + parts[1];
+        else if (parts.length === 3) durSec = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+      if (!exists) {
+        audioTracks.push({
+          id: 'at_bgm_' + Date.now() + '_' + idx,
+          name: trackName,
+          type: 'bgm',
+          path: `[BGM: ${trackName}].wav`,
+          start: timeOffset,
+          duration: durSec,
+          volume: 100,
+          fadeIn: 2,
+          fadeOut: 3
+        });
+        addedBGM++;
+      }
+      // clips にも追加
+      const clipExists = clips.some(c => c.name === trackName);
+      if (!clipExists) {
+        clips.push({
+          id: 'clip_proj_' + Date.now() + '_' + idx,
+          order: clips.length + 1,
+          name: trackName,
+          file: `[VIDEO: ${trackName}].mp4`,
+          duration: durSec,
+          type: 'video',
+          color: song.emoji || '🎵',
+          notes: `${song.genre || ''} / BPM:${song.bpm || '-'} / Key:${song.key || '-'}`
+        });
+      }
+      timeOffset += durSec;
+    });
+    // mcScripts[] → ボイストラック追加
+    let addedVoice = 0;
+    mcScripts.forEach((seg, idx) => {
+      const trackName = seg.segTitle || seg.title || 'MC' + (idx + 1);
+      const exists = audioTracks.some(t => t.name === trackName && t.type === 'voice');
+      if (!exists) {
+        audioTracks.push({
+          id: 'at_voice_' + Date.now() + '_' + idx,
+          name: trackName,
+          type: 'voice',
+          path: `[VOICE: ${trackName}].wav`,
+          start: 0,
+          duration: seg.duration || 30,
+          volume: 90,
+          fadeIn: 0,
+          fadeOut: 1
+        });
+        addedVoice++;
+      }
+    });
+    saveData();
+    renderClipList();
+    updateStats();
+    toast(`BGM ${addedBGM} 件・ボイス ${addedVoice} 件をプロジェクトから読み込みました`);
+  } catch(e) { toast('読み込みエラー: ' + e.message); }
+}
+
+function saveTimelineToProject() {
+  try {
+    const proj = getProject();
+    proj.timeline = clips.map(c => ({
+      id: c.id, name: c.name, file: c.file,
+      duration: c.duration, type: c.type, order: c.order
+    }));
+    proj.audioTracks = audioTracks.map(t => ({
+      id: t.id, name: t.name, type: t.type,
+      start: t.start, duration: t.duration, volume: t.volume
+    }));
+    setProject(proj);
+    toast('タイムラインをプロジェクトに保存しました → Export Studio で利用可');
+  } catch(e) { toast('保存エラー: ' + e.message); }
+}
 
 setInterval(saveData, 60000);
 window.addEventListener('beforeunload', saveData);

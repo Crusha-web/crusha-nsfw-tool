@@ -738,6 +738,13 @@ textarea { resize:vertical; min-height:100px; }
 <!-- ===== MAIN ===== -->
 <main class="main">
 
+  <!-- PROJECT BANNER -->
+  <div id="proj-banner" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="color:#00ff88;font-weight:700;">🚀 プロジェクト連動</span>
+    <span id="proj-banner-info" style="color:#6b6b8a;font-size:13px;">— プロジェクト未読み込み —</span>
+    <button class="btn btn-primary" onclick="loadFromProject()" style="margin-left:auto;">📂 プロジェクトから一括読み込み</button>
+  </div>
+
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div class="page-title-area">
@@ -1855,6 +1862,93 @@ AIを組み合わせれば1人でもバーチャルライブが作れる時代�
 ${hashtags}`;
 
   showToast('全プラットフォーム投稿文を生成しました');
+}
+
+// ===== PROJECT INTEGRATION =====
+function getProject() {
+  try { return JSON.parse(localStorage.getItem('crusha_project') || '{}'); } catch(e) { return {}; }
+}
+function setProject(proj) {
+  try { localStorage.setItem('crusha_project', JSON.stringify(proj)); } catch(e) {}
+}
+
+function loadFromProject() {
+  try {
+    const proj = getProject();
+    const songs = proj.songs || [];
+    const mcScripts = proj.mcScripts || [];
+    const timeline = proj.timeline || [];
+    if (!proj.projectName && !songs.length) {
+      showToast('プロジェクトにデータがありません。Music Studio で保存してください。');
+      return;
+    }
+    // バナー更新
+    const infoEl = document.getElementById('proj-banner-info');
+    if (infoEl) {
+      infoEl.textContent = `${proj.projectName || '無題'} / ${proj.artistName || ''} — 曲数: ${songs.length}`;
+    }
+    // プロジェクト名 → タイトル
+    if (proj.projectName) {
+      const titleEl = document.getElementById('metaTitle');
+      if (titleEl && !titleEl.value) titleEl.value = proj.projectName;
+    }
+    // songs[] → チャプター自動生成
+    if (songs.length > 0) {
+      chapters.length = 0;
+      chapters.push({ time:'0:00', title:'Opening — 開幕' });
+      let timeAccum = 5; // 秒
+      songs.forEach((song, idx) => {
+        const mins = Math.floor(timeAccum / 60);
+        const secs = timeAccum % 60;
+        const timeStr = `${mins}:${String(secs).padStart(2,'0')}`;
+        const emoji = song.emoji || '🎵';
+        chapters.push({ time: timeStr, title: `${idx+1}曲目「${song.title || song.name || '曲' + (idx+1)}」${emoji}` });
+        // MC挟み込み
+        const mcSeg = mcScripts.find((m, mi) => mi === idx);
+        if (mcSeg) {
+          let durSec = 30;
+          if (song.duration) {
+            const parts = song.duration.split(':').map(Number);
+            durSec = parts.length === 2 ? parts[0]*60+parts[1] : durSec;
+          }
+          timeAccum += durSec;
+          const mMins = Math.floor(timeAccum / 60);
+          const mSecs = timeAccum % 60;
+          chapters.push({ time: `${mMins}:${String(mSecs).padStart(2,'0')}`, title: `MCトーク — ${mcSeg.segTitle || ''}` });
+          timeAccum += 30;
+        } else {
+          let durSec = 180;
+          if (song.duration) {
+            const parts = song.duration.split(':').map(Number);
+            durSec = parts.length === 2 ? parts[0]*60+parts[1] : durSec;
+          }
+          timeAccum += durSec;
+        }
+      });
+      const endMins = Math.floor(timeAccum / 60);
+      const endSecs = timeAccum % 60;
+      chapters.push({ time: `${endMins}:${String(endSecs).padStart(2,'0')}`, title: 'エンディング' });
+      renderChapters();
+    }
+    // songs[] → タグ追加
+    songs.forEach(song => {
+      const title = song.title || song.name;
+      if (title && !tags.includes(title) && tags.length < 30) addTag(title);
+      if (song.genre && !tags.includes(song.genre) && tags.length < 30) addTag(song.genre);
+    });
+    if (proj.artistName && !tags.includes(proj.artistName) && tags.length < 30) addTag(proj.artistName);
+    // 概要欄の曲リスト生成
+    const descEl = document.getElementById('metaDesc');
+    if (descEl && songs.length > 0) {
+      const songList = songs.map((s, i) => `${i+1}. ${s.title || s.name || '曲'+(i+1)}`).join('\n');
+      const base = `${proj.projectName || 'CRUSHA Virtual Live'}\n\n` +
+        `🎵 セットリスト\n${songList}\n\n` +
+        `Artist: ${proj.artistName || 'CRUSHA'}\n制作: AI (Suno / Wan2.2 / VOICEVOX)`;
+      if (!descEl.value) descEl.value = base;
+    }
+    showToast(`プロジェクト「${proj.projectName || '無題'}」から一括読み込み完了`);
+    saveState();
+  } catch(e) { showToast('読み込みエラー: ' + e.message); }
 }
 
 // ===== INIT =====

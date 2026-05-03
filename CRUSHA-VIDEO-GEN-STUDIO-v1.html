@@ -428,6 +428,13 @@ select option { background: #1a1a2e; }
   </div>
 </div>
 
+<!-- PROJECT BANNER -->
+<div id="proj-banner" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <span style="color:var(--cyan);font-weight:700;">🎬 プロジェクト連動</span>
+  <span id="proj-banner-info" style="color:var(--muted);font-size:13px;">— プロジェクト未読み込み —</span>
+  <button class="btn" onclick="loadFromProject()" style="margin-left:auto;">📂 プロジェクトから読み込み</button>
+</div>
+
 <!-- MAIN LAYOUT -->
 <div class="main-layout">
 
@@ -1921,6 +1928,88 @@ function toast(msg, type = '') {
 // ─────────────────────────────────────────────
 setInterval(() => { saveData(); }, 60000);
 window.addEventListener('beforeunload', saveAll);
+
+// ─────────────────────────────────────────────
+// PROJECT INTEGRATION
+// ─────────────────────────────────────────────
+function getProject() {
+  try { return JSON.parse(localStorage.getItem('crusha_project') || '{}'); } catch(e) { return {}; }
+}
+function setProject(proj) {
+  try { localStorage.setItem('crusha_project', JSON.stringify(proj)); } catch(e) {}
+}
+
+function loadFromProject() {
+  try {
+    const proj = getProject();
+    const songsData = proj.songs || [];
+    const scenes   = proj.scenes || [];
+    if (!songsData.length && !scenes.length) {
+      toast('プロジェクトにデータがありません。Music Studio で保存してください。', 'warn');
+      return;
+    }
+    // バナー更新
+    const infoEl = document.getElementById('proj-banner-info');
+    if (infoEl) {
+      infoEl.textContent = `${proj.projectName || '無題'} / ${proj.artistName || ''} — 曲数: ${songsData.length}`;
+    }
+    // songs[] → shots へ変換追加
+    let added = 0;
+    songsData.forEach((song, idx) => {
+      const exists = shots.some(s => s.title === (song.title || song.name || '曲' + (idx+1)));
+      if (!exists) {
+        const newShot = {
+          id: 'shot_proj_' + Date.now() + '_' + idx,
+          title: song.title || song.name || '曲' + (idx + 1),
+          model: 'wan2.2',
+          prompt: `${song.theme || ''}, music video, cinematic, ${song.genre || 'pop'} style`,
+          negPrompt: 'low quality, blurry, watermark',
+          steps: 30,
+          cfg: 7,
+          frames: 81,
+          fps: 16,
+          width: 832,
+          height: 480,
+          seed: -1,
+          status: 'pending',
+          duration: song.duration || '3:00',
+          bpm: song.bpm || 120,
+          key: song.key || 'C',
+          emoji: song.emoji || '🎵'
+        };
+        shots.push(newShot);
+        added++;
+      }
+    });
+    // scenes[] → shots へ追加
+    scenes.forEach((scene, idx) => {
+      const sceneTitle = scene.title || 'シーン' + (idx + 1);
+      const exists = shots.some(s => s.title === sceneTitle);
+      if (!exists) {
+        shots.push({
+          id: 'shot_scene_' + Date.now() + '_' + idx,
+          title: sceneTitle,
+          model: 'wan2.2',
+          prompt: scene.prompt || sceneTitle,
+          negPrompt: 'low quality, blurry',
+          steps: 30,
+          cfg: 7,
+          frames: 81,
+          fps: 16,
+          width: 832,
+          height: 480,
+          seed: -1,
+          status: 'pending'
+        });
+        added++;
+      }
+    });
+    saveData();
+    renderShotList();
+    if (currentShot) renderShotDetail(currentShot);
+    toast(`プロジェクトから ${added} 件のショットを読み込みました`);
+  } catch(e) { toast('読み込みエラー: ' + e.message); }
+}
 
 // ─────────────────────────────────────────────
 // START

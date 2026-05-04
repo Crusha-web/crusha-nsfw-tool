@@ -1228,6 +1228,8 @@ function copyText(target) {
 
 // ═══ SAVE / LOAD ═══
 function exportAll() {
+  // 保存前に必ず入力欄の内容をsongs[]に書き戻す
+  updateCurrentSong();
   const data = {
     songs,
     lyrics: {
@@ -1239,37 +1241,61 @@ function exportAll() {
       bridge:document.getElementById('ly-bridge').value,
       outro: document.getElementById('ly-outro').value,
     },
-    compose: {
-      title: document.getElementById('c-title').value,
-      bpm:   document.getElementById('c-bpm').value,
-      key:   document.getElementById('c-key').value,
-      theme: document.getElementById('c-theme').value,
-    },
     currentSong,
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem('crusha_music_studio', JSON.stringify(data));
-  toast('ツール内に保存しました！（ブラウザを閉じても残ります）');
+  // crusha_projectにも同時反映（他ツール連動）
+  autoSyncProject();
+  toast('全データを保存しました！（ブラウザを閉じても残ります）');
 }
 
 function loadAll() {
   try {
     const raw = localStorage.getItem('crusha_music_studio');
-    if (!raw) return;
+    if (!raw) { toast('保存データがありません（先に「全データ保存」してください）'); return; }
     const d = JSON.parse(raw);
+
+    // ① songs[] を完全復元（これが抜けていた根本バグ）
+    if (d.songs && d.songs.length > 0) {
+      d.songs.forEach((saved, i) => {
+        if (songs[i]) {
+          songs[i].title    = saved.title    || songs[i].title;
+          songs[i].bpm      = saved.bpm      || songs[i].bpm;
+          songs[i].key      = saved.key      || songs[i].key;
+          songs[i].theme    = saved.theme    || songs[i].theme;
+          songs[i].genre    = saved.genre    || songs[i].genre;
+          songs[i].emoji    = saved.emoji    || songs[i].emoji;
+          songs[i].dur      = saved.dur      || songs[i].dur;
+          songs[i].audioFile= saved.audioFile|| '';
+          songs[i].status   = saved.status   || songs[i].status;
+        }
+      });
+    }
+
+    // ② 歌詞を復元
     if (d.lyrics) {
       Object.keys(d.lyrics).forEach(k => {
         const el = document.getElementById('ly-' + k);
         if (el) el.value = d.lyrics[k];
       });
     }
-    if (d.compose) {
-      if (d.compose.title) document.getElementById('c-title').value = d.compose.title;
-      if (d.compose.bpm)   document.getElementById('c-bpm').value   = d.compose.bpm;
-      if (d.compose.key)   document.getElementById('c-key').value   = d.compose.key;
-      if (d.compose.theme) document.getElementById('c-theme').value = d.compose.theme;
-    }
-  } catch(e) { /* 初回は無視 */ }
+
+    // ③ UI全再描画（songs[]が変わったのでグリッド・サイドバー両方更新）
+    if (typeof d.currentSong === 'number') currentSong = d.currentSong;
+    renderSongGrid();
+    renderSidebar();
+    updateTotalDur();
+    selectSong(currentSong);
+
+    // ④ 復元データをcrusha_projectにも反映（他ツールに即連動）
+    autoSyncProject();
+
+    toast('データを読み込みました！（' + songs.filter(s => s.title !== '[曲タイトル未定]').length + '曲タイトル復元）');
+  } catch(e) {
+    toast('読み込みエラー: ' + e.message);
+    console.error('[MUSIC STUDIO] loadAll error:', e);
+  }
 }
 
 // ═══ TOAST ═══

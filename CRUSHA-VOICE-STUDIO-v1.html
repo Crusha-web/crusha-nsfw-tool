@@ -679,6 +679,9 @@ window.addEventListener('DOMContentLoaded', () => {
       loadFromProject();
     }
   } catch(e) {}
+  // 30秒ごとに自動保存（データロス防止）
+  setInterval(exportJSON, 30000);
+  window.addEventListener('beforeunload', exportJSON);
 });
 
 function renderSegmentList() {

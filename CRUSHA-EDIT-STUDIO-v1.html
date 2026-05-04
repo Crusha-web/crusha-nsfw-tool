@@ -1237,8 +1237,13 @@ function loadFromProject() {
       let durSec = 180;
       if (song.duration) {
         const parts = song.duration.split(':').map(Number);
-        if (parts.length === 2) durSec = parts[0] * 60 + parts[1];
-        else if (parts.length === 3) durSec = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          durSec = parts[0] * 60 + parts[1];
+        } else if (parts.length === 3 && parts.every(p => !isNaN(p))) {
+          durSec = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else {
+          console.warn('[EDIT STUDIO] duration パース失敗:', song.duration, '→ デフォルト 180秒 を使用');
+        }
       }
       if (!exists) {
         // audioFileが登録されていればそのファイル名を使う

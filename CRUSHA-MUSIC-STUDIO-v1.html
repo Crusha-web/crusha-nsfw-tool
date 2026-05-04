@@ -878,7 +878,7 @@ function updateCurrentSong() {
   s.status    = (titleVal || s.audioFile) ? 'done' : 'draft';
 }
 
-// 自動保存（crusha_project共有ストレージへ）
+// crusha_project共有ストレージ + crusha_music_studio の両方に書き出す
 function autoSyncProject() {
   updateCurrentSong();
   try {
@@ -942,6 +942,9 @@ function init() {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', autoSyncProject);
   });
+  // 30秒ごとに自動保存（ブラウザを閉じてもデータを守る）
+  setInterval(autoSyncProject, 30000);
+  window.addEventListener('beforeunload', autoSyncProject);
 }
 
 // ═══ SONG GRID ═══

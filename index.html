@@ -471,6 +471,111 @@
 
   /* ── タップエフェクト ── */
   .tool-card:active { transform: scale(0.98); }
+
+  /* ── 制作順ショートカットパネル ── */
+  .shortcut-panel {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .shortcut-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .shortcut-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .shortcut-item:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.15);
+    transform: translateX(4px);
+  }
+  .shortcut-item:active { transform: scale(0.99); }
+  .shortcut-num {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    flex: 0 0 32px;
+    color: #000;
+  }
+  .shortcut-icon {
+    font-size: 20px;
+    flex: 0 0 24px;
+    text-align: center;
+  }
+  .shortcut-info { flex: 1; min-width: 0; }
+  .shortcut-name {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .shortcut-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .shortcut-arrow {
+    font-size: 16px;
+    color: rgba(255,255,255,0.2);
+    flex: 0 0 auto;
+  }
+  /* 各ステップの色 */
+  .sc-1 .shortcut-num { background: linear-gradient(135deg,#ff00aa,#8b00ff); }
+  .sc-1 .shortcut-name { color: #ff66cc; }
+  .sc-2 .shortcut-num { background: linear-gradient(135deg,#8b00ff,#00f5ff); }
+  .sc-2 .shortcut-name { color: #cc88ff; }
+  .sc-3 .shortcut-num { background: linear-gradient(135deg,#00f5ff,#0088ff); }
+  .sc-3 .shortcut-name { color: #00f5ff; }
+  .sc-4 .shortcut-num { background: linear-gradient(135deg,#00ff88,#00f5ff); }
+  .sc-4 .shortcut-name { color: #00ff88; }
+  .sc-5 .shortcut-num { background: linear-gradient(135deg,#ff8c00,#ffd700); }
+  .sc-5 .shortcut-name { color: #ff8c00; }
+  .sc-6 .shortcut-num { background: linear-gradient(135deg,#ffd700,#00ff88); }
+  .sc-6 .shortcut-name { color: #ffd700; }
+  .sc-ex .shortcut-num { background: linear-gradient(135deg,#444,#666); }
+  .sc-ex .shortcut-name { color: rgba(255,255,255,0.6); }
+  /* 下矢印コネクター */
+  .shortcut-connector {
+    text-align: center;
+    font-size: 16px;
+    color: rgba(255,255,255,0.15);
+    margin: -2px 0;
+    line-height: 1;
+  }
+  @media (max-width: 480px) {
+    .shortcut-desc { display: none; }
+    .shortcut-item { padding: 10px 12px; gap: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -499,6 +604,90 @@
 
   <!-- PWAインストールボタン -->
   <button id="install-btn">📲 ホーム画面に追加してインストール</button>
+
+  <!-- ===== 制作順ショートカットパネル ===== -->
+  <div class="shortcut-panel">
+    <div class="shortcut-title">📁 PRODUCTION FOLDER — 制作順に開く</div>
+    <div class="shortcut-list">
+
+      <a href="CRUSHA-MUSIC-STUDIO-v1.html" class="shortcut-item sc-1">
+        <div class="shortcut-num">1</div>
+        <div class="shortcut-icon">🎵</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">MUSIC STUDIO</div>
+          <div class="shortcut-desc">Suno AI用プロンプト生成 → 曲名・尺・ジャンルを登録してプロジェクト保存</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-NSFW-SUPREME-v13.html" class="shortcut-item sc-2">
+        <div class="shortcut-num">2</div>
+        <div class="shortcut-icon">✨</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">CRUSHA SUPREME</div>
+          <div class="shortcut-desc">キャラクタープロンプト生成 → ComfyUI / SD XLで画像生成</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-VOICE-STUDIO-v1.html" class="shortcut-item sc-3">
+        <div class="shortcut-num">3</div>
+        <div class="shortcut-icon">🎙️</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">VOICE STUDIO</div>
+          <div class="shortcut-desc">MCスクリプト生成 → VOICEVOX / AivisSpeech で音声化 → プロジェクトに保存</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-VIDEO-GEN-STUDIO-v1.html" class="shortcut-item sc-4">
+        <div class="shortcut-num">4</div>
+        <div class="shortcut-icon">🎞️</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">VIDEO GEN STUDIO</div>
+          <div class="shortcut-desc">Wan2.2 / AnimateDiff ワークフロー生成 → ComfyUIで映像生成</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-EDIT-STUDIO-v1.html" class="shortcut-item sc-5">
+        <div class="shortcut-num">5</div>
+        <div class="shortcut-icon">✂️</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">EDIT STUDIO</div>
+          <div class="shortcut-desc">プロジェクト読み込み → タイムライン自動構築 → FFmpegで書き出し</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-EXPORT-STUDIO-v1.html" class="shortcut-item sc-6">
+        <div class="shortcut-num">6</div>
+        <div class="shortcut-icon">🚀</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">EXPORT STUDIO</div>
+          <div class="shortcut-desc">プロジェクト一括読み込み → チャプター・タグ・概要欄自動生成 → YouTube公開</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+      <div class="shortcut-connector">↓</div>
+
+      <a href="CRUSHA-VIDEO-STUDIO-v1.html" class="shortcut-item sc-ex">
+        <div class="shortcut-num">📋</div>
+        <div class="shortcut-icon">🎬</div>
+        <div class="shortcut-info">
+          <div class="shortcut-name">VIDEO STUDIO（全工程ダッシュボード）</div>
+          <div class="shortcut-desc">6ステージ全体を1画面で管理・確認するマスターパネル</div>
+        </div>
+        <div class="shortcut-arrow">›</div>
+      </a>
+
+    </div>
+  </div>
 
   <!-- ツールカード -->
   <div class="tools-grid">

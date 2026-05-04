@@ -615,7 +615,7 @@ def tts(text, filename):
 // データ定義
 // ──────────────────────────────────
 
-const SEGMENTS = [
+let SEGMENTS = [
   { id:'seg01', name:'オープニング', time:'00:00〜01:30', duration:90,  type:'opening',  song:'', icon:'🌟' },
   { id:'seg02', name:'1曲目後MC',   time:'03:30〜04:30', duration:60,  type:'between',  song:'Track 1後', icon:'🎵' },
   { id:'seg03', name:'2曲目後MC',   time:'07:00〜08:00', duration:60,  type:'between',  song:'Track 2後', icon:'🎶' },
@@ -1004,43 +1004,104 @@ function setProject(data) {
   try { localStorage.setItem('crusha_project', JSON.stringify(data)); } catch(e) {}
 }
 
+// ── 曲データからSEGMENTSを動的に構築 ──
+function buildSegmentsFromSongs(songs) {
+  const segs = [];
+  let timeMin = 0;
+
+  // オープニング MC（固定）
+  segs.push({
+    id: 'seg_opening',
+    name: 'オープニング MC',
+    time: `00:00〜01:30`,
+    duration: 90,
+    type: 'opening',
+    song: '',
+    icon: '🌟'
+  });
+  timeMin += 1.5;
+
+  // 各曲の後のMC（曲タイトルを埋め込む）
+  songs.forEach((song, i) => {
+    const title = song.title || song.name || `曲${i + 1}`;
+    // 曲の尺を分単位で推定（duration "3:45" → 3.75分、なければ4分）
+    let songMin = 4;
+    if (song.duration) {
+      const parts = song.duration.split(':').map(Number);
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        songMin = parts[0] + parts[1] / 60;
+      }
+    }
+    timeMin += songMin;
+    const endMin = Math.floor(timeMin);
+    const mcEndMin = endMin + 1.5;
+    const fmt = m => `${String(Math.floor(m)).padStart(2,'0')}:${String(Math.round((m%1)*60)).padStart(2,'0')}`;
+
+    // 中盤MCは中間あたりの曲の後（曲数が3以上で真ん中）
+    const isMid = songs.length >= 3 && i === Math.floor(songs.length / 2) - 1;
+    segs.push({
+      id: `seg_after_${i + 1}`,
+      name: isMid ? `中盤MC（「${title}」後）` : `「${title}」後 MC`,
+      time: `${fmt(endMin)}〜${fmt(mcEndMin)}`,
+      duration: isMid ? 90 : 60,
+      type: isMid ? 'mid' : 'between',
+      song: title,
+      icon: isMid ? '💫' : (i % 2 === 0 ? '🎵' : '🎶'),
+      // スクリプトのヒント文（未記入のセグメントに初期表示）
+      hint: isMid
+        ? `[笑い]ありがとう〜！！[間:0.5]\n[感動]「${title}」……どうだった！？[間:0.8]\nちょっと一息入れようか。[間:0.5]みんな元気そうで嬉しいよ！`
+        : `[笑い]ありがとう！！[間:0.5]\n[感動]「${title}」、楽しんでくれた？[間:0.8]\n次もめちゃくちゃ気合入ってるから——[間:0.5]覚悟してね！`
+    });
+    timeMin = mcEndMin;
+  });
+
+  // エンディング MC（固定）
+  const fmt2 = m => `${String(Math.floor(m)).padStart(2,'0')}:${String(Math.round((m%1)*60)).padStart(2,'0')}`;
+  segs.push({
+    id: 'seg_ending',
+    name: 'エンディング MC',
+    time: `${fmt2(timeMin)}〜${fmt2(timeMin + 2)}`,
+    duration: 120,
+    type: 'ending',
+    song: '',
+    icon: '🌙',
+    hint: `[感動]今日は……本当にありがとう！！[間:1.0]\n[ささやき]みんなの顔、ぜんぶ見えてたよ。[間:1.5]\n[元気]また絶対やるから——次も来てね！！\n[感嘆]バイバーイ！！！`
+  });
+
+  return segs;
+}
+
 function loadFromProject() {
   try {
     const proj = getProject();
     if (!proj.songs || proj.songs.length === 0) {
-      showToast('プロジェクトに曲データがありません。Music Studioで保存してください。');
+      showToast('プロジェクトに曲データがありません。Music Studio で先に保存してください。');
       return;
     }
-    // プロジェクト情報を表示
-    const info = `${proj.projectName || '無題'} (${proj.songs.length}曲)`;
-    const el = document.getElementById('proj-info');
-    if (el) el.textContent = '— ' + info;
 
-    // セグメントリストに曲情報を反映（曲間MCセグメントを追加）
-    // SEGMENTS配列にproject曲データを統合表示するため、サイドバーの下部に曲リストを表示
-    let songListHtml = '<div style="margin-top:14px;"><div class="sidebar-title">🎵 プロジェクト楽曲</div>';
-    proj.songs.forEach((s, i) => {
-      songListHtml += `<div style="background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.2);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;">
-        <div style="font-weight:700;color:#00f5ff;">${s.emoji || '🎵'} ${s.title}</div>
-        <div style="color:rgba(255,255,255,0.4);">${s.genre || ''} · ${s.duration || ''}</div>
-      </div>`;
+    // ① SEGMENTSを曲データから動的に再構築
+    SEGMENTS = buildSegmentsFromSongs(proj.songs);
+
+    // ② 既存スクリプトを保持しつつ、未記入セグメントにヒント文を挿入
+    SEGMENTS.forEach(seg => {
+      if (!scripts[seg.id] && seg.hint) {
+        scripts[seg.id] = seg.hint;
+      }
     });
-    songListHtml += '</div>';
 
-    // サイドバーの末尾に追加（既存のものを置換しないよう id を使用）
-    let songListEl = document.getElementById('proj-song-list');
-    if (!songListEl) {
-      songListEl = document.createElement('div');
-      songListEl.id = 'proj-song-list';
-      const sidebar = document.querySelector('.sidebar');
-      if (sidebar) sidebar.insertAdjacentHTML('beforeend', songListHtml);
-    } else {
-      songListEl.innerHTML = songListHtml;
-    }
+    // ③ ヘッダーのプロジェクト情報を更新
+    const el = document.getElementById('proj-info');
+    if (el) el.textContent = `— ${proj.projectName || '無題'} / ${proj.artistName || 'CRUSHA'} (${proj.songs.length}曲 / ${SEGMENTS.length}セグメント)`;
 
-    showToast(`プロジェクトから${proj.songs.length}曲を読み込みました`);
+    // ④ UIを全部再描画
+    currentSeg = 0;
+    renderSegmentList();
+    selectSegment(0);
+
+    showToast(`✅ ${proj.songs.length}曲を読み込み → ${SEGMENTS.length}セグメントを生成しました`);
   } catch(e) {
     showToast('読み込みエラー: ' + e.message);
+    console.error('[VOICE STUDIO] loadFromProject error:', e);
   }
 }
 

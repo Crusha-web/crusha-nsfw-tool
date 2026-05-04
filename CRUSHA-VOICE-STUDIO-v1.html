@@ -600,8 +600,9 @@ def tts(text, filename):
         </div>
 
         <div class="card">
-          <div class="card-title">💾 JSON エクスポート</div>
-          <button class="gen-btn gen-btn-cyan" onclick="exportJSON()">💾 全データをJSONで保存</button>
+          <div class="card-title">💾 データ保存・読込</div>
+          <button class="gen-btn gen-btn-cyan" onclick="exportJSON()" style="margin-bottom:8px;">💾 ツール内に保存</button>
+          <button class="gen-btn" onclick="loadData();renderSegmentList();renderVoiceCards();showToast('データを読み込みました');">📂 保存データを読込</button>
         </div>
       </div>
     </div>
@@ -939,12 +940,8 @@ function exportVoicevox() {
 function exportJSON() {
   scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
   const data = { scripts, segDone, selectedVoice, timestamp: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'crusha_voice_studio_backup.json';
-  a.click();
-  showToast('JSONを保存しました');
+  localStorage.setItem('crusha-voice-studio', JSON.stringify(data));
+  showToast('ツール内に保存しました！（ブラウザを閉じても残ります）');
 }
 
 // ──────────────────────────────────

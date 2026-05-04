@@ -1848,14 +1848,7 @@ function loadProject() {
 
 function exportAll() {
   saveAll();
-  const raw = localStorage.getItem('crusha_video_studio');
-  const blob = new Blob([raw], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'crusha-video-project-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  showToast('エクスポートしました');
+  showToast('ツール内に保存しました！（ブラウザを閉じても残ります）');
 }
 
 function addSong() {

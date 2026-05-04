@@ -1168,13 +1168,7 @@ function exportAll() {
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem('crusha_music_studio', JSON.stringify(data));
-  // ファイルエクスポート
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'crusha-music-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  toast('保存しました！');
+  toast('ツール内に保存しました！（ブラウザを閉じても残ります）');
 }
 
 function loadAll() {

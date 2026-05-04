@@ -707,6 +707,13 @@ function init() {
   updateStats();
   buildTimeline();
   renderAudioTracks();
+  // 起動時にcrusha_projectから自動で曲・MCデータを読み込む
+  try {
+    const proj = getProject();
+    if ((proj.songs && proj.songs.length > 0) || (proj.mcScripts && proj.mcScripts.length > 0)) {
+      loadFromProject();
+    }
+  } catch(e) {}
 }
 
 // ─────────────────────────────────────────────

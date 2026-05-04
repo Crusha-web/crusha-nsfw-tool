@@ -1970,6 +1970,12 @@ function init() {
 
   // 自動保存
   setInterval(saveState, 10000);
+
+  // 起動時にcrusha_projectから自動で読み込む
+  try {
+    const proj = getProject();
+    if (proj.songs && proj.songs.length > 0) loadFromProject();
+  } catch(e) {}
 }
 
 init();

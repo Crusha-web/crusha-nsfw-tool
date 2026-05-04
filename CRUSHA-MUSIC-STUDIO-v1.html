@@ -857,14 +857,80 @@ const songs = [
 let currentSong = 0; // index
 const tags = {};
 
+// ═══ 入力 → songs[] へ書き戻し（これがなかったのが根本バグ）═══
+function updateCurrentSong() {
+  if (currentSong < 0 || currentSong >= songs.length) return;
+  const s = songs[currentSong];
+  const titleVal = (document.getElementById('c-title').value || '').trim();
+  s.title  = titleVal || '[曲タイトル未定]';
+  s.bpm    = parseInt(document.getElementById('c-bpm').value)   || s.bpm;
+  s.key    = document.getElementById('c-key').value              || s.key;
+  s.theme  = (document.getElementById('c-theme').value || '').trim() || s.theme;
+  s.status = titleVal ? 'done' : 'draft';
+}
+
+// 自動保存（crusha_project共有ストレージへ）
+function autoSyncProject() {
+  updateCurrentSong();
+  try {
+    const proj = getProject();
+    proj.projectName = document.getElementById('proj-name').value || proj.projectName;
+    proj.artistName  = document.getElementById('proj-artist').value || proj.artistName;
+    proj.songs = songs.map(s => ({
+      id: s.id, name: s.name, title: s.title,
+      duration: Math.floor(s.dur) + ':' + String(Math.round((s.dur%1)*60)).padStart(2,'0'),
+      genre: s.genre, bpm: s.bpm, key: s.key, theme: s.theme, emoji: s.emoji,
+      sunoPrompt: s.sunoPrompt || ''
+    }));
+    setProject(proj);
+  } catch(e) {}
+}
+
 // ═══ INIT ═══
 function init() {
+  // crusha_projectに曲データがあれば復元
+  try {
+    const proj = getProject();
+    if (proj.songs && proj.songs.length > 0) {
+      proj.songs.forEach((ps, i) => {
+        if (songs[i]) {
+          songs[i].title  = ps.title  || songs[i].title;
+          songs[i].bpm    = ps.bpm    || songs[i].bpm;
+          songs[i].key    = ps.key    || songs[i].key;
+          songs[i].theme  = ps.theme  || songs[i].theme;
+          songs[i].genre  = ps.genre  || songs[i].genre;
+          songs[i].status = (ps.title && ps.title !== '[曲タイトル未定]') ? 'done' : 'draft';
+        }
+      });
+    }
+    if (proj.projectName) document.getElementById('proj-name').value = proj.projectName;
+    if (proj.artistName)  document.getElementById('proj-artist').value = proj.artistName;
+  } catch(e) {}
+
   renderSongGrid();
   renderSidebar();
   renderSongSelTags('song-sel-tags');
   renderSongSelTags('suno-song-sel');
   updateTotalDur();
   loadAll();
+  // 常に現在の songs[] を crusha_project に書き出す（他ツールが即読める状態にする）
+  autoSyncProject();
+
+  // 入力変更時に自動で songs[] と crusha_project に反映
+  ['c-title','c-bpm','c-key','c-theme'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      updateCurrentSong();
+      renderSongGrid();
+      renderSidebar();
+      autoSyncProject();
+    });
+  });
+  ['proj-name','proj-artist'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', autoSyncProject);
+  });
 }
 
 // ═══ SONG GRID ═══
@@ -1223,27 +1289,10 @@ function setProject(data) {
 
 function saveToProject() {
   try {
-    const proj = getProject();
-    proj.projectName = document.getElementById('proj-name').value || proj.projectName;
-    proj.artistName  = document.getElementById('proj-artist').value || proj.artistName;
-    // songs配列を構築
-    proj.songs = songs.map((s, i) => {
-      const durMin  = Math.floor(s.dur);
-      const durSec  = Math.round((s.dur % 1) * 60);
-      return {
-        id: s.id,
-        title: s.title.replace('[曲タイトル未定]', s.name),
-        duration: `${durMin}:${String(durSec).padStart(2,'0')}`,
-        genre: s.genre,
-        bpm: s.bpm,
-        key: s.key,
-        theme: s.theme,
-        emoji: s.emoji,
-        sunoPrompt: ''
-      };
-    });
-    setProject(proj);
-    toast('プロジェクトに保存しました → 他ツールで読み込み可');
+    autoSyncProject(); // 入力値を songs[] に書き戻してから保存
+    renderSongGrid();
+    const names = songs.filter(s => s.title !== '[曲タイトル未定]').map(s => s.title).join('、');
+    toast('✅ 全ツールに連動保存！' + (names ? `（${names}）` : '曲タイトルを入力してください'));
   } catch(e) {
     toast('保存エラー: ' + e.message);
   }

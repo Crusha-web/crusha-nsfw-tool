@@ -1232,7 +1232,8 @@ function loadFromProject() {
     let timeOffset = 0;
     songs.forEach((song, idx) => {
       const trackName = song.title || song.name || '曲' + (idx + 1);
-      const exists = audioTracks.some(t => t.name === trackName && t.type === 'bgm');
+      // サフィックス（⏳未登録/✅）を除いた名前で重複チェック（複数回呼び出し対応）
+      const exists = audioTracks.some(t => t.type === 'bgm' && t.name.replace(/ [✅⏳].*/,'') === trackName);
       // duration "3:45" → 秒数変換
       let durSec = 180;
       if (song.duration) {

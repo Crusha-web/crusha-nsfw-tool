@@ -1241,11 +1241,15 @@ function loadFromProject() {
         else if (parts.length === 3) durSec = parts[0] * 3600 + parts[1] * 60 + parts[2];
       }
       if (!exists) {
+        // audioFileが登録されていればそのファイル名を使う
+        const audioPath = song.audioFile
+          ? song.audioFile
+          : `[BGM: ${trackName}].mp3`;
         audioTracks.push({
           id: 'at_bgm_' + Date.now() + '_' + idx,
-          name: trackName,
+          name: trackName + (song.audioFile ? ' ✅' : ' ⏳未登録'),
           type: 'bgm',
-          path: `[BGM: ${trackName}].wav`,
+          path: audioPath,
           start: timeOffset,
           duration: durSec,
           volume: 100,

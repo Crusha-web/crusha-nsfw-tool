@@ -1940,13 +1940,18 @@ function loadFromProject() {
     // 概要欄の曲リスト生成
     const descEl = document.getElementById('metaDesc');
     if (descEl && songs.length > 0) {
-      const songList = songs.map((s, i) => `${i+1}. ${s.title || s.name || '曲'+(i+1)}`).join('\n');
+      const songList = songs.map((s, i) => {
+        const audioStatus = s.audioFile ? ` ✅ [${s.audioFile}]` : ' ⏳音源未登録';
+        return `${i+1}. ${s.title || s.name || '曲'+(i+1)}${audioStatus}`;
+      }).join('\n');
       const base = `${proj.projectName || 'CRUSHA Virtual Live'}\n\n` +
         `🎵 セットリスト\n${songList}\n\n` +
         `Artist: ${proj.artistName || 'CRUSHA'}\n制作: AI (Suno / Wan2.2 / VOICEVOX)`;
       if (!descEl.value) descEl.value = base;
     }
-    showToast(`プロジェクト「${proj.projectName || '無題'}」から一括読み込み完了`);
+    // 音源ファイル登録状況をトーストで表示
+    const registered = songs.filter(s => s.audioFile).length;
+    showToast(`プロジェクト「${proj.projectName || '無題'}」読込完了 ／ 音源登録: ${registered}/${songs.length}曲`);
     saveState();
   } catch(e) { showToast('読み込みエラー: ' + e.message); }
 }

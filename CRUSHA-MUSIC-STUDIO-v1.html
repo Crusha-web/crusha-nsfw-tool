@@ -447,9 +447,17 @@
       <div class="card">
         <div class="card-t">🎵 基本設定</div>
         <label>曲タイトル（仮）</label>
-        <input type="text" id="c-title" placeholder="例: NOVA / 星を掴め / Refrain">
+        <input type="text" id="c-title" placeholder="例: NOVA / 星を切り裂いて / Refrain">
         <label>テーマ・キーワード</label>
         <input type="text" id="c-theme" placeholder="例: 諦めない / 夜明け / 君への想い / 未来へ">
+
+        <!-- ▼ Sunoで作った音源ファイルをここに登録 -->
+        <div style="background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.35);border-radius:10px;padding:12px 14px;margin-top:10px;">
+          <div style="font-size:11px;font-weight:800;color:#ffaa00;letter-spacing:1px;margin-bottom:8px;">🎧 Suno音源ファイル登録</div>
+          <label style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px;display:block;">ファイル名（CRUSHA STUDIOフォルダに置いたMP3）</label>
+          <input type="text" id="c-audiofile" placeholder="例: 夜を切り裂いて.mp3" style="font-size:12px;color:#ffaa00;">
+          <div style="font-size:10px;color:rgba(255,170,0,0.5);margin-top:5px;">📁 ファイルは「CRUSHA STUDIO」フォルダに入れておくこと → Edit Studioのオーディオトラックに自動反映</div>
+        </div>
         <div class="row2">
           <div>
             <label>BPM</label>
@@ -862,11 +870,12 @@ function updateCurrentSong() {
   if (currentSong < 0 || currentSong >= songs.length) return;
   const s = songs[currentSong];
   const titleVal = (document.getElementById('c-title').value || '').trim();
-  s.title  = titleVal || '[曲タイトル未定]';
-  s.bpm    = parseInt(document.getElementById('c-bpm').value)   || s.bpm;
-  s.key    = document.getElementById('c-key').value              || s.key;
-  s.theme  = (document.getElementById('c-theme').value || '').trim() || s.theme;
-  s.status = titleVal ? 'done' : 'draft';
+  s.title     = titleVal || '[曲タイトル未定]';
+  s.bpm       = parseInt(document.getElementById('c-bpm').value)   || s.bpm;
+  s.key       = document.getElementById('c-key').value              || s.key;
+  s.theme     = (document.getElementById('c-theme').value || '').trim() || s.theme;
+  s.audioFile = (document.getElementById('c-audiofile').value || '').trim();
+  s.status    = (titleVal || s.audioFile) ? 'done' : 'draft';
 }
 
 // 自動保存（crusha_project共有ストレージへ）
@@ -880,6 +889,7 @@ function autoSyncProject() {
       id: s.id, name: s.name, title: s.title,
       duration: Math.floor(s.dur) + ':' + String(Math.round((s.dur%1)*60)).padStart(2,'0'),
       genre: s.genre, bpm: s.bpm, key: s.key, theme: s.theme, emoji: s.emoji,
+      audioFile: s.audioFile || '',
       sunoPrompt: s.sunoPrompt || ''
     }));
     setProject(proj);
@@ -894,12 +904,13 @@ function init() {
     if (proj.songs && proj.songs.length > 0) {
       proj.songs.forEach((ps, i) => {
         if (songs[i]) {
-          songs[i].title  = ps.title  || songs[i].title;
-          songs[i].bpm    = ps.bpm    || songs[i].bpm;
-          songs[i].key    = ps.key    || songs[i].key;
-          songs[i].theme  = ps.theme  || songs[i].theme;
-          songs[i].genre  = ps.genre  || songs[i].genre;
-          songs[i].status = (ps.title && ps.title !== '[曲タイトル未定]') ? 'done' : 'draft';
+          songs[i].title     = ps.title     || songs[i].title;
+          songs[i].bpm       = ps.bpm       || songs[i].bpm;
+          songs[i].key       = ps.key       || songs[i].key;
+          songs[i].theme     = ps.theme     || songs[i].theme;
+          songs[i].genre     = ps.genre     || songs[i].genre;
+          songs[i].audioFile = ps.audioFile || '';
+          songs[i].status    = (ps.title && ps.title !== '[曲タイトル未定]') || ps.audioFile ? 'done' : 'draft';
         }
       });
     }
@@ -917,7 +928,7 @@ function init() {
   autoSyncProject();
 
   // 入力変更時に自動で songs[] と crusha_project に反映
-  ['c-title','c-bpm','c-key','c-theme'].forEach(id => {
+  ['c-title','c-bpm','c-key','c-theme','c-audiofile'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => {
@@ -989,9 +1000,10 @@ function renderSongSelTags(elId) {
 function selectSong(i) {
   currentSong = i;
   const s = songs[i];
-  document.getElementById('c-title').value = s.title.replace('[曲タイトル未定]','');
-  document.getElementById('c-bpm').value = s.bpm;
-  document.getElementById('c-theme').value = s.theme;
+  document.getElementById('c-title').value     = s.title.replace('[曲タイトル未定]','');
+  document.getElementById('c-bpm').value       = s.bpm;
+  document.getElementById('c-theme').value     = s.theme;
+  document.getElementById('c-audiofile').value = s.audioFile || '';
   document.getElementById('lyrics-song-name').textContent = `${s.name} — ${s.title}`;
   renderSongGrid();
   renderSidebar();

@@ -364,6 +364,54 @@
   <div class="ptitle">🎤 セットリスト管理</div>
   <div class="psub">AIrisスタイルの25〜30分ライブ構成。5曲＋MC×2が標準。</div>
 
+  <!-- ▼ 連動手順ガイド -->
+  <div class="card" style="border-color:rgba(168,85,247,0.4);background:rgba(168,85,247,0.06);">
+    <div class="card-t" style="color:#a855f7;">📖 CRUSHA STUDIO 全ツール連動 — 使い方手順</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;line-height:1.9;">
+      <div>
+        <div style="font-weight:800;color:#f59e0b;margin-bottom:6px;">STEP 1 — MUSIC STUDIO（ここ）</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 各曲カードをクリック → <b>「楽曲コンセプト設計」</b>タブで設定<br>
+          ② <b>「📂 MP3/WAVを選択」</b>でSuno生成ファイルを読み込む<br>
+          ③ <b>「Sunoプロンプト」</b>タブでプロンプト生成・コピー<br>
+          ④ <b>「💾 エクスポート」</b>ボタンで全データを保存（他ツールに自動反映）
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#06b6d4;margin-bottom:6px;">STEP 2 — VOICE STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ 曲タイトルが自動でセグメント化<br>
+          ② 各セグメントのMCスクリプトを作成<br>
+          ③ 「🎛️ RVC設定」タブ → <b>「📂 WAV/MP3選択」</b>でRVC変換済み音声を読み込む<br>
+          ④ 「書き出し」タブで全スクリプトをDL
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#ec4899;margin-bottom:6px;">STEP 3 — EDIT STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ BGMトラックが自動追加<br>
+          ② タイムラインで音楽・ボイス・映像を配置<br>
+          ③ 「🎬 編集ガイド」で書き出しコマンドを確認
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#10b981;margin-bottom:6px;">STEP 4 — VIDEO GEN STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ 曲ごとにショットが自動生成<br>
+          ② 「🎛️ 設定」タブでSDXLチェックポイント・CRUSHA LoRAを確認<br>
+          ③ 「🔗 ワークフロー生成」→ CRUSHA LoRAが自動組み込まれたJSONが生成<br>
+          ④ 「🚀 ComfyUIに送信」または JSONをコピーしてComfyUIにペースト
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(168,85,247,0.2);">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);">
+        💡 <b>保存先固定：</b> 全ファイルは <code>C:\Users\USER\Desktop\CRUSHA STUDIO\</code> に保存してください。
+        MP3/WAVはこのフォルダに置いてから「📂 選択」ボタンで読み込むと最も確実です。
+      </div>
+    </div>
+  </div>
+
   <div class="song-grid" id="song-grid">
     <!-- JS で生成 -->
   </div>

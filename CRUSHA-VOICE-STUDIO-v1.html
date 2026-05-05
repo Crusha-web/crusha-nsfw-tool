@@ -542,6 +542,25 @@ def tts(text, filename):
           <div class="cmd-box" id="rvcCmd">python infer-web.py --f0up_key 0 --input_path ./mc_wav/ --index_rate 0.75 --filter_radius 3 --rms_mix_rate 0.25 --protect 0.33 --hop_length 128 --f0method rmvpe --opt_path ./mc_rvc_out/ --model_name crusha_v1.pth --index_path crusha_v1.index --device cuda:0 --is_half True</div>
           <button class="gen-btn gen-btn-cyan" onclick="generateRvcCmd()" style="margin-top:10px;">🔄 コマンド更新</button>
         </div>
+
+        <!-- ▼ RVC出力ファイル読み込み -->
+        <div class="card">
+          <div class="card-title">📥 RVC変換済み音声 — 読み込み</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">
+            RVCで変換したWAVを読み込んでプレビュー確認。Edit Studioのボイストラックに自動連携します。
+          </div>
+          <div id="rvc-file-list"></div>
+          <button class="gen-btn" onclick="addRvcFileSlot()" style="margin-top:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);">＋ 音声スロットを追加</button>
+          <div style="font-size:10px;color:rgba(168,85,247,0.5);margin-top:6px;">📁 C:\Users\USER\Desktop\CRUSHA STUDIO\mc_rvc_out\ の出力WAVを選択</div>
+        </div>
+
+        <!-- ▼ 全セグメント一括プレビュー -->
+        <div class="card">
+          <div class="card-title">▶ 読み込み済み音声 — 一覧プレビュー</div>
+          <div id="rvc-preview-list" style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.3);">音声を読み込むとここに表示されます</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -672,6 +691,8 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTemplates();
   selectSegment(0);
   updateRvcCmd();
+  renderRvcFileList();
+  renderRvcPreview();
   // 起動時にcrusha_projectから自動で曲データを読み込む
   try {
     const proj = getProject();
@@ -873,6 +894,101 @@ function updateRvcCmd() {
 }
 
 function generateRvcCmd() { updateRvcCmd(); showToast('コマンドを更新しました'); }
+
+// ──────────────────────────────────
+// RVC出力音声 読み込み
+// ──────────────────────────────────
+let rvcAudioSlots = []; // { label, fileName, url, duration }
+
+function addRvcFileSlot() {
+  const idx = rvcAudioSlots.length;
+  rvcAudioSlots.push({ label: `音声 ${idx + 1}`, fileName: '', url: null, duration: 0 });
+  renderRvcFileList();
+}
+
+function renderRvcFileList() {
+  const container = document.getElementById('rvc-file-list');
+  if (!container) return;
+  if (rvcAudioSlots.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;padding:10px;">＋ 音声スロットを追加 してください</div>';
+    return;
+  }
+  container.innerHTML = rvcAudioSlots.map((slot, i) => `
+    <div style="background:rgba(139,0,255,0.08);border:1px solid rgba(139,0,255,0.3);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="text" value="${slot.label}" oninput="rvcAudioSlots[${i}].label=this.value;renderRvcPreview()"
+          style="width:120px;background:rgba(0,0,0,0.3);border:1px solid rgba(139,0,255,0.3);border-radius:6px;padding:4px 8px;color:#bb88ff;font-size:12px;margin:0;">
+        <label for="rvc-file-input-${i}" style="cursor:pointer;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;white-space:nowrap;margin:0;">📂 WAV/MP3選択</label>
+        <input type="file" id="rvc-file-input-${i}" accept="audio/*" style="display:none;" onchange="loadRvcFile(this,${i})">
+        <span style="font-size:11px;color:#bb88ff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${slot.fileName || '未選択'}</span>
+        <button onclick="removeRvcSlot(${i})" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:6px;color:#f87171;padding:4px 8px;cursor:pointer;font-size:11px;">✕</button>
+      </div>
+      ${slot.url ? `
+      <audio controls src="${slot.url}" style="width:100%;height:32px;accent-color:#a855f7;"></audio>
+      <div style="font-size:10px;color:rgba(168,85,247,0.7);margin-top:4px;">✅ ${slot.duration}</div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function loadRvcFile(input, idx) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const tmp = new Audio(url);
+  tmp.onloadedmetadata = () => {
+    const sec = Math.round(tmp.duration);
+    const dispDur = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} | ${(file.size/1024/1024).toFixed(1)}MB`;
+    rvcAudioSlots[idx].fileName = file.name;
+    rvcAudioSlots[idx].url      = url;
+    rvcAudioSlots[idx].duration = dispDur;
+    rvcAudioSlots[idx].sec      = sec;
+    if (!rvcAudioSlots[idx].label || rvcAudioSlots[idx].label.startsWith('音声 ')) {
+      rvcAudioSlots[idx].label = file.name.replace(/\.[^.]+$/, '');
+    }
+    renderRvcFileList();
+    renderRvcPreview();
+    syncRvcToProject();
+    showToast(`✅ ${file.name} 読み込み完了`);
+  };
+  tmp.onerror = () => showToast('⚠ 音声ファイルの読み込みに失敗しました');
+}
+
+function removeRvcSlot(idx) {
+  rvcAudioSlots.splice(idx, 1);
+  renderRvcFileList();
+  renderRvcPreview();
+  syncRvcToProject();
+}
+
+function renderRvcPreview() {
+  const container = document.getElementById('rvc-preview-list');
+  if (!container) return;
+  const loaded = rvcAudioSlots.filter(s => s.url);
+  if (loaded.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);">音声を読み込むとここに表示されます</div>';
+    return;
+  }
+  container.innerHTML = loaded.map((slot, i) => `
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:11px;color:#a855f7;font-weight:700;min-width:30px;">${String(i+1).padStart(2,'0')}</span>
+      <span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${slot.label}</span>
+      <span style="font-size:11px;color:rgba(168,85,247,0.7);">${slot.duration}</span>
+      <audio controls src="${slot.url}" style="height:28px;accent-color:#a855f7;min-width:180px;"></audio>
+    </div>
+  `).join('');
+}
+
+function syncRvcToProject() {
+  try {
+    const projRaw = localStorage.getItem('crusha_project');
+    const proj = projRaw ? JSON.parse(projRaw) : {};
+    proj.rvcAudio = rvcAudioSlots.filter(s => s.fileName).map(s => ({
+      label: s.label, fileName: s.fileName, duration: s.duration
+    }));
+    localStorage.setItem('crusha_project', JSON.stringify(proj));
+  } catch(e) {}
+}
 
 // ──────────────────────────────────
 // 書き出し

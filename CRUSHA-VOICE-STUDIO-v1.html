@@ -542,6 +542,25 @@ def tts(text, filename):
           <div class="cmd-box" id="rvcCmd">python infer-web.py --f0up_key 0 --input_path ./mc_wav/ --index_rate 0.75 --filter_radius 3 --rms_mix_rate 0.25 --protect 0.33 --hop_length 128 --f0method rmvpe --opt_path ./mc_rvc_out/ --model_name crusha_v1.pth --index_path crusha_v1.index --device cuda:0 --is_half True</div>
           <button class="gen-btn gen-btn-cyan" onclick="generateRvcCmd()" style="margin-top:10px;">🔄 コマンド更新</button>
         </div>
+
+        <!-- ▼ RVC出力ファイル読み込み -->
+        <div class="card">
+          <div class="card-title">📥 RVC変換済み音声 — 読み込み</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">
+            RVCで変換したWAVを読み込んでプレビュー確認。Edit Studioのボイストラックに自動連携します。
+          </div>
+          <div id="rvc-file-list"></div>
+          <button class="gen-btn" onclick="addRvcFileSlot()" style="margin-top:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);">＋ 音声スロットを追加</button>
+          <div style="font-size:10px;color:rgba(168,85,247,0.5);margin-top:6px;">📁 C:\Users\USER\Desktop\CRUSHA STUDIO\mc_rvc_out\ の出力WAVを選択</div>
+        </div>
+
+        <!-- ▼ 全セグメント一括プレビュー -->
+        <div class="card">
+          <div class="card-title">▶ 読み込み済み音声 — 一覧プレビュー</div>
+          <div id="rvc-preview-list" style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.3);">音声を読み込むとここに表示されます</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -600,8 +619,9 @@ def tts(text, filename):
         </div>
 
         <div class="card">
-          <div class="card-title">💾 JSON エクスポート</div>
-          <button class="gen-btn gen-btn-cyan" onclick="exportJSON()">💾 全データをJSONで保存</button>
+          <div class="card-title">💾 データ保存・読込</div>
+          <button class="gen-btn gen-btn-cyan" onclick="exportJSON()" style="margin-bottom:8px;">💾 ツール内に保存</button>
+          <button class="gen-btn" onclick="loadData();renderSegmentList();renderVoiceCards();showToast('データを読み込みました');">📂 保存データを読込</button>
         </div>
       </div>
     </div>
@@ -614,7 +634,7 @@ def tts(text, filename):
 // データ定義
 // ──────────────────────────────────
 
-const SEGMENTS = [
+let SEGMENTS = [
   { id:'seg01', name:'オープニング', time:'00:00〜01:30', duration:90,  type:'opening',  song:'', icon:'🌟' },
   { id:'seg02', name:'1曲目後MC',   time:'03:30〜04:30', duration:60,  type:'between',  song:'Track 1後', icon:'🎵' },
   { id:'seg03', name:'2曲目後MC',   time:'07:00〜08:00', duration:60,  type:'between',  song:'Track 2後', icon:'🎶' },
@@ -671,6 +691,18 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTemplates();
   selectSegment(0);
   updateRvcCmd();
+  renderRvcFileList();
+  renderRvcPreview();
+  // 起動時にcrusha_projectから自動で曲データを読み込む
+  try {
+    const proj = getProject();
+    if (proj.songs && proj.songs.length > 0) {
+      loadFromProject();
+    }
+  } catch(e) {}
+  // 30秒ごとに自動保存（データロス防止）
+  setInterval(exportJSON, 30000);
+  window.addEventListener('beforeunload', exportJSON);
 });
 
 function renderSegmentList() {
@@ -864,6 +896,101 @@ function updateRvcCmd() {
 function generateRvcCmd() { updateRvcCmd(); showToast('コマンドを更新しました'); }
 
 // ──────────────────────────────────
+// RVC出力音声 読み込み
+// ──────────────────────────────────
+let rvcAudioSlots = []; // { label, fileName, url, duration }
+
+function addRvcFileSlot() {
+  const idx = rvcAudioSlots.length;
+  rvcAudioSlots.push({ label: `音声 ${idx + 1}`, fileName: '', url: null, duration: 0 });
+  renderRvcFileList();
+}
+
+function renderRvcFileList() {
+  const container = document.getElementById('rvc-file-list');
+  if (!container) return;
+  if (rvcAudioSlots.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;padding:10px;">＋ 音声スロットを追加 してください</div>';
+    return;
+  }
+  container.innerHTML = rvcAudioSlots.map((slot, i) => `
+    <div style="background:rgba(139,0,255,0.08);border:1px solid rgba(139,0,255,0.3);border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="text" value="${slot.label}" oninput="rvcAudioSlots[${i}].label=this.value;renderRvcPreview()"
+          style="width:120px;background:rgba(0,0,0,0.3);border:1px solid rgba(139,0,255,0.3);border-radius:6px;padding:4px 8px;color:#bb88ff;font-size:12px;margin:0;">
+        <label for="rvc-file-input-${i}" style="cursor:pointer;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;white-space:nowrap;margin:0;">📂 WAV/MP3選択</label>
+        <input type="file" id="rvc-file-input-${i}" accept="audio/*" style="display:none;" onchange="loadRvcFile(this,${i})">
+        <span style="font-size:11px;color:#bb88ff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${slot.fileName || '未選択'}</span>
+        <button onclick="removeRvcSlot(${i})" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:6px;color:#f87171;padding:4px 8px;cursor:pointer;font-size:11px;">✕</button>
+      </div>
+      ${slot.url ? `
+      <audio controls src="${slot.url}" style="width:100%;height:32px;accent-color:#a855f7;"></audio>
+      <div style="font-size:10px;color:rgba(168,85,247,0.7);margin-top:4px;">✅ ${slot.duration}</div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function loadRvcFile(input, idx) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const tmp = new Audio(url);
+  tmp.onloadedmetadata = () => {
+    const sec = Math.round(tmp.duration);
+    const dispDur = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} | ${(file.size/1024/1024).toFixed(1)}MB`;
+    rvcAudioSlots[idx].fileName = file.name;
+    rvcAudioSlots[idx].url      = url;
+    rvcAudioSlots[idx].duration = dispDur;
+    rvcAudioSlots[idx].sec      = sec;
+    if (!rvcAudioSlots[idx].label || rvcAudioSlots[idx].label.startsWith('音声 ')) {
+      rvcAudioSlots[idx].label = file.name.replace(/\.[^.]+$/, '');
+    }
+    renderRvcFileList();
+    renderRvcPreview();
+    syncRvcToProject();
+    showToast(`✅ ${file.name} 読み込み完了`);
+  };
+  tmp.onerror = () => showToast('⚠ 音声ファイルの読み込みに失敗しました');
+}
+
+function removeRvcSlot(idx) {
+  rvcAudioSlots.splice(idx, 1);
+  renderRvcFileList();
+  renderRvcPreview();
+  syncRvcToProject();
+}
+
+function renderRvcPreview() {
+  const container = document.getElementById('rvc-preview-list');
+  if (!container) return;
+  const loaded = rvcAudioSlots.filter(s => s.url);
+  if (loaded.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);">音声を読み込むとここに表示されます</div>';
+    return;
+  }
+  container.innerHTML = loaded.map((slot, i) => `
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:11px;color:#a855f7;font-weight:700;min-width:30px;">${String(i+1).padStart(2,'0')}</span>
+      <span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${slot.label}</span>
+      <span style="font-size:11px;color:rgba(168,85,247,0.7);">${slot.duration}</span>
+      <audio controls src="${slot.url}" style="height:28px;accent-color:#a855f7;min-width:180px;"></audio>
+    </div>
+  `).join('');
+}
+
+function syncRvcToProject() {
+  try {
+    const projRaw = localStorage.getItem('crusha_project');
+    const proj = projRaw ? JSON.parse(projRaw) : {};
+    proj.rvcAudio = rvcAudioSlots.filter(s => s.fileName).map(s => ({
+      label: s.label, fileName: s.fileName, duration: s.duration
+    }));
+    localStorage.setItem('crusha_project', JSON.stringify(proj));
+  } catch(e) {}
+}
+
+// ──────────────────────────────────
 // 書き出し
 // ──────────────────────────────────
 function generateAllExport() {
@@ -939,12 +1066,8 @@ function exportVoicevox() {
 function exportJSON() {
   scripts[SEGMENTS[currentSeg].id] = document.getElementById('scriptEditor').value;
   const data = { scripts, segDone, selectedVoice, timestamp: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'crusha_voice_studio_backup.json';
-  a.click();
-  showToast('JSONを保存しました');
+  localStorage.setItem('crusha-voice-studio', JSON.stringify(data));
+  showToast('ツール内に保存しました！（ブラウザを閉じても残ります）');
 }
 
 // ──────────────────────────────────
@@ -997,43 +1120,104 @@ function setProject(data) {
   try { localStorage.setItem('crusha_project', JSON.stringify(data)); } catch(e) {}
 }
 
+// ── 曲データからSEGMENTSを動的に構築 ──
+function buildSegmentsFromSongs(songs) {
+  const segs = [];
+  let timeMin = 0;
+
+  // オープニング MC（固定）
+  segs.push({
+    id: 'seg_opening',
+    name: 'オープニング MC',
+    time: `00:00〜01:30`,
+    duration: 90,
+    type: 'opening',
+    song: '',
+    icon: '🌟'
+  });
+  timeMin += 1.5;
+
+  // 各曲の後のMC（曲タイトルを埋め込む）
+  songs.forEach((song, i) => {
+    const title = song.title || song.name || `曲${i + 1}`;
+    // 曲の尺を分単位で推定（duration "3:45" → 3.75分、なければ4分）
+    let songMin = 4;
+    if (song.duration) {
+      const parts = song.duration.split(':').map(Number);
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        songMin = parts[0] + parts[1] / 60;
+      }
+    }
+    timeMin += songMin;
+    const endMin = Math.floor(timeMin);
+    const mcEndMin = endMin + 1.5;
+    const fmt = m => `${String(Math.floor(m)).padStart(2,'0')}:${String(Math.round((m%1)*60)).padStart(2,'0')}`;
+
+    // 中盤MCは中間あたりの曲の後（曲数が3以上で真ん中）
+    const isMid = songs.length >= 3 && i === Math.floor(songs.length / 2) - 1;
+    segs.push({
+      id: `seg_after_${i + 1}`,
+      name: isMid ? `中盤MC（「${title}」後）` : `「${title}」後 MC`,
+      time: `${fmt(endMin)}〜${fmt(mcEndMin)}`,
+      duration: isMid ? 90 : 60,
+      type: isMid ? 'mid' : 'between',
+      song: title,
+      icon: isMid ? '💫' : (i % 2 === 0 ? '🎵' : '🎶'),
+      // スクリプトのヒント文（未記入のセグメントに初期表示）
+      hint: isMid
+        ? `[笑い]ありがとう〜！！[間:0.5]\n[感動]「${title}」……どうだった！？[間:0.8]\nちょっと一息入れようか。[間:0.5]みんな元気そうで嬉しいよ！`
+        : `[笑い]ありがとう！！[間:0.5]\n[感動]「${title}」、楽しんでくれた？[間:0.8]\n次もめちゃくちゃ気合入ってるから——[間:0.5]覚悟してね！`
+    });
+    timeMin = mcEndMin;
+  });
+
+  // エンディング MC（固定）
+  const fmt2 = m => `${String(Math.floor(m)).padStart(2,'0')}:${String(Math.round((m%1)*60)).padStart(2,'0')}`;
+  segs.push({
+    id: 'seg_ending',
+    name: 'エンディング MC',
+    time: `${fmt2(timeMin)}〜${fmt2(timeMin + 2)}`,
+    duration: 120,
+    type: 'ending',
+    song: '',
+    icon: '🌙',
+    hint: `[感動]今日は……本当にありがとう！！[間:1.0]\n[ささやき]みんなの顔、ぜんぶ見えてたよ。[間:1.5]\n[元気]また絶対やるから——次も来てね！！\n[感嘆]バイバーイ！！！`
+  });
+
+  return segs;
+}
+
 function loadFromProject() {
   try {
     const proj = getProject();
     if (!proj.songs || proj.songs.length === 0) {
-      showToast('プロジェクトに曲データがありません。Music Studioで保存してください。');
+      showToast('プロジェクトに曲データがありません。Music Studio で先に保存してください。');
       return;
     }
-    // プロジェクト情報を表示
-    const info = `${proj.projectName || '無題'} (${proj.songs.length}曲)`;
-    const el = document.getElementById('proj-info');
-    if (el) el.textContent = '— ' + info;
 
-    // セグメントリストに曲情報を反映（曲間MCセグメントを追加）
-    // SEGMENTS配列にproject曲データを統合表示するため、サイドバーの下部に曲リストを表示
-    let songListHtml = '<div style="margin-top:14px;"><div class="sidebar-title">🎵 プロジェクト楽曲</div>';
-    proj.songs.forEach((s, i) => {
-      songListHtml += `<div style="background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.2);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;">
-        <div style="font-weight:700;color:#00f5ff;">${s.emoji || '🎵'} ${s.title}</div>
-        <div style="color:rgba(255,255,255,0.4);">${s.genre || ''} · ${s.duration || ''}</div>
-      </div>`;
+    // ① SEGMENTSを曲データから動的に再構築
+    SEGMENTS = buildSegmentsFromSongs(proj.songs);
+
+    // ② 既存スクリプトを保持しつつ、未記入セグメントにヒント文を挿入
+    SEGMENTS.forEach(seg => {
+      if (!scripts[seg.id] && seg.hint) {
+        scripts[seg.id] = seg.hint;
+      }
     });
-    songListHtml += '</div>';
 
-    // サイドバーの末尾に追加（既存のものを置換しないよう id を使用）
-    let songListEl = document.getElementById('proj-song-list');
-    if (!songListEl) {
-      songListEl = document.createElement('div');
-      songListEl.id = 'proj-song-list';
-      const sidebar = document.querySelector('.sidebar');
-      if (sidebar) sidebar.insertAdjacentHTML('beforeend', songListHtml);
-    } else {
-      songListEl.innerHTML = songListHtml;
-    }
+    // ③ ヘッダーのプロジェクト情報を更新
+    const el = document.getElementById('proj-info');
+    if (el) el.textContent = `— ${proj.projectName || '無題'} / ${proj.artistName || 'CRUSHA'} (${proj.songs.length}曲 / ${SEGMENTS.length}セグメント)`;
 
-    showToast(`プロジェクトから${proj.songs.length}曲を読み込みました`);
+    // ④ UIを全部再描画
+    currentSeg = 0;
+    renderSegmentList();
+    selectSegment(0);
+
+    showToast(`✅ ${proj.songs.length}曲を読み込み → ${SEGMENTS.length}セグメントを生成しました`);
   } catch(e) {
     showToast('読み込みエラー: ' + e.message);
+    console.error('[VOICE STUDIO] loadFromProject error:', e);
   }
 }
 

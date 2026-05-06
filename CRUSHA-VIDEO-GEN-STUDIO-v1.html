@@ -775,6 +775,62 @@ select option { background: #1a1a2e; }
                 oninput="saveSettings()">
             </div>
           </div>
+          <!-- ⚠ チェックポイント未検出 -->
+          <div id="checkpoint-warning" style="background:rgba(255,107,45,0.12);border:1px solid rgba(255,107,45,0.5);border-radius:10px;padding:12px 14px;margin-top:8px;">
+            <div style="font-size:12px;font-weight:700;color:#ff6b2d;margin-bottom:6px;">⚠ チェックポイントが未設定です</div>
+            <div style="font-size:11px;color:rgba(255,200,150,0.8);line-height:1.8;">
+              <strong>推奨チェックポイント（SDXLベース）：</strong><br>
+              • <code style="color:#ffd700;">animagine-xl-4.0.safetensors</code> — アニメ特化SDXL（推奨）<br>
+              • <code style="color:#ffd700;">kohaku-xl-epsilon-rev2.safetensors</code> — リアル+アニメ混合<br>
+              • <code style="color:#ffd700;">illustriousXL_v11.safetensors</code> — イラスト高品質<br>
+              <br>
+              <strong>ダウンロード先：</strong>
+              <a href="https://civitai.com/search/models?modelType=Checkpoint&baseModel=SDXL%201.0" target="_blank"
+                style="color:#00d4ff;">CivitAI SDXL Checkpoints →</a><br>
+              <strong>保存先：</strong> <code>C:\ComfyUI_windows_portable\ComfyUI\models\checkpoints\</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🩵 CRUSHA LoRA 設定</h3>
+          <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.3);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+            <div style="font-size:11px;color:rgba(0,212,255,0.8);margin-bottom:8px;font-weight:700;">✅ 検出済みLoRA（自動設定）</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.8;">
+              📁 <code>models/loras/crusha_character_v1.safetensors</code> — SD1.5版<br>
+              📁 <code>models/loras/SDXL/crusha_sdxl_v1.safetensors</code> — SDXL版（推奨）<br>
+              📁 <code>models/loras/SDXL/crusha_sdxl_v1-000002.safetensors</code><br>
+              📁 <code>models/loras/SDXL/crusha_sdxl_v1-000004.safetensors</code>
+            </div>
+          </div>
+          <div class="form-row cols2">
+            <div>
+              <label>CRUSHA LoRAパス（SDXL）</label>
+              <input type="text" id="crushaLoraPath" value="models/loras/SDXL/crusha_sdxl_v1.safetensors"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>LoRA 強度</label>
+              <input type="number" id="crushaLoraStrength" value="0.85" min="0" max="1.5" step="0.05"
+                oninput="saveSettings()">
+            </div>
+          </div>
+          <div class="form-row cols2">
+            <div>
+              <label>トリガーワード</label>
+              <input type="text" id="crushaTrigger" value="crusha_v1, ferret ears, turquoise hair"
+                oninput="saveSettings()">
+            </div>
+            <div>
+              <label>LoRAバージョン選択</label>
+              <select id="crushaLoraVersion" onchange="onLoraVersionChange()">
+                <option value="SDXL/crusha_sdxl_v1.safetensors">SDXL v1（最終・推奨）</option>
+                <option value="SDXL/crusha_sdxl_v1-000004.safetensors">SDXL v1-000004</option>
+                <option value="SDXL/crusha_sdxl_v1-000002.safetensors">SDXL v1-000002</option>
+                <option value="crusha_character_v1.safetensors">SD1.5 v1</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div class="settings-section">
@@ -1262,6 +1318,11 @@ function init() {
   updateStats();
   loadSettings();
   renderBatchTable();
+  // 起動時にcrusha_projectから自動で曲データを読み込む
+  try {
+    const proj = getProject();
+    if (proj.songs && proj.songs.length > 0) loadFromProject();
+  } catch(e) {}
 }
 
 // ─────────────────────────────────────────────
@@ -1523,15 +1584,20 @@ function genWan22T2VWorkflow(pos, neg, frames, w, h, steps, cfg, seed) {
 }
 
 function genAnimateDiffXLWorkflow(pos, neg, frames, w, h, steps, cfg, motionScale, seed) {
-  const sdxlPath = document.getElementById('sdxlModelPath')?.value || 'animagine-xl-4.0.safetensors';
-  const animPath = document.getElementById('animaDiffPath')?.value || 'animatediff/mm_sdxl_v10_beta.ckpt';
+  const sdxlPath   = document.getElementById('sdxlModelPath')?.value   || 'animagine-xl-4.0.safetensors';
+  const animPath   = document.getElementById('animaDiffPath')?.value   || 'animatediff/mm_sdxl_v10_beta.ckpt';
+  const loraPath   = document.getElementById('crushaLoraPath')?.value  || 'loras/SDXL/crusha_sdxl_v1.safetensors';
+  const loraStr    = parseFloat(document.getElementById('crushaLoraStrength')?.value || 0.85);
+  const trigger    = document.getElementById('crushaTrigger')?.value   || 'crusha_v1, ferret ears, turquoise hair';
+  const posWithTrg = trigger ? `${trigger}, ${pos}` : pos;
 
   return {
     "1": { class_type: "CheckpointLoaderSimple", inputs: { ckpt_name: sdxlPath }, _meta: { title: "SDXL Checkpoint" } },
+    "10": { class_type: "LoraLoader", inputs: { model: ["1", 0], clip: ["1", 1], lora_name: loraPath, strength_model: loraStr, strength_clip: loraStr }, _meta: { title: "CRUSHA LoRA" } },
     "2": { class_type: "ADE_LoadAnimateDiffModel", inputs: { model_name: animPath, ad_settings: null }, _meta: { title: "AnimateDiff Motion Module" } },
-    "3": { class_type: "ADE_AnimateDiffLoaderWithContext", inputs: { model: ["1", 0], motion_model: ["2", 0], motion_scale: motionScale, apply_v2_models_properly: true }, _meta: { title: "AnimateDiff Loader" } },
-    "4": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["1", 1], text_g: pos, text_l: pos, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Positive Prompt" } },
-    "5": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["1", 1], text_g: neg, text_l: neg, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Negative Prompt" } },
+    "3": { class_type: "ADE_AnimateDiffLoaderWithContext", inputs: { model: ["10", 0], motion_model: ["2", 0], motion_scale: motionScale, apply_v2_models_properly: true }, _meta: { title: "AnimateDiff Loader" } },
+    "4": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["10", 1], text_g: posWithTrg, text_l: posWithTrg, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Positive Prompt (+CRUSHA trigger)" } },
+    "5": { class_type: "CLIPTextEncodeSDXL", inputs: { clip: ["10", 1], text_g: neg, text_l: neg, width: w, height: h, crop_w: 0, crop_h: 0, target_width: w, target_height: h }, _meta: { title: "Negative Prompt" } },
     "6": { class_type: "EmptyLatentImage", inputs: { width: w, height: h, batch_size: frames }, _meta: { title: "Latent (frames)" } },
     "7": { class_type: "KSampler", inputs: { model: ["3", 0], positive: ["4", 0], negative: ["5", 0], latent_image: ["6", 0], seed: seed, steps: steps, cfg: cfg, sampler_name: "dpm_2_ancestral", scheduler: "karras", denoise: 1.0 }, _meta: { title: "KSampler" } },
     "8": { class_type: "VAEDecode", inputs: { samples: ["7", 0], vae: ["1", 2] }, _meta: { title: "VAE Decode" } },
@@ -1860,13 +1926,20 @@ function saveSettings() {
   const fields = ['wan22Path','wan22VaePath','wan22ClipPath','wan22ImgEncPath',
     'animaDiffPath','sdxlModelPath','comfyHost','comfyPort','outputDir',
     'defSteps','defCfg','defSeed','motionScale','guidanceScale','videoCfg',
-    'denoiseStrength','i2vBaseDir','i2vDefaultImg'];
+    'denoiseStrength','i2vBaseDir','i2vDefaultImg',
+    'crushaLoraPath','crushaLoraStrength','crushaTrigger','crushaLoraVersion'];
   const s = {};
   fields.forEach(f => {
     const el = document.getElementById(f);
     if (el) s[f] = el.value;
   });
   try { localStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify(s)); } catch(e) {}
+}
+
+function onLoraVersionChange() {
+  const ver = document.getElementById('crushaLoraVersion').value;
+  document.getElementById('crushaLoraPath').value = 'models/loras/' + ver;
+  saveSettings();
 }
 
 function loadSettings() {

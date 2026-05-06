@@ -364,6 +364,54 @@
   <div class="ptitle">🎤 セットリスト管理</div>
   <div class="psub">AIrisスタイルの25〜30分ライブ構成。5曲＋MC×2が標準。</div>
 
+  <!-- ▼ 連動手順ガイド -->
+  <div class="card" style="border-color:rgba(168,85,247,0.4);background:rgba(168,85,247,0.06);">
+    <div class="card-t" style="color:#a855f7;">📖 CRUSHA STUDIO 全ツール連動 — 使い方手順</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;line-height:1.9;">
+      <div>
+        <div style="font-weight:800;color:#f59e0b;margin-bottom:6px;">STEP 1 — MUSIC STUDIO（ここ）</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 各曲カードをクリック → <b>「楽曲コンセプト設計」</b>タブで設定<br>
+          ② <b>「📂 MP3/WAVを選択」</b>でSuno生成ファイルを読み込む<br>
+          ③ <b>「Sunoプロンプト」</b>タブでプロンプト生成・コピー<br>
+          ④ <b>「💾 エクスポート」</b>ボタンで全データを保存（他ツールに自動反映）
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#06b6d4;margin-bottom:6px;">STEP 2 — VOICE STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ 曲タイトルが自動でセグメント化<br>
+          ② 各セグメントのMCスクリプトを作成<br>
+          ③ 「🎛️ RVC設定」タブ → <b>「📂 WAV/MP3選択」</b>でRVC変換済み音声を読み込む<br>
+          ④ 「書き出し」タブで全スクリプトをDL
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#ec4899;margin-bottom:6px;">STEP 3 — EDIT STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ BGMトラックが自動追加<br>
+          ② タイムラインで音楽・ボイス・映像を配置<br>
+          ③ 「🎬 編集ガイド」で書き出しコマンドを確認
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#10b981;margin-bottom:6px;">STEP 4 — VIDEO GEN STUDIO</div>
+        <div style="color:rgba(255,255,255,0.7);">
+          ① 「📂 プロジェクトから読み込み」→ 曲ごとにショットが自動生成<br>
+          ② 「🎛️ 設定」タブでSDXLチェックポイント・CRUSHA LoRAを確認<br>
+          ③ 「🔗 ワークフロー生成」→ CRUSHA LoRAが自動組み込まれたJSONが生成<br>
+          ④ 「🚀 ComfyUIに送信」または JSONをコピーしてComfyUIにペースト
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(168,85,247,0.2);">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);">
+        💡 <b>保存先固定：</b> 全ファイルは <code>C:\Users\USER\Desktop\CRUSHA STUDIO\</code> に保存してください。
+        MP3/WAVはこのフォルダに置いてから「📂 選択」ボタンで読み込むと最も確実です。
+      </div>
+    </div>
+  </div>
+
   <div class="song-grid" id="song-grid">
     <!-- JS で生成 -->
   </div>
@@ -447,9 +495,25 @@
       <div class="card">
         <div class="card-t">🎵 基本設定</div>
         <label>曲タイトル（仮）</label>
-        <input type="text" id="c-title" placeholder="例: NOVA / 星を掴め / Refrain">
+        <input type="text" id="c-title" placeholder="例: NOVA / 星を切り裂いて / Refrain">
         <label>テーマ・キーワード</label>
         <input type="text" id="c-theme" placeholder="例: 諦めない / 夜明け / 君への想い / 未来へ">
+
+        <!-- ▼ Sunoで作った音源ファイルをここに登録 -->
+        <div style="background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.35);border-radius:10px;padding:12px 14px;margin-top:10px;">
+          <div style="font-size:11px;font-weight:800;color:#ffaa00;letter-spacing:1px;margin-bottom:8px;">🎧 Suno音源ファイル読み込み</div>
+          <input type="hidden" id="c-audiofile">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <label for="c-audiofile-picker" style="cursor:pointer;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;margin:0;">📂 MP3/WAVを選択</label>
+            <input type="file" id="c-audiofile-picker" accept="audio/*" style="display:none;" onchange="loadAudioFile(this)">
+            <span id="c-audiofile-name" style="font-size:12px;color:#ffaa00;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未選択</span>
+          </div>
+          <div id="c-audio-player-wrap" style="display:none;margin-bottom:8px;">
+            <audio id="c-audio-player" controls style="width:100%;height:36px;accent-color:#f59e0b;"></audio>
+          </div>
+          <div id="c-audio-dur-info" style="font-size:10px;color:rgba(255,170,0,0.7);"></div>
+          <div style="font-size:10px;color:rgba(255,170,0,0.4);margin-top:4px;">📁 C:\Users\USER\Desktop\CRUSHA STUDIO\ のMP3/WAVを選択 → Edit Studioのオーディオトラックに自動反映</div>
+        </div>
         <div class="row2">
           <div>
             <label>BPM</label>
@@ -857,14 +921,86 @@ const songs = [
 let currentSong = 0; // index
 const tags = {};
 
+// ═══ 入力 → songs[] へ書き戻し（これがなかったのが根本バグ）═══
+function updateCurrentSong() {
+  if (currentSong < 0 || currentSong >= songs.length) return;
+  const s = songs[currentSong];
+  const titleVal = (document.getElementById('c-title').value || '').trim();
+  s.title     = titleVal || '[曲タイトル未定]';
+  s.bpm       = parseInt(document.getElementById('c-bpm').value)   || s.bpm;
+  s.key       = document.getElementById('c-key').value              || s.key;
+  s.theme     = (document.getElementById('c-theme').value || '').trim() || s.theme;
+  s.audioFile = document.getElementById('c-audiofile').value || '';
+  s.status    = (titleVal || s.audioFile) ? 'done' : 'draft';
+}
+
+// crusha_project共有ストレージ + crusha_music_studio の両方に書き出す
+function autoSyncProject() {
+  updateCurrentSong();
+  try {
+    const proj = getProject();
+    proj.projectName = document.getElementById('proj-name').value || proj.projectName;
+    proj.artistName  = document.getElementById('proj-artist').value || proj.artistName;
+    proj.songs = songs.map(s => ({
+      id: s.id, name: s.name, title: s.title,
+      duration: Math.floor(s.dur) + ':' + String(Math.round((s.dur%1)*60)).padStart(2,'0'),
+      genre: s.genre, bpm: s.bpm, key: s.key, theme: s.theme, emoji: s.emoji,
+      audioFile: s.audioFile || '',
+      sunoPrompt: s.sunoPrompt || ''
+    }));
+    setProject(proj);
+  } catch(e) {}
+}
+
 // ═══ INIT ═══
 function init() {
+  // crusha_projectに曲データがあれば復元
+  try {
+    const proj = getProject();
+    if (proj.songs && proj.songs.length > 0) {
+      proj.songs.forEach((ps, i) => {
+        if (songs[i]) {
+          songs[i].title     = ps.title     || songs[i].title;
+          songs[i].bpm       = ps.bpm       || songs[i].bpm;
+          songs[i].key       = ps.key       || songs[i].key;
+          songs[i].theme     = ps.theme     || songs[i].theme;
+          songs[i].genre     = ps.genre     || songs[i].genre;
+          songs[i].audioFile = ps.audioFile || '';
+          songs[i].status    = (ps.title && ps.title !== '[曲タイトル未定]') || ps.audioFile ? 'done' : 'draft';
+        }
+      });
+    }
+    if (proj.projectName) document.getElementById('proj-name').value = proj.projectName;
+    if (proj.artistName)  document.getElementById('proj-artist').value = proj.artistName;
+  } catch(e) {}
+
   renderSongGrid();
   renderSidebar();
   renderSongSelTags('song-sel-tags');
   renderSongSelTags('suno-song-sel');
   updateTotalDur();
   loadAll();
+  // 常に現在の songs[] を crusha_project に書き出す（他ツールが即読める状態にする）
+  autoSyncProject();
+
+  // 入力変更時に自動で songs[] と crusha_project に反映
+  ['c-title','c-bpm','c-key','c-theme'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      updateCurrentSong();
+      renderSongGrid();
+      renderSidebar();
+      autoSyncProject();
+    });
+  });
+  ['proj-name','proj-artist'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', autoSyncProject);
+  });
+  // 30秒ごとに自動保存（ブラウザを閉じてもデータを守る）
+  setInterval(autoSyncProject, 30000);
+  window.addEventListener('beforeunload', autoSyncProject);
 }
 
 // ═══ SONG GRID ═══
@@ -923,12 +1059,71 @@ function renderSongSelTags(elId) {
 function selectSong(i) {
   currentSong = i;
   const s = songs[i];
-  document.getElementById('c-title').value = s.title.replace('[曲タイトル未定]','');
-  document.getElementById('c-bpm').value = s.bpm;
-  document.getElementById('c-theme').value = s.theme;
+  document.getElementById('c-title').value     = s.title.replace('[曲タイトル未定]','');
+  document.getElementById('c-bpm').value       = s.bpm;
+  document.getElementById('c-theme').value     = s.theme;
+  document.getElementById('c-audiofile').value = s.audioFile || '';
   document.getElementById('lyrics-song-name').textContent = `${s.name} — ${s.title}`;
+
+  // オーディオプレイヤー状態を復元
+  const nameSp  = document.getElementById('c-audiofile-name');
+  const wrap    = document.getElementById('c-audio-player-wrap');
+  const player  = document.getElementById('c-audio-player');
+  const durInfo = document.getElementById('c-audio-dur-info');
+  if (s.audioURL) {
+    nameSp.textContent  = s.audioFile || '読み込み済み';
+    player.src          = s.audioURL;
+    wrap.style.display  = 'block';
+    const sec = Math.round(s.dur * 60);
+    durInfo.textContent = `✅ 尺: ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')} | 読み込み済み`;
+  } else {
+    nameSp.textContent  = s.audioFile || '未選択';
+    player.src          = '';
+    wrap.style.display  = 'none';
+    durInfo.textContent = '';
+  }
+
   renderSongGrid();
   renderSidebar();
+}
+
+// ═══ 音源ファイル読み込み（File API） ═══
+function loadAudioFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url     = URL.createObjectURL(file);
+  const player  = document.getElementById('c-audio-player');
+  const nameSp  = document.getElementById('c-audiofile-name');
+  const wrap    = document.getElementById('c-audio-player-wrap');
+  const durInfo = document.getElementById('c-audio-dur-info');
+  const hiddenF = document.getElementById('c-audiofile');
+
+  player.src         = url;
+  hiddenF.value      = file.name;
+  nameSp.textContent = file.name;
+  wrap.style.display = 'block';
+  durInfo.textContent = '⏳ 尺を解析中...';
+
+  player.onloadedmetadata = () => {
+    const totalSec = Math.round(player.duration);
+    const min      = parseFloat((totalSec / 60).toFixed(3));
+    const dispMin  = Math.floor(totalSec / 60);
+    const dispSec  = String(totalSec % 60).padStart(2, '0');
+    songs[currentSong].dur       = min;
+    songs[currentSong].audioFile = file.name;
+    songs[currentSong].audioURL  = url;
+    durInfo.textContent = `✅ 尺: ${dispMin}:${dispSec}（自動取得） | ${(file.size/1024/1024).toFixed(1)}MB`;
+    updateCurrentSong();
+    renderSongGrid();
+    renderSidebar();
+    updateTotalDur();
+    autoSyncProject();
+    toast('🎵 音源ファイル読み込み完了！');
+  };
+  player.onerror = () => {
+    durInfo.textContent = '❌ 読み込みエラー: 対応していない形式か破損したファイルです';
+    toast('⚠ 音源ファイルの読み込みに失敗しました');
+  };
 }
 
 function editSong(i) {
@@ -1147,6 +1342,8 @@ function copyText(target) {
 
 // ═══ SAVE / LOAD ═══
 function exportAll() {
+  // 保存前に必ず入力欄の内容をsongs[]に書き戻す
+  updateCurrentSong();
   const data = {
     songs,
     lyrics: {
@@ -1158,43 +1355,61 @@ function exportAll() {
       bridge:document.getElementById('ly-bridge').value,
       outro: document.getElementById('ly-outro').value,
     },
-    compose: {
-      title: document.getElementById('c-title').value,
-      bpm:   document.getElementById('c-bpm').value,
-      key:   document.getElementById('c-key').value,
-      theme: document.getElementById('c-theme').value,
-    },
     currentSong,
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem('crusha_music_studio', JSON.stringify(data));
-  // ファイルエクスポート
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'crusha-music-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  toast('保存しました！');
+  // crusha_projectにも同時反映（他ツール連動）
+  autoSyncProject();
+  toast('全データを保存しました！（ブラウザを閉じても残ります）');
 }
 
 function loadAll() {
   try {
     const raw = localStorage.getItem('crusha_music_studio');
-    if (!raw) return;
+    if (!raw) { toast('保存データがありません（先に「全データ保存」してください）'); return; }
     const d = JSON.parse(raw);
+
+    // ① songs[] を完全復元（これが抜けていた根本バグ）
+    if (d.songs && d.songs.length > 0) {
+      d.songs.forEach((saved, i) => {
+        if (songs[i]) {
+          songs[i].title    = saved.title    || songs[i].title;
+          songs[i].bpm      = saved.bpm      || songs[i].bpm;
+          songs[i].key      = saved.key      || songs[i].key;
+          songs[i].theme    = saved.theme    || songs[i].theme;
+          songs[i].genre    = saved.genre    || songs[i].genre;
+          songs[i].emoji    = saved.emoji    || songs[i].emoji;
+          songs[i].dur      = saved.dur      || songs[i].dur;
+          songs[i].audioFile= saved.audioFile|| '';
+          songs[i].status   = saved.status   || songs[i].status;
+        }
+      });
+    }
+
+    // ② 歌詞を復元
     if (d.lyrics) {
       Object.keys(d.lyrics).forEach(k => {
         const el = document.getElementById('ly-' + k);
         if (el) el.value = d.lyrics[k];
       });
     }
-    if (d.compose) {
-      if (d.compose.title) document.getElementById('c-title').value = d.compose.title;
-      if (d.compose.bpm)   document.getElementById('c-bpm').value   = d.compose.bpm;
-      if (d.compose.key)   document.getElementById('c-key').value   = d.compose.key;
-      if (d.compose.theme) document.getElementById('c-theme').value = d.compose.theme;
-    }
-  } catch(e) { /* 初回は無視 */ }
+
+    // ③ UI全再描画（songs[]が変わったのでグリッド・サイドバー両方更新）
+    if (typeof d.currentSong === 'number') currentSong = d.currentSong;
+    renderSongGrid();
+    renderSidebar();
+    updateTotalDur();
+    selectSong(currentSong);
+
+    // ④ 復元データをcrusha_projectにも反映（他ツールに即連動）
+    autoSyncProject();
+
+    toast('データを読み込みました！（' + songs.filter(s => s.title !== '[曲タイトル未定]').length + '曲タイトル復元）');
+  } catch(e) {
+    toast('読み込みエラー: ' + e.message);
+    console.error('[MUSIC STUDIO] loadAll error:', e);
+  }
 }
 
 // ═══ TOAST ═══
@@ -1229,27 +1444,10 @@ function setProject(data) {
 
 function saveToProject() {
   try {
-    const proj = getProject();
-    proj.projectName = document.getElementById('proj-name').value || proj.projectName;
-    proj.artistName  = document.getElementById('proj-artist').value || proj.artistName;
-    // songs配列を構築
-    proj.songs = songs.map((s, i) => {
-      const durMin  = Math.floor(s.dur);
-      const durSec  = Math.round((s.dur % 1) * 60);
-      return {
-        id: s.id,
-        title: s.title.replace('[曲タイトル未定]', s.name),
-        duration: `${durMin}:${String(durSec).padStart(2,'0')}`,
-        genre: s.genre,
-        bpm: s.bpm,
-        key: s.key,
-        theme: s.theme,
-        emoji: s.emoji,
-        sunoPrompt: ''
-      };
-    });
-    setProject(proj);
-    toast('プロジェクトに保存しました → 他ツールで読み込み可');
+    autoSyncProject(); // 入力値を songs[] に書き戻してから保存
+    renderSongGrid();
+    const names = songs.filter(s => s.title !== '[曲タイトル未定]').map(s => s.title).join('、');
+    toast('✅ 全ツールに連動保存！' + (names ? `（${names}）` : '曲タイトルを入力してください'));
   } catch(e) {
     toast('保存エラー: ' + e.message);
   }
